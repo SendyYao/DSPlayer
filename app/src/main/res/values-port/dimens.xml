@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="player_cover_size">190.0dip</dimen>
+    <dimen name="main_detail_control_action_space">10.0dip</dimen>
+    <dimen name="main_detail_control_horizontal_padding">10.0dip</dimen>
+    <dimen name="mini_player_total_height">96.0dip</dimen>
+    <dimen name="mini_player_visual_height">70.0dip</dimen>
+    <dimen name="player_quick_control_action_space">5.0dip</dimen>
+    <dimen name="player_quick_control_horizontal_padding">5.0dip</dimen>
+    <dimen name="player_tool_control_action_space">0.0dip</dimen>
+    <dimen name="player_tool_control_horizontal_padding">0.0dip</dimen>
+    <dimen name="main_detail_control_action_space_tablet">10.0dip</dimen>
+    <dimen name="main_detail_control_horizontal_padding_tablet">10.0dip</dimen>
+    <dimen name="mini_player_total_height_tablet">118.0dip</dimen>
+    <dimen name="mini_player_visual_height_tablet">92.0dip</dimen>
+    <dimen name="player_cover_size_tablet">300.0dip</dimen>
+    <dimen name="player_quick_control_action_space_tablet">10.0dip</dimen>
+    <dimen name="player_quick_control_horizontal_padding_tablet">20.0dip</dimen>
+    <dimen name="player_tool_control_action_space_tablet">20.0dip</dimen>
+    <dimen name="player_tool_control_horizontal_padding_tablet">20.0dip</dimen>
+</resources>

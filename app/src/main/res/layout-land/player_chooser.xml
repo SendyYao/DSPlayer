@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:divider="?android:listDivider"
+    android:orientation="vertical"
+    android:showDividers="middle">
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0.0dip"
+        android:layout_weight="1.0">
+
+        <ListView
+            android:id="@id/single_player_chooser"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="@android:color/transparent"
+            android:choiceMode="singleChoice" />
+
+        <ListView
+            android:id="@id/group_player_editor"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="@android:color/transparent"
+            android:choiceMode="multipleChoice"
+            android:visibility="gone" />
+
+        <include
+            android:id="@id/player_chooser_progress"
+            layout="@layout/progress"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <View
+        android:id="@id/divider"
+        android:layout_width="fill_parent"
+        android:layout_height="1.0dip"
+        android:background="#80dcdcdc"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@id/PlayerChooser_ButtonLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="48.0dip"
+        android:divider="?android:listDivider"
+        android:orientation="horizontal"
+        android:showDividers="middle"
+        android:visibility="gone">
+
+        <Button
+            android:id="@id/PlayerChooser_BtnBack"
+            android:layout_width="0.0dip"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1.0"
+            android:background="@drawable/abc_list_selector_holo_dark"
+            android:gravity="center"
+            android:text="@string/back"
+            android:textColor="@android:color/white"
+            android:textSize="20.0sp" />
+
+        <Button
+            android:id="@id/PlayerChooser_BtnOK"
+            android:layout_width="0.0dip"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1.0"
+            android:background="@drawable/abc_list_selector_holo_dark"
+            android:gravity="center"
+            android:text="@android:string/ok"
+            android:textColor="@android:color/white"
+            android:textSize="20.0sp" />
+    </LinearLayout>
+</LinearLayout>

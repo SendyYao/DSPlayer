@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.synology.lib.widget.BoundedLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:syno="http://schemas.android.com/apk/res-auto"
+    android:layout_width="@dimen/volume_dialog_width"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@color/popup_bg"
+    syno:maxHeight="@dimen/large_dialog_height">
+
+    <ListView
+        android:id="@id/VolumeDialog_RootView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:divider="#ff3d3e3f"
+        android:dividerHeight="1.0dip"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:showDividers="middle" />
+</com.synology.lib.widget.BoundedLayout>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.facebook.drawee.view.SimpleDraweeView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/PlayingControlPanel_ThumbImageView"
+    android:layout_width="@dimen/player_cover_size"
+    android:layout_height="@dimen/player_cover_size"
+    android:scaleType="centerCrop" />

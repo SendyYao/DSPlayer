@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/nav_home" android:title="Home"/>
+        <item android:id="@+id/nav_library" android:title="Library"/>
+        <item android:id="@+id/nav_playlist" android:title="Playlist"/>
+        <item android:id="@+id/nav_radio" android:title="Radio"/>
+        <item android:id="@+id/nav_search" android:title="Search"/>
+    </group>
+</menu>

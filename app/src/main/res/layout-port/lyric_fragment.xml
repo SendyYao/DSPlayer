@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/layout_lyric_fragment"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="10.0dip"
+        android:layout_marginRight="10.0dip">
+
+        <include
+            layout="@layout/player_song_detail"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:id="@id/sv_lyric"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        android:padding="10.0dip"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:id="@id/layout_sv_lyric"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:id="@id/tv_lyric"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:lineSpacingExtra="10.0dip"
+                android:singleLine="false"
+                android:textColor="@android:color/white"
+                android:textSize="14.0sp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@id/layout_dynamiclyric"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <com.whisperyao.dsplayer.widget.DynamicLyricListView
+            android:id="@id/dymanic_listview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:listSelector="@android:color/transparent"
+            android:padding="10.0dip"
+            android:scrollbars="none" />
+    </LinearLayout>
+</FrameLayout>

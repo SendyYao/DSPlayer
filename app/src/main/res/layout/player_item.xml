@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.synology.lib.widget.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:checkable="http://schemas.android.com/apk/res-auto"
+    android:id="@id/player_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="60.0dip"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    checkable:related_checkable="@id/player_name">
+
+    <CheckedTextView
+        android:id="@id/player_name"
+        android:layout_width="0.0dip"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.0"
+        android:clickable="false"
+        android:drawableLeft="?android:listChoiceIndicatorSingle"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="2"
+        android:paddingRight="15.0dip"
+        android:scrollHorizontally="true"
+        android:singleLine="false"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+    <ImageView
+        android:id="@id/player_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/login_help"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@id/player_lock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icon_lock"
+        android:visibility="gone" />
+</com.synology.lib.widget.CheckableLinearLayout>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appcompat="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@id/editmenu_group_play"
+        android:icon="@drawable/state_tool_play"
+        android:title="@string/play"
+        appcompat:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@id/editmenu_play"
+                android:title="@string/play" />
+            <item
+                android:id="@id/editmenu_add"
+                android:title="@string/add_item" />
+            <item
+                android:id="@id/editmenu_add_to_next"
+                android:title="@string/add_to_next"
+                android:visible="false" />
+        </menu>
+    </item>
+    <item
+        android:id="@id/editmenu_rating"
+        android:icon="@drawable/state_tool_rating"
+        android:title="@string/rating_action" />
+    <item
+        android:id="@id/editmenu_download"
+        android:icon="@drawable/state_tool_download"
+        android:title="@string/download"
+        appcompat:showAsAction="ifRoom" />
+    <item
+        android:id="@id/editmenu_share"
+        android:icon="@drawable/state_tool_share"
+        android:title="@string/sharing_share"
+        appcompat:showAsAction="ifRoom" />
+    <item
+        android:id="@id/editmenu_delete"
+        android:icon="@drawable/state_tool_del"
+        android:title="@string/delete"
+        appcompat:showAsAction="ifRoom" />
+    <item
+        android:id="@id/editmenu_add_to_playlist"
+        android:icon="@drawable/state_tool_add_to_playlist"
+        android:title="@string/add_to_playlist"
+        appcompat:showAsAction="ifRoom" />
+</menu>

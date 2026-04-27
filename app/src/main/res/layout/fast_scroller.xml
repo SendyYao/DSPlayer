@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.whisperyao.dsplayer.widget.SynoFastScroller xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fast_scroller"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_alignTop="@+id/swipe_container"
+    android:layout_alignBottom="@+id/swipe_container"
+    android:layout_alignParentRight="true"
+    android:layout_centerHorizontal="true"
+    android:layout_alignParentEnd="true"
+    app:fastScrollerAutoHideDelayInMillis="1000"
+    app:fastScrollerAutoHideEnabled="true"
+    app:fastScrollerBubbleEnabled="false"
+    app:fastScrollerBubblePosition="adjacent"
+    app:fastScrollerIgnoreTouchesOutsideHandle="true"/>

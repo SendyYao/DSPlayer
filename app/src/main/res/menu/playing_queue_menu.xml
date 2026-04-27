@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@id/ItemAction_DELETE"
+        android:title="@string/delete" />
+    <item
+        android:id="@id/ItemAction_SHARING"
+        android:title="@string/sharing_share"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_ADDTO_PLAYLIST"
+        android:title="@string/add_to_playlist"
+        android:visible="false" />
+</menu>

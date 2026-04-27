@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <include
+        android:id="@id/lyric_progress"
+        layout="@layout/progress"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:id="@id/sv_lyric"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:overScrollMode="never"
+        android:scrollbars="none">
+
+        <TextView
+            android:id="@id/tv_lyric"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:lineSpacingExtra="25.0dip"
+            android:scrollbars="none"
+            android:singleLine="false"
+            android:textColor="@android:color/white"
+            android:textSize="22.0sp" />
+    </ScrollView>
+
+    <com.whisperyao.dsplayer.widget.DynamicLyricListView
+        android:id="@id/dymanic_listview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:clickable="false"
+        android:listSelector="@android:color/transparent"
+        android:scrollbars="none" />
+</FrameLayout>

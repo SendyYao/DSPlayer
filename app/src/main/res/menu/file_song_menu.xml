@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@id/ItemAction_UNPIN"
+        android:title="@string/unpin"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_PIN"
+        android:title="@string/pin"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_PLAY"
+        android:title="@string/play" />
+    <item
+        android:id="@id/ItemAction_ADD_ITEM"
+        android:title="@string/add_item" />
+    <item
+        android:id="@id/ItemAction_ADD_NEXT"
+        android:title="@string/add_to_next"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_ADDTO_PLAYLIST"
+        android:title="@string/add_to_playlist"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_RATING"
+        android:title="@string/rating_action"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_SHARING"
+        android:title="@string/sharing_share"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_EDIT"
+        android:title="@string/edit"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_DOWNLOAD"
+        android:title="@string/download"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_DELETE"
+        android:title="@string/delete"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_BY_SITUATION"
+        android:visible="false" />
+</menu>

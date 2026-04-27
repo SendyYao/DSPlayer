@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:baselineAligned="false">
+
+    <LinearLayout
+        android:id="@id/content_main"
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent"
+        android:layout_weight="1.0"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@id/content_header"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@id/content_title"
+                style="@style/TextView_SectionHeader"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@id/Shoutcast_Logo"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/ShoutCastBgColor"
+                android:contentDescription="@string/app_name"
+                android:src="@drawable/logo_shoutcast"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0.0dip"
+            android:layout_weight="1.0">
+
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@id/refresh"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <com.whisperyao.dsplayer.widget.CustomListView
+                    android:id="@id/content_list"
+                    style="@style/Audio_ListView.FastScroll.OverLight"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent" />
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <include
+                android:id="@id/content_progress"
+                layout="@layout/progress"
+                android:visibility="gone" />
+
+            <include
+                android:id="@id/content_empty"
+                layout="@layout/empty"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <ImageView
+            android:id="@id/Shoutcast_LogoBottom"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/ShoutCastBgColor"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/logo_shoutcast"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

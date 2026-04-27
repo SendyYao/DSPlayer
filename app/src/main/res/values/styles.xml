@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme.Light.NoActionBar" parent="@style/Theme.Dsaudio_light.NoActionBar">
+        <item name="android:windowBackground">@color/background_light</item>
+        <item name="android:actionModeBackground">@color/action_mode_color</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:fastScrollTrackDrawable">@null</item>
+        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="actionModeBackground">@color/action_mode_color</item>
+        <item name="colorControlHighlight">#ffe9e9e9</item>
+        <item name="vpiTabPageIndicatorStyle">@style/customTabPageIndicator</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+    <style name="DropDownListView.Dsaudio_light" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_dsaudio_light</item>
+    </style>
+    <style name="Theme.Dsaudio_light.NoActionBar" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Dsaudio_light</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Dsaudio_light</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Dsaudio_light</item>
+        <item name="android:actionModeBackground">@color/action_mode_color</item>
+        <item name="android:actionModeCloseDrawable">@drawable/bt_cancel</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Dsaudio_light</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Dsaudio_light</item>
+        <item name="android:actionModeSplitBackground">@color/action_mode_color</item>
+        <item name="actionBarStyle">@style/ActionBar.Solid.Dsaudio_light</item>
+        <item name="actionBarTabStyle">@style/ActionBarTabStyle.Dsaudio_light</item>
+        <item name="actionDropDownStyle">@style/DropDownNav.Dsaudio_light</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_dsaudio_light</item>
+        <item name="actionModeCloseDrawable">@drawable/bt_cancel</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_dsaudio_light</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="colorControlNormal">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="dropDownListViewStyle">@style/DropDownListView.Dsaudio_light</item>
+        <item name="popupMenuStyle">@style/PopupMenu.Dsaudio_light</item>
+    </style>
+    <style name="PopupMenu.Dsaudio_light" parent="@style/Widget.AppCompat.Light.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_dsaudio_light</item>
+    </style>
+    <style name="ActionBarTabStyle.Dsaudio_light" parent="@style/Widget.AppCompat.Light.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_dsaudio_light</item>
+    </style>
+    <style name="DropDownNav.Dsaudio_light" parent="@style/Widget.AppCompat.Light.Spinner.DropDown.ActionBar">
+        <item name="android:background">@drawable/spinner_background_ab_dsaudio_light</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_dsaudio_light</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_dsaudio_light</item>
+    </style>
+    <style name="ActionBar.Solid.Dsaudio_light" parent="@style/Widget.AppCompat.Light.ActionBar.Solid">
+        <item name="android:progressBarStyle">@style/ProgressBar.Dsaudio_light</item>
+        <item name="android:background">@color/bg_header1</item>
+        <item name="android:backgroundStacked">@color/bg_header1</item>
+        <item name="android:backgroundSplit">@color/bg_header1</item>
+        <item name="background">@drawable/ab_solid_dsaudio_light</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_dsaudio_light</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_dsaudio_light</item>
+        <item name="progressBarStyle">@style/ProgressBar.Dsaudio_light</item>
+    </style>
+    <style name="ProgressBar.Dsaudio_light" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_dsaudio_light</item>
+    </style>
+    <style name="drawerListItemStyle">
+        <item name="android:textAppearance">?android:textAppearanceListItemSmall</item>
+        <item name="android:background">?android:activatedBackgroundIndicator</item>
+        <item name="android:minHeight">@dimen/drawer_item_min_hight</item>
+    </style>
+    <style name="TextView_PlayingTime">
+        <item name="android:textSize">11.0sp</item>
+        <item name="android:textColor">#ff00ca82</item>
+        <item name="android:hint">--:--</item>
+    </style>
+    <style name="TextView_DurationLength">
+        <item name="android:textSize">11.0sp</item>
+        <item name="android:textColor">#ff8c8c8d</item>
+        <item name="android:hint">--:--</item>
+    </style>
+    <style name="TextView_Title" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">18.0sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    <style name="TextView_Title.OverDark" parent="@style/TextView_Title">
+        <item name="android:textColor">@color/text_title_over_dark</item>
+    </style>
+    <style name="TextView_Title.OverLight" parent="@style/TextView_Title">
+        <item name="android:textColor">@color/text_title_over_light</item>
+    </style>
+    <style name="TextView_Description" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">14.0sp</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    <style name="TextView_Description.OverDark" parent="@style/TextView_Description">
+        <item name="android:textColor">@color/text_description_over_light</item>
+    </style>
+    <style name="TextView_Description.OverLight" parent="@style/TextView_Description">
+        <item name="android:textColor">@color/text_description_over_light</item>
+    </style>
+    <style name="TextView_SectionHeader" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">15.0sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/section_header_text</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:background">@color/section_header_gb</item>
+        <item name="android:paddingLeft">15.0dip</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">30.0dip</item>
+        <item name="android:singleLine">true</item>
+    </style>
+    <style name="RadioButton">
+        <item name="android:textColor">@drawable/button_text_color</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingLeft">5.0dip</item>
+        <item name="android:paddingRight">5.0dip</item>
+        <item name="android:button">@null</item>
+        <item name="android:minWidth">70.0dip</item>
+        <item name="android:minHeight">33.0dip</item>
+    </style>
+    <style name="Widget" />
+    <style name="Widget.TabPageIndicator" parent="@style/Widget">
+        <item name="android:textAppearance">@style/TextAppearance.TabPageIndicator</item>
+        <item name="android:textSize">12.0sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/vpi__tab_indicator</item>
+        <item name="android:paddingLeft">22.0dip</item>
+        <item name="android:paddingTop">12.0dip</item>
+        <item name="android:paddingRight">22.0dip</item>
+        <item name="android:paddingBottom">12.0dip</item>
+        <item name="android:maxLines">1</item>
+    </style>
+    <style name="TextAppearance.TabPageIndicator" parent="@style/Widget">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/vpi__dark_theme</item>
+    </style>
+    <style name="customTabPageIndicator" parent="@style/Widget.TabPageIndicator">
+        <item name="android:textSize">18.0sp</item>
+        <item name="android:textColor">@color/text_title_over_light</item>
+        <item name="android:gravity">center</item>
+        <item name="android:fadingEdge">horizontal</item>
+        <item name="android:fadingEdgeLength">8.0dip</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:dividerPadding">10.0dip</item>
+    </style>
+    <style name="Audio_ListView" parent="@android:style/Widget.ListView">
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:dividerHeight">1.0dip</item>
+        <item name="android:fastScrollEnabled">false</item>
+        <item name="android:overScrollMode">never</item>
+        <item name="android:requiresFadingEdge">vertical</item>
+    </style>
+    <style name="Audio_ListView.FastScroll.OverLight" parent="@style/Audio_ListView.OverLight">
+        <item name="android:fastScrollEnabled">true</item>
+    </style>
+    <style name="Audio_ListView.OverLight" parent="@style/Audio_ListView">
+        <item name="android:listSelector">@drawable/list_bg_over_light</item>
+        <item name="android:divider">@color/list_divider_over_light</item>
+    </style>
+    <style name="Audio_GridView" parent="@android:style/Widget.GridView">
+        <item name="android:listSelector">@null</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:fastScrollEnabled">true</item>
+        <item name="android:overScrollMode">never</item>
+        <item name="android:requiresFadingEdge">vertical</item>
+    </style>
+    <style name="VolumeDialog" parent="@android:style/Theme.Translucent">
+        <item name="android:windowIsFloating">true</item>
+    </style>
+    <style name="AppTheme.Player" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="actionModeBackground">@color/action_mode_color</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="colorControlNormal">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="toolbarStyle">@style/ToolbarTheme.Base.Dark</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+    <style name="Base.Widget.AppCompat.ActionButton.Overflow" parent="@android:style/Widget.Material.ActionButton.Overflow" />
+    <style name="Widget.AppCompat.ActionButton.Overflow" parent="@style/Base.Widget.AppCompat.ActionButton.Overflow" />
+    <style name="DarkToolbarOverflowButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:tint">@color/white</item>
+    </style>
+    <style name="ToolbarTheme.Base.Dark" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/action_mode_color</item>
+        <item name="actionOverflowButtonStyle">@style/DarkToolbarOverflowButtonStyle</item>
+    </style>
+    <style name="Player_FullScreen" parent="@style/Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Dsaudio_dark</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    <style name="ActionBar.Solid.Dsaudio_dark" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="android:progressBarStyle">@style/ProgressBar.Dsaudio_dark</item>
+        <item name="android:background">@color/bg_header4</item>
+        <item name="android:backgroundStacked">@color/bg_header4</item>
+        <item name="android:backgroundSplit">@color/bg_header4</item>
+        <item name="background">@drawable/ab_solid_dsaudio_dark</item>
+        <item name="backgroundSplit">@drawable/ab_bottom_solid_dsaudio_dark</item>
+        <item name="backgroundStacked">@drawable/ab_stacked_solid_dsaudio_dark</item>
+        <item name="progressBarStyle">@style/ProgressBar.Dsaudio_dark</item>
+    </style>
+    <style name="ProgressBar.Dsaudio_dark" parent="@style/Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_dsaudio_dark</item>
+    </style>
+    <style name="TextView_Player" parent="@android:style/Widget.TextView" />
+    <style name="TextView_Player.Album" parent="@style/TextView_Player">
+        <item name="android:textSize">14.0sp</item>
+        <item name="android:textColor">@color/text_description_over_dark</item>
+    </style>
+    <style name="TextView_Player.Title" parent="@style/TextView_Player">
+        <item name="android:textSize">16.0sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/text_title_over_dark</item>
+    </style>
+    <style name="TextView_Player.Artist" parent="@style/TextView_Player">
+        <item name="android:textSize">14.0sp</item>
+        <item name="android:textColor">@color/text_description_over_dark</item>
+    </style>
+</resources>

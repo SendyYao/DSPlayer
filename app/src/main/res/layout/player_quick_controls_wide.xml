@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="@dimen/player_quick_control_horizontal_padding"
+    android:paddingRight="@dimen/player_quick_control_horizontal_padding">
+
+    <include
+        layout="@layout/player_btn_prev"
+        android:layout_marginRight="@dimen/player_quick_control_action_space"
+        android:visibility="visible" />
+
+    <include
+        layout="@layout/player_btn_play"
+        android:visibility="visible" />
+
+    <include
+        layout="@layout/player_btn_next"
+        android:layout_marginLeft="@dimen/player_quick_control_action_space"
+        android:visibility="visible" />
+
+    <include
+        layout="@layout/player_btn_stop"
+        android:layout_marginLeft="@dimen/player_quick_control_action_space"
+        android:visibility="visible" />
+</LinearLayout>

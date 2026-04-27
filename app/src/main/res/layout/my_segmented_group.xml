@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/foldergroup_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <info.hoang8f.android.segmented.SegmentedGroup xmlns:segmentedgroup="http://schemas.android.com/apk/res-auto"
+        android:id="@id/foldergroup"
+        android:layout_width="wrap_content"
+        android:layout_height="32.0dip"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="20.0dip"
+        android:layout_marginTop="10.0dip"
+        android:layout_marginRight="20.0dip"
+        android:layout_marginBottom="10.0dip"
+        android:checkedButton="@id/foldergroup_folder"
+        android:orientation="horizontal"
+        segmentedgroup:sc_border_width="1.0dip"
+        segmentedgroup:sc_corner_radius="6.0dip"
+        segmentedgroup:sc_tint_color="@color/colorPrimary">
+
+        <RadioButton
+            android:id="@id/foldergroup_folder"
+            style="@style/RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20.0dip"
+            android:paddingRight="20.0dip"
+            android:text="@string/category_folder"
+            android:textSize="13.0sp" />
+
+        <RadioButton
+            android:id="@id/foldergroup_song"
+            style="@style/RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="20.0dip"
+            android:paddingRight="20.0dip"
+            android:text="@string/category_song"
+            android:textSize="13.0sp" />
+    </info.hoang8f.android.segmented.SegmentedGroup>
+</LinearLayout>

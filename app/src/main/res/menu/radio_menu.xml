@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@id/ItemAction_PLAY"
+        android:title="@string/play"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_ADD_ITEM"
+        android:title="@string/add_item"
+        android:visible="false" />
+    <item
+        android:id="@id/ItemAction_ADDTO_PLAYLIST"
+        android:title="@string/add_to_playlist"
+        android:visible="false" />
+</menu>

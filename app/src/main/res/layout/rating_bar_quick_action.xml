@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.whisperyao.dsplayer.widget.RatingBar xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/main_detail_editable_rating_bar_width"
+    android:layout_height="@dimen/main_detail_editable_rating_bar_height"
+    android:background="@color/popup_bg"
+    android:divider="@drawable/transparent"
+    android:dividerHeight="4.0dip"
+    android:paddingTop="14.0dip"
+    android:paddingBottom="14.0dip"
+    android:showDividers="middle" />

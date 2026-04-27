@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@id/PlayingControlPanel_LayoutInfo"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="@dimen/main_detail_control_horizontal_padding"
+    android:paddingRight="@dimen/main_detail_control_horizontal_padding">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@id/PlayingControlPanel_CoverImage"
+        android:layout_width="@dimen/main_detail_control_cover_size"
+        android:layout_height="@dimen/main_detail_control_cover_size"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="@dimen/main_detail_control_action_space"
+        android:layout_weight="1.0"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@integer/main_detail_control_time_visibility">
+
+            <TextView
+                android:id="@id/PlayingControlPanel_PlayingTime"
+                style="@style/TextView_PlayingTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14.0sp" />
+
+            <TextView
+                style="@style/TextView_DurationLength"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint=""
+                android:text="/"
+                android:textSize="14.0sp" />
+
+            <TextView
+                android:id="@id/PlayingControlPanel_Duration"
+                style="@style/TextView_DurationLength"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14.0sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.whisperyao.dsplayer.widget.AlwaysMarqueeTextView
+                android:id="@id/PlayingControlPanel_TitleText"
+                style="@style/TextView_Title.OverDark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3.0dip"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:textSize="14.0sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.whisperyao.dsplayer.widget.AlwaysMarqueeTextView
+                android:id="@id/PlayingControlPanel_ArtistText"
+                style="@style/TextView_Description.OverDark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:textSize="14.0sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@id/PlayingControlPanel_RatingBar_Layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@id/PlayingControlPanel_RatingBar"
+            layout="@layout/rating_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="@dimen/main_detail_control_action_space"
+            android:visibility="@integer/main_detail_control_rating_visibility" />
+    </FrameLayout>
+</LinearLayout>

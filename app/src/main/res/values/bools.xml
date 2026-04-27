@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="abc_action_bar_embed_tabs">true</bool>
+    <bool name="abc_config_actionMenuItemAllCaps">true</bool>
+    <bool name="config_materialPreferenceIconSpaceReserved">false</bool>
+    <bool name="default_circle_indicator_centered">true</bool>
+    <bool name="default_circle_indicator_snap">false</bool>
+    <bool name="default_line_indicator_centered">true</bool>
+    <bool name="default_title_indicator_selected_bold">true</bool>
+    <bool name="default_underline_indicator_fades">true</bool>
+    <bool name="gdpr_light_status_bar">true</bool>
+    <bool name="is_tablet">false</bool>
+    <item type="bool" name="large_screen">@bool/lib__large_screen</item>
+    <bool name="lib__large_screen">false</bool>
+    <bool name="lib__seven_inch_screen">false</bool>
+    <bool name="login_login_button_show_text">true</bool>
+    <bool name="mtrl_btn_textappearance_all_caps">true</bool>
+    <item type="bool" name="seven_inch_screen">@bool/lib__seven_inch_screen</item>
+</resources>

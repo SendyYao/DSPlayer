@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.whisperyao.dsplayer.widget.TabletContainerFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:divider="#ffdadadd"
+    android:dividerHeight="2.0dip"
+    android:orientation="horizontal"
+    android:showDividers="middle">
+
+    <LinearLayout
+        android:id="@id/layout_title_panel"
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@id/title_list_frame"
+            android:layout_width="fill_parent"
+            android:layout_height="0.0dip"
+            android:layout_weight="1.0">
+
+            <GridView
+                android:id="@id/content_grid"
+                style="@style/Audio_GridView"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:fastScrollEnabled="true"
+                android:verticalSpacing="15.0dip" />
+
+            <com.whisperyao.dsplayer.widget.CustomListView
+                android:id="@id/content_list"
+                style="@style/Audio_ListView.FastScroll.OverLight"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" />
+
+            <include
+                android:id="@id/content_progress"
+                layout="@layout/progress"
+                android:visibility="gone" />
+
+            <include
+                android:id="@id/content_empty"
+                layout="@layout/empty"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <ImageView
+            android:id="@id/Shoutcast_Logo"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/ShoutCastBgColor"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/logo_shoutcast"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@id/tablet_content"
+        android:layout_width="0.0dip"
+        android:layout_height="fill_parent" />
+</com.whisperyao.dsplayer.widget.TabletContainerFrameLayout>
