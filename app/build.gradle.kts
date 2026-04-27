@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -28,7 +29,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "NAS_ADDRESS", "\"${localProperties["nas.address"]}\"")
-        buildConfigField("Int", "NAS_PORT", "\"${localProperties["nas.port"]}\"")
+        buildConfigField("int", "NAS_PORT", localProperties["nas.port"].toString())
         buildConfigField("String", "NAS_ACCOUNT", "\"${localProperties["nas.account"]}\"")
         buildConfigField("String", "NAS_PASSWORD", "\"${localProperties["nas.password"]}\"")
         buildConfigField("String", "NAS_SID", "\"${localProperties["nas.sid"]}\"")
@@ -70,10 +71,9 @@ dependencies {
     implementation(libs.flexbox)
     implementation(libs.okhttp)
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")
-    implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.fresco)
-    implementation("com.facebook.fresco:imagepipeline-okhttp3:3.6.0")
-    implementation("jp.wasabeef:fresco-processors:2.2.1")
+    implementation(libs.imagepipeline.okhttp3)
+    implementation(libs.fresco.processors)
     // Core library (required)
     implementation(libs.flexible.adapter)
     // UI extensions (recommended)

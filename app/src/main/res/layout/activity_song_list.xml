@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="#121212"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <TextView
-        android:text="Songs"
+        android:text="@string/category_song"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:padding="16dp"
@@ -18,17 +19,16 @@
         android:layout_width="match_parent"
         android:layout_height="120dp">
 
-        <ImageView
+        <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/top_cover_bg"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@raw/cover"
-            android:scaleType="centerCrop"/>
+            fresco:placeholderImage="@raw/cover"
+            fresco:placeholderImageScaleType="centerCrop"/>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#80FFFFFF"/>
+            android:layout_height="match_parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -48,20 +48,20 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintHorizontal_bias="0.3">
 
-                <ImageView
+                <com.facebook.drawee.view.SimpleDraweeView
                     android:id="@+id/top_cover"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="5dp"
-                    android:src="@raw/cover"
-                    android:scaleType="centerCrop"/>
+                    fresco:placeholderImage="@raw/cover"
+                    fresco:placeholderImageScaleType="centerCrop"/>
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:id="@+id/song_count_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="71 Song(s)"
+                android:text="@string/songs_count"
                 android:textColor="@color/white"
 
                 app:layout_constraintStart_toEndOf="@id/card"

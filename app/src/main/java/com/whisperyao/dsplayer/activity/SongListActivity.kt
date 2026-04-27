@@ -6,13 +6,14 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.bumptech.glide.Glide
+import com.facebook.drawee.view.SimpleDraweeView
 import com.whisperyao.dsplayer.BuildConfig
+import com.whisperyao.dsplayer.CoverUriLoader
 import com.whisperyao.dsplayer.R
+import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.model.NASSong
 import com.whisperyao.dsplayer.model.Song
 import com.whisperyao.dsplayer.util.SessionManager
@@ -112,15 +113,6 @@ class SongListActivity : AppCompatActivity() {
         return list
     }
 
-    fun getCoverUrl(songId: String): String {
-        return "$baseUrl/webapi/AudioStation/cover.cgi?" +
-                "api=SYNO.AudioStation.Cover" +
-                "&version=1" +
-                "&method=getsongcover" +
-                "&id=$songId" +
-                "&_sid=$sid"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_song_list)
@@ -131,17 +123,23 @@ class SongListActivity : AppCompatActivity() {
 
             runOnUiThread {
 
-                findViewById<TextView>(R.id.song_count_text).text = "$songCount Song(s)"
+                findViewById<TextView>(R.id.song_count_text).text =
+                    getString(R.string.songs_count, songCount)
 
-                val coverUrl = getCoverUrl(songList[0].songId)
+                val firstSongItem: SongItem = SongItem.generateNoneSong()
 
-                Glide.with(this@SongListActivity)
-                    .load(coverUrl)
-                    .into(findViewById(R.id.top_cover_bg))
+                firstSongItem.id = songList[0].songId
 
-                Glide.with(this@SongListActivity)
-                    .load(coverUrl)
-                    .into(findViewById(R.id.top_cover))
+                CoverUriLoader()
+                    .with(findViewById(R.id.top_cover_bg))
+                    .placeHolder(R.raw.cover)
+                    .blur(15)
+                    .load(firstSongItem)
+
+                CoverUriLoader()
+                    .with(findViewById(R.id.top_cover))
+                    .placeHolder(R.raw.cover)
+                    .load(firstSongItem)
 
                 val adapter = object : ArrayAdapter<NASSong>(
                     this,
@@ -151,19 +149,24 @@ class SongListActivity : AppCompatActivity() {
                     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                         val view = convertView ?: layoutInflater.inflate(R.layout.item_song, parent, false)
 
-                        val song = getItem(position)!!
+                        val songItem: SongItem = SongItem.generateNoneSong()
+                        getItem(position)!!.apply {
+                            songItem.title = title
+                            songItem.id = songId
+                            songItem.artist = artist
+                        }
 
-                        view.findViewById<TextView>(R.id.tvTitle).text = song.title
-                        view.findViewById<TextView>(R.id.tvArtist).text = song.artist
+                        view.findViewById<TextView>(R.id.tvTitle).text = songItem.title
+                        view.findViewById<TextView>(R.id.tvArtist).text = songItem.artist
 
                         // 👉 封面
-                        val imgCover = view.findViewById<ImageView>(R.id.imgCover)
+                        val imgCover = view.findViewById<SimpleDraweeView>(R.id.imgCover)
 
-                        val coverUrl = getCoverUrl(song.songId)
-
-                        Glide.with(this@SongListActivity)
-                            .load(coverUrl)
-                            .into(imgCover)
+                        CoverUriLoader()
+                            .with(imgCover)
+                            .placeHolder(R.drawable.icon_song)
+                            .failureImage(R.drawable.icon_music)
+                            .load(songItem)
 
                         return view
                     }
@@ -178,5 +181,9 @@ class SongListActivity : AppCompatActivity() {
             intent.putExtra("song_index", 0)
             startActivity(intent)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

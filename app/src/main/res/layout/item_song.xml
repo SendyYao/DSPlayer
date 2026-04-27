@@ -3,18 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:background="#121212">
-    <ImageView
+    <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/imgCover"
         android:layout_width="48dp"
         android:layout_height="match_parent"
-        android:src="@drawable/icon_song"
-        android:scaleType="fitCenter"
+        fresco:placeholderImage="@drawable/icon_song"
+        fresco:placeholderImageScaleType="fitCenter"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         />
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:padding="12dp"
         android:layout_width="match_parent"
@@ -24,7 +24,7 @@
             android:id="@+id/tvTitle"
             android:textColor="#FFFFFF"
             android:textSize="16sp"
-            android:text="Song Name"
+            android:text="@string/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -32,7 +32,7 @@
             android:id="@+id/tvArtist"
             android:textColor="#AAAAAA"
             android:textSize="12sp"
-            android:text="Artist"
+            android:text="@string/artist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
