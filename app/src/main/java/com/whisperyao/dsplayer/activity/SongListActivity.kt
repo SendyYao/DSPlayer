@@ -15,7 +15,6 @@ import com.whisperyao.dsplayer.CoverUriLoader
 import com.whisperyao.dsplayer.R
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.model.NASSong
-import com.whisperyao.dsplayer.model.Song
 import com.whisperyao.dsplayer.util.SessionManager
 import okhttp3.Call
 import okhttp3.Callback
@@ -28,9 +27,7 @@ import org.json.JSONObject
 class SongListActivity : AppCompatActivity() {
     private lateinit var listView: ListView
 
-    private val songs = listOf(
-        Song("无言感激", "谭咏麟", R.raw.song, R.raw.lyric)
-    )
+    private lateinit var songItemList: List<NASSong>
 
     private var baseUrl: String = "http://${BuildConfig.NAS_ADDRESS}:${BuildConfig.NAS_PORT}"
     private var sid: String = SessionManager.getSid(this)
@@ -120,7 +117,7 @@ class SongListActivity : AppCompatActivity() {
         listView = findViewById(R.id.listView)
 
         fetchSongs { songList ->
-
+            songItemList = songList
             runOnUiThread {
 
                 findViewById<TextView>(R.id.song_count_text).text =
@@ -179,6 +176,7 @@ class SongListActivity : AppCompatActivity() {
         listView.setOnItemClickListener { _, _, position, _ ->
             val intent = Intent(this, PlayerActivity::class.java)
             intent.putExtra("song_index", 0)
+            intent.putExtra("current_song", songItemList[position])
             startActivity(intent)
         }
     }

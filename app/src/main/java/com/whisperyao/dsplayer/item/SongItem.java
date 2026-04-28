@@ -1,5 +1,6 @@
 package com.whisperyao.dsplayer.item;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -25,7 +26,7 @@ import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/* loaded from: classes2.dex */
+
 public class SongItem extends Item {
     private static final String ADDITIONAL = "additional";
     private static final String ALBUM_ART_URL = "albumArtURL";
@@ -632,6 +633,7 @@ public class SongItem extends Item {
         return ((((((((((((((((((((((("id integer primary key autoincrement, dsid text not null, songid text, title text, ") + "artist text, ") + "album text, ") + "composer text, ") + "genre text, ") + "album_artist text, ") + "path text not null, ") + "duration integer, ") + "filesize long, ") + "bitrate long, ") + "channel integer, ") + "frequency integer, ") + "cache_path text, ") + "timestamp long default 0, ") + "hit_count int default 0, ") + "cover_path text, ") + "lyric_path text, ") + "disc integer, ") + "track integer, ") + "year integer, ") + "comment text, ") + "cache_bitrate long, ") + "rating integer default -1, ") + "download_type int default 1";
     }
 
+    @SuppressLint("Range")
     public static SongItem fromQueryCursor(final Cursor cursor) {
         SongItem songItem = new SongItem(Item.ItemType.FILE_MODE, cursor.getString(cursor.getColumnIndex(SQL_SONGID)), cursor.getString(cursor.getColumnIndex("title")));
         songItem.setDsId(cursor.getString(cursor.getColumnIndex("dsid")));

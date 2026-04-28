@@ -1,42 +1,110 @@
 package com.whisperyao.dsplayer.activity
 
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.dirror.lyricviewx.LyricViewX
 import com.dirror.lyricviewx.OnPlayClickListener
 import com.dirror.lyricviewx.OnSingleClickListener
+import com.facebook.drawee.view.SimpleDraweeView
+import com.synology.ThreadWork
+import com.whisperyao.dsplayer.CacheManager
+import com.whisperyao.dsplayer.ConnectionManager
+import com.whisperyao.dsplayer.CoverUriLoader
 import com.whisperyao.dsplayer.R
-import com.whisperyao.dsplayer.model.Song
+import com.whisperyao.dsplayer.item.SongItem
+import com.whisperyao.dsplayer.model.NASSong
+import com.whisperyao.dsplayer.util.SynoLog
 
 class PlayerActivity : AppCompatActivity() {
 
     private var showLyric = true
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var lyricView: LyricViewX
+    private var hasLyric = false
+    private var currentSong: NASSong? = null
+    private var mLoadLyricThread: ThreadWork? = null
+    private lateinit var currentSongItem: SongItem
 
-    private val songs = listOf(
-        Song("无言感激", "谭咏麟", R.raw.song, R.raw.lyric)
-    )
+    fun playMusic(url: String) {
+        mediaPlayer = MediaPlayer().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
 
+            setDataSource(url)
+
+            setOnPreparedListener {
+                it.start()
+            }
+
+            setOnCompletionListener {
+                SynoLog.i("Music", "播放完成")
+            }
+
+            setOnErrorListener { _, what, extra ->
+                SynoLog.e("Music", "播放失败 what=$what extra=$extra")
+                true
+            }
+
+            prepareAsync()
+        }
+    }
+
+    private fun loadLyric() {
+        mLoadLyricThread = object : ThreadWork() {
+            private var strLyric: String? = null
+
+            override fun preWork() {
+                currentSongItem = SongItem.generateNoneSong()
+                currentSongItem.id = currentSong?.songId
+                hasLyric = false
+            }
+
+            override fun onWorking() {
+                try {
+                    val rootJson = CacheManager.getInstance().doEnumLyrics(currentSongItem)
+                    val dataJson = rootJson.optJSONObject("data") ?: rootJson
+
+                    strLyric = dataJson.optJSONArray("lyrics")
+                        ?.optJSONObject(0)
+                        ?.optJSONObject("additional")
+                        ?.optString("full_lyrics")
+                        ?: dataJson.optString("lyrics", "")
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            override fun onComplete() {
+                SynoLog.d("PhoneLyricFragment", "instance=${hashCode()} lyric loaded, lyric: $strLyric")
+                lyricView.loadLyric(strLyric)
+            }
+        }
+
+        mLoadLyricThread?.startWork()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
 
-        val index = intent.getIntExtra("song_index", 0)
-        val song = songs[index]
+        currentSong = intent.getParcelableExtra("current_song")
 
         val tvTitle = findViewById<TextView>(R.id.tvTitle)
         val tvArtist = findViewById<TextView>(R.id.tvArtist)
-        val imgCover = findViewById<ImageView>(R.id.imgCover)
+        val imgCover = findViewById<SimpleDraweeView>(R.id.imgCover)
 
         imgCover.post {
             val width = imgCover.width
@@ -49,17 +117,16 @@ class PlayerActivity : AppCompatActivity() {
         val btnPlay = findViewById<Button>(R.id.btnPlay)
         lyricView = findViewById(R.id.lyricView)
 
-        tvTitle.text = song.title
-        tvArtist.text = song.artists
+        tvTitle.text = currentSong?.title
+        tvArtist.text = currentSong?.artist
 
-        mediaPlayer = MediaPlayer.create(this, song.resId)
-        mediaPlayer.start()
+        loadLyric()
 
-        val lyricText = resources.openRawResource(song.lyricResId)
-            .bufferedReader()
-            .use { it.readText() }
+        val playUrl = ConnectionManager.getPlayUrl(currentSongItem)
 
-        lyricView.loadLyric(lyricText)
+        SynoLog.d("PlayerActivity", "playUrl: $playUrl")
+
+        playMusic(playUrl)
 
         lyricView.setNormalColor(ContextCompat.getColor(this, R.color.white))
         lyricView.setCurrentColor(ContextCompat.getColor(this, R.color.current_lyric_color))
@@ -76,7 +143,6 @@ class PlayerActivity : AppCompatActivity() {
 
         lyricView.setOnSingerClickListener(object : OnSingleClickListener {
             override fun onClick() {
-                // TODO: Add dynamic background
                 lyricView.alpha = if (showLyric) 1f else 0f
                 showLyric = !showLyric
             }
@@ -85,11 +151,14 @@ class PlayerActivity : AppCompatActivity() {
         val handler = Handler(Looper.getMainLooper())
         handler.post( object : Runnable {
             override fun run() {
-                if (::mediaPlayer.isInitialized) {
-                    lyricView.updateTime(mediaPlayer.currentPosition.toLong())
-                    // TODO judge to exit
-                }
+                try {
+                    if (::mediaPlayer.isInitialized) {
+                        lyricView.updateTime(mediaPlayer.currentPosition.toLong())
+                    }
                 handler.postDelayed(this, 500)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         })
 
@@ -100,6 +169,11 @@ class PlayerActivity : AppCompatActivity() {
                 mediaPlayer.start()
             }
         }
+
+        // TODO: Add dynamic background | DONE
+        CoverUriLoader()
+            .with(findViewById(R.id.imgCover))
+            .load(currentSongItem)
     }
 
     override fun onDestroy() {

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="#121212"
     android:padding="16dp">
@@ -31,20 +31,19 @@
         android:text="Play / Pause" />
 
     <FrameLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:background="#121212"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="100dp"
         >
 
-        <ImageView
+        <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/imgCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:src="@raw/cover"
+            fresco:placeholderImageScaleType="fitCenter"
+            fresco:placeholderImage="@raw/cover"
             />
 
         <View
@@ -55,8 +54,7 @@
         <com.dirror.lyricviewx.LyricViewX
             android:id="@+id/lyricView"
             android:layout_width="match_parent"
-           android:layout_height="match_parent"
-            android:layout_weight="1" />
+           android:layout_height="match_parent" />
 
     </FrameLayout>
 
