@@ -1,6 +1,7 @@
 package com.whisperyao.dsplayer.adapters;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -52,7 +53,7 @@ public class RatingAdapter extends AbsAdapter<RatingFragment.RatingLevelItem> {
             this.mCoverView = binding.cover;
             this.mTitleView = binding.title;
             this.shortcut = binding.shortcut;
-            binding.checkbox.setVisibility(8);
+            binding.checkbox.setVisibility(View.GONE);
         }
 
         @Override

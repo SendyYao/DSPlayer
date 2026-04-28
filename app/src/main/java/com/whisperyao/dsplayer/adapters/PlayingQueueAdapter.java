@@ -2,6 +2,7 @@ package com.whisperyao.dsplayer.adapters;
 
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -35,7 +36,7 @@ public class PlayingQueueAdapter extends AbsAdapter<SongItem> {
     }
 
     public void setPlayingStatus(PlaybackStateCompat state) {
-        boolean z = state != null && (state.getState() == 3 || state.getState() == 6);
+        boolean z = state != null && (state.getState() == PlaybackStateCompat.STATE_PLAYING || state.getState() == PlaybackStateCompat.STATE_BUFFERING);
         if (this.isPlaying != z) {
             this.isPlaying = z;
             notifyItemChanged(this.nowPlayingQueueId);
@@ -68,7 +69,7 @@ public class PlayingQueueAdapter extends AbsAdapter<SongItem> {
     @Override
     public void onBind(AbsHolder holder, SongItem song, int position) {
         if (holder instanceof ListHolder) {
-            ((ListHolder) holder).showData((SongItem) this.data.get(position));
+            holder.showData(this.data.get(position));
         }
     }
 
@@ -186,7 +187,7 @@ public class PlayingQueueAdapter extends AbsAdapter<SongItem> {
             }
             TextView textView = this.duration;
             if (textView != null) {
-                textView.setVisibility(0);
+                textView.setVisibility(View.VISIBLE);
                 if (item.isFile()) {
                     this.duration.setText(item.getTimeString());
                 } else {
@@ -201,26 +202,26 @@ public class PlayingQueueAdapter extends AbsAdapter<SongItem> {
                 this.layout.setBackgroundColor(this.transparent);
             }
             if (PlayingQueueAdapter.this.isDragMode()) {
-                this.drag.setVisibility(0);
-                this.mark.setVisibility(8);
-                this.shortcut.setVisibility(8);
+                this.drag.setVisibility(View.VISIBLE);
+                this.mark.setVisibility(View.GONE);
+                this.shortcut.setVisibility(View.GONE);
                 TextView textView2 = this.duration;
                 if (textView2 != null) {
-                    textView2.setVisibility(8);
+                    textView2.setVisibility(View.GONE);
                     return;
                 }
                 return;
             }
             if (PlayingQueueAdapter.this.isCheckMode()) {
-                this.drag.setVisibility(8);
-                this.shortcut.setVisibility(8);
-                this.mark.setVisibility(0);
+                this.drag.setVisibility(View.GONE);
+                this.shortcut.setVisibility(View.GONE);
+                this.mark.setVisibility(View.VISIBLE);
                 this.mark.setChecked(PlayingQueueAdapter.this.isItemChecked(getAdapterPosition()));
                 return;
             }
-            this.drag.setVisibility(8);
-            this.mark.setVisibility(8);
-            this.shortcut.setVisibility(0);
+            this.drag.setVisibility(View.GONE);
+            this.mark.setVisibility(View.GONE);
+            this.shortcut.setVisibility(View.VISIBLE);
         }
     }
 }

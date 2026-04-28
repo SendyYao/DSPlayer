@@ -1,6 +1,7 @@
 package com.whisperyao.dsplayer.adapters;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -56,9 +57,9 @@ public class RadioListAdapter extends AbsAdapter<SongItem> {
             super(binding.getRoot());
             this.title = binding.title;
             this.cover = binding.cover;
-            binding.subtitle.setVisibility(8);
-            binding.checkbox.setVisibility(8);
-            binding.shortcut.setVisibility(8);
+            binding.subtitle.setVisibility(View.GONE);
+            binding.checkbox.setVisibility(View.GONE);
+            binding.shortcut.setVisibility(View.GONE);
         }
 
         @Override
@@ -92,11 +93,11 @@ public class RadioListAdapter extends AbsAdapter<SongItem> {
             this.subtitle = textView;
             ImageView imageView = binding.SongItemShortCut;
             this.shortcut = imageView;
-            binding.SongItemTime.setVisibility(8);
-            binding.SongItemCover.setVisibility(8);
-            binding.SongItemCheckBox.setVisibility(8);
-            textView.setVisibility(0);
-            imageView.setVisibility(0);
+            binding.SongItemTime.setVisibility(View.GONE);
+            binding.SongItemCover.setVisibility(View.GONE);
+            binding.SongItemCheckBox.setVisibility(View.GONE);
+            textView.setVisibility(View.VISIBLE);
+            imageView.setVisibility(View.VISIBLE);
         }
 
         @Override

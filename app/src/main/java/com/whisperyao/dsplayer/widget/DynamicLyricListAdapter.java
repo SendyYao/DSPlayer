@@ -8,8 +8,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.whisperyao.dsplayer.R;
-import com.whisperyao.dsplayer.util.SynoLog;
-
 import java.util.ArrayList;
 import java.util.Collections;
 

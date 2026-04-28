@@ -13,7 +13,7 @@ import com.whisperyao.dsplayer.R;
 import java.util.ArrayList;
 import java.util.List;
 
-/* loaded from: classes2.dex */
+
 public class RatingBar extends LinearLayout {
     private static int LEVEL_PER_STAR = 10;
     private float mCurrentStars;
@@ -36,7 +36,7 @@ public class RatingBar extends LinearLayout {
             this.mScore = score;
         }
 
-        @Override // android.view.View.OnClickListener
+        @Override
         public void onClick(View v) {
             if (RatingBar.this.mIsIndicator) {
                 return;
@@ -79,7 +79,7 @@ public class RatingBar extends LinearLayout {
         }
     }
 
-    @Override // android.view.View
+    @Override
     protected void onFinishInflate() throws Resources.NotFoundException {
         super.onFinishInflate();
         int dimensionPixelSize = getResources().getDimensionPixelSize(R.dimen.star_l_width);
@@ -108,8 +108,7 @@ public class RatingBar extends LinearLayout {
         this.mOnRatingChangeListener = listener;
     }
 
-    /* JADX INFO: Access modifiers changed from: private */
-    public void performClickStar(int whichStar) {
+    private void performClickStar(int whichStar) {
         setRating(whichStar, true);
     }
 
@@ -157,7 +156,7 @@ public class RatingBar extends LinearLayout {
     }
 
     private void setupIndicator() {
-        this.mStarNoRating.setVisibility(this.mIsIndicator ? 8 : 0);
-        this.mSymmestryView.setVisibility(this.mIsIndicator ? 8 : 0);
+        this.mStarNoRating.setVisibility(this.mIsIndicator ? View.GONE : View.VISIBLE);
+        this.mSymmestryView.setVisibility(this.mIsIndicator ? View.GONE : View.VISIBLE);
     }
 }

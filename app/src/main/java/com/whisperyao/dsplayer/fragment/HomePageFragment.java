@@ -110,8 +110,8 @@ public class HomePageFragment extends Fragment implements ContentFragment.Conten
         this.mTabs = tab;
         SynoLog.d(LOG, tab.toString());
         if (tab != null) {
-            tab.setTabMode(1);
-            this.mTabs.setVisibility(0);
+            tab.setTabMode(TabLayout.MODE_FIXED);
+            this.mTabs.setVisibility(View.VISIBLE);
             this.mTabs.clearOnTabSelectedListeners();
             this.mTabs.setupWithViewPager(this.mViewPager);
             this.mTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -139,7 +139,7 @@ public class HomePageFragment extends Fragment implements ContentFragment.Conten
                 }
             });
             if (2 > size) {
-                this.mTabs.setVisibility(8);
+                this.mTabs.setVisibility(View.GONE);
             }
         }
         this.mViewPager.setCurrentItem(this.mCurrentPage, false);

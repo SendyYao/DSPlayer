@@ -2,6 +2,7 @@ package com.whisperyao.dsplayer.playing;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.TextView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.whisperyao.dsplayer.R;
@@ -40,7 +41,7 @@ public class PlayingSongDetailHelper {
         this.mTitleText = tvTitle;
         this.mRatingBar = rbRating;
         if (rbRating != null) {
-            rbRating.setVisibility(4);
+            rbRating.setVisibility(View.INVISIBLE);
             this.mRatingBar.setOnRatingChangeListener((ratingBar, rating, fromUser) -> {
                 if (!fromUser || PlayingSongDetailHelper.this.mSong == null) {
                     return;
@@ -85,7 +86,7 @@ public class PlayingSongDetailHelper {
             this.mArtistText.setText(null);
             this.mAlbumText.setText(null);
             this.mTitleText.setText(null);
-            this.mRatingBar.setVisibility(4);
+            this.mRatingBar.setVisibility(View.INVISIBLE);
             this.mRatingBar.setRating(0.0f);
             return;
         }
@@ -112,7 +113,7 @@ public class PlayingSongDetailHelper {
         updateCover();
         boolean zIsWithRating = song.isWithRating();
         boolean zCanEditRating = ConnectionManager.canEditRating(Common.isLogin(), song);
-        this.mRatingBar.setVisibility(zIsWithRating ? 0 : 4);
+        this.mRatingBar.setVisibility(zIsWithRating ? View.VISIBLE : View.INVISIBLE);
         this.mRatingBar.setIsIndicator(!zCanEditRating);
         this.mRatingBar.setRating(song.getRating());
     }

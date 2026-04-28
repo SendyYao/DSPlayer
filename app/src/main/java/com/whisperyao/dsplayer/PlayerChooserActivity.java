@@ -11,7 +11,6 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
@@ -26,9 +25,8 @@ import com.whisperyao.dsplayer.mediasession.service.AbstractMediaBrowserService;
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager;
 import com.whisperyao.dsplayer.playing.Player;
 import com.whisperyao.dsplayer.playing.PlayingStatusManager;
-//import com.whisperyao.dsplayer.util.firebase.FirebaseAnalyticsUtil;
+// import com.whisperyao.dsplayer.util.firebase.FirebaseAnalyticsUtil;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -163,29 +161,29 @@ public class PlayerChooserActivity extends TestRendererActivity {
     }
 
     private void switchToLoading() {
-        this.mProgress.setVisibility(0);
-        this.mListViewSingle.setVisibility(8);
-        this.mListViewGroup.setVisibility(8);
-        this.mButtonLayout.setVisibility(8);
+        this.mProgress.setVisibility(View.VISIBLE);
+        this.mListViewSingle.setVisibility(View.GONE);
+        this.mListViewGroup.setVisibility(View.GONE);
+        this.mButtonLayout.setVisibility(View.GONE);
     }
 
     private void switchToSinglePlayerChooser() {
         setTitle(R.string.select_player);
-        this.mProgress.setVisibility(8);
-        this.mListViewSingle.setVisibility(0);
-        this.mListViewGroup.setVisibility(8);
-        this.mButtonBack.setVisibility(8);
-        this.mButtonLayout.setVisibility(0);
+        this.mProgress.setVisibility(View.GONE);
+        this.mListViewSingle.setVisibility(View.VISIBLE);
+        this.mListViewGroup.setVisibility(View.GONE);
+        this.mButtonBack.setVisibility(View.GONE);
+        this.mButtonLayout.setVisibility(View.VISIBLE);
         this.mMode = Mode.single;
     }
 
     private void switchToGroupPlayerEditor(final Player player) {
         setTitle(R.string.select_airplay_devices);
-        this.mProgress.setVisibility(8);
-        this.mListViewSingle.setVisibility(8);
-        this.mListViewGroup.setVisibility(0);
-        this.mButtonBack.setVisibility(0);
-        this.mButtonLayout.setVisibility(0);
+        this.mProgress.setVisibility(View.GONE);
+        this.mListViewSingle.setVisibility(View.GONE);
+        this.mListViewGroup.setVisibility(View.VISIBLE);
+        this.mButtonBack.setVisibility(View.VISIBLE);
+        this.mButtonLayout.setVisibility(View.VISIBLE);
         GroupPlayerEditorAdapter groupPlayerEditorAdapter = new GroupPlayerEditorAdapter(this, player);
         this.mGroupPlayerEditorAdapter = groupPlayerEditorAdapter;
         this.mListViewGroup.setAdapter((ListAdapter) groupPlayerEditorAdapter);
@@ -302,24 +300,24 @@ public class PlayerChooserActivity extends TestRendererActivity {
         }
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> new AsyncTask<Void, Void, Void>() {
-            @Override // android.os.AsyncTask
+            @Override
             protected void onPreExecute() {
                 PlayerChooserActivity.this.switchToLoading();
             }
 
-            @Override // android.os.AsyncTask
+            @Override
             protected Void doInBackground(Void... params) {
                 RemoteController.setGroupPlayer(player.getUniqueId(), arrayList);
                 return null;
             }
 
-            @Override // android.os.AsyncTask
+            @Override
             protected void onPostExecute(Void result) {
                 PlayerChooserActivity.this.performClickBack();
                 PlayerChooserActivity.this.loadPlayers();
             }
 
-            @Override // android.os.AsyncTask
+            @Override
             protected void onCancelled() {
                 PlayerChooserActivity.this.performClickBack();
                 PlayerChooserActivity.this.loadPlayers();
@@ -332,7 +330,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
         onBackPressed();
     }
 
-    @Override // androidx.activity.ComponentActivity, android.app.Activity
+    @Override
     public void onBackPressed() {
         if (this.mMode.equals(Mode.single)) {
             finish();
@@ -345,14 +343,14 @@ public class PlayerChooserActivity extends TestRendererActivity {
         this.mListViewSingle.setItemChecked(this.mPlayerStatusManager.getPlayers().indexOf(this.mSelectedPlayer), true);
     }
 
-    @Override // com.synology.dsaudio.TestRendererActivity
+    @Override
     protected void passSettingRemotePlayerPassword(Player player) {
         if (this.mMode.equals(Mode.single)) {
             doChangePlayer(player);
         }
     }
 
-    @Override // com.synology.dsaudio.TestRendererActivity
+    @Override
     protected void cancelSettingRemotePlayerPassword() {
         if (this.mMode.equals(Mode.single)) {
             this.mListViewSingle.setItemChecked(this.mPlayerStatusManager.getPlayers().indexOf(this.mSelectedPlayer), true);
@@ -371,7 +369,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
         }
 
         SinglePlayerChooserAdapter(Context context, PlayingStatusManager playerStatusManager) {
-            this.mInflater = (LayoutInflater) context.getSystemService("layout_inflater");
+            this.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.mPlayerStatusManager = playerStatusManager;
         }
 
@@ -403,8 +401,8 @@ public class PlayerChooserActivity extends TestRendererActivity {
             }
             Player item = getItem(position);
             viewHolder.mNameTextView.setText(item.getName());
-            viewHolder.mLockImageView.setVisibility(item.getHasPassword() ? 0 : 8);
-            viewHolder.mInfoImageView.setVisibility(item.isGroupPlayer() ? 0 : 8);
+            viewHolder.mLockImageView.setVisibility(item.getHasPassword() ? View.VISIBLE : View.GONE);
+            viewHolder.mInfoImageView.setVisibility(item.isGroupPlayer() ? View.VISIBLE : View.GONE);
             viewHolder.mInfoImageView.setOnClickListener(new View.OnClickListener() {
                 private int mIndex;
 
@@ -441,7 +439,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
         }
 
         GroupPlayerEditorAdapter(Context context, Player player) {
-            this.mInflater = (LayoutInflater) context.getSystemService("layout_inflater");
+            this.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.mPlayer = player;
             for (Player player2 : PlayerChooserActivity.this.playingStatusManager.getPlayers()) {
                 if (!player2.isGroupPlayer() && this.mPlayer.getPlayerType().equals(player2.getPlayerType())) {

@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/* loaded from: classes.dex */
 public abstract class AbsAdapter<T> extends RecyclerView.Adapter<AbsHolder> implements View.OnClickListener {
     private boolean bIsCheckMode;
     private boolean bIsDragMode;
@@ -302,7 +301,7 @@ public abstract class AbsAdapter<T> extends RecyclerView.Adapter<AbsHolder> impl
         }
         View view = this.mEmptyView;
         if (view != null) {
-            view.setVisibility(getItemCount() == 0 ? 0 : 8);
+            view.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
         }
         notifyDataSetChanged();
     }

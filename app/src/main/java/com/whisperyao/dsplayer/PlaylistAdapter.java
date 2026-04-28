@@ -164,8 +164,8 @@ public class PlaylistAdapter extends BaseAdapter {
             childViewHolder.cover = viewInflate.findViewById(R.id.cover);
             childViewHolder.mark = viewInflate.findViewById(R.id.checkbox);
             childViewHolder.shortcut = viewInflate.findViewById(R.id.shortcut);
-            childViewHolder.subtitle.setVisibility(8);
-            childViewHolder.mark.setVisibility(8);
+            childViewHolder.subtitle.setVisibility(View.GONE);
+            childViewHolder.mark.setVisibility(View.GONE);
             viewInflate.setTag(childViewHolder);
         } else {
             viewInflate = convertView;
@@ -260,7 +260,6 @@ public class PlaylistAdapter extends BaseAdapter {
             this.mSections.add(section);
         }
         SynoLog.d("PlaylistAdapter", "items: " + items);
-        System.out.println(items);
         this.mData.put(section, items);
         generateContentList();
         notifyDataSetChanged();

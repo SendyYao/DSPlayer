@@ -3,11 +3,10 @@ package com.whisperyao.dsplayer.widget;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
-/* loaded from: classes2.dex */
-public class AlwaysMarqueeTextView extends TextView {
-    @Override // android.view.View
+
+public class AlwaysMarqueeTextView extends androidx.appcompat.widget.AppCompatTextView {
+    @Override
     public boolean isFocused() {
         return true;
     }
@@ -24,17 +23,17 @@ public class AlwaysMarqueeTextView extends TextView {
         super(context, attrs, defStyle);
     }
 
-    @Override // android.widget.TextView, android.view.View
+    @Override
     public void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         if (focused) {
-            super.onFocusChanged(focused, direction, previouslyFocusedRect);
+            super.onFocusChanged(true, direction, previouslyFocusedRect);
         }
     }
 
-    @Override // android.widget.TextView, android.view.View
+    @Override
     public void onWindowFocusChanged(boolean focused) {
         if (focused) {
-            super.onWindowFocusChanged(focused);
+            super.onWindowFocusChanged(true);
         }
     }
 }

@@ -25,9 +25,6 @@ abstract class BaseActivity : DaggerAppCompatActivity(), ConnectionManagerProvid
 
     var connectionManager: ConnectionManager = App.connectionManager
 
-    // PlayingStatusManager(ChromeCastHelper(App.getContext()))
-    // var playerStatusManager: PlayingStatusManager = DataModelManager.getMInstance().playingStatusManager
-
     @Inject
     lateinit var playerStatusManager: PlayingStatusManager
 

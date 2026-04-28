@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.gms.cast.MediaTrack;
 import com.whisperyao.dsplayer.R;
 import com.synology.ThreadWork;
@@ -110,9 +112,9 @@ public class HomePageDefaultGenreFragment extends ContentFragment implements Con
 
     private void showView(boolean show) {
         if (show) {
-            this.mRecyclerView.setVisibility(0);
+            this.mRecyclerView.setVisibility(View.VISIBLE);
         } else {
-            this.mRecyclerView.setVisibility(8);
+            this.mRecyclerView.setVisibility(View.GONE);
         }
     }
 
@@ -213,7 +215,7 @@ public class HomePageDefaultGenreFragment extends ContentFragment implements Con
         this.mEmptyImageView = this.mContentView.findViewById(R.id.icon_no_data);
         this.mFastScroller = this.mContentView.findViewById(R.id.fast_scroller);
         this.mRecyclerView = this.mContentView.findViewById(R.id.recycler_view);
-        this.mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getSpan(), 1, false));
+        this.mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getSpan(), RecyclerView.VERTICAL, false));
         this.mRecyclerView.setAdapter(this.containerGridAdapter);
         this.containerGridAdapter.addEmptyView(this.mEmptyView, false);
         this.containerGridAdapter.setIsListMode(false);
@@ -226,7 +228,7 @@ public class HomePageDefaultGenreFragment extends ContentFragment implements Con
         });
         this.mTitleView = this.mContentView.findViewById(R.id.content_title);
         if (StateManager.getInstance().isMobileLayout() && !TextUtils.isEmpty(this.mTitle)) {
-            this.mTitleView.setVisibility(0);
+            this.mTitleView.setVisibility(View.VISIBLE);
             this.mTitleView.setText(this.mTitle);
         }
         onConfigurationChanged(this.mActivity.getResources().getConfiguration());

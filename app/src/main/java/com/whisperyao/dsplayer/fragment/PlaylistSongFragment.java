@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 //import com.google.firebase.analytics.FirebaseAnalytics;
 import com.whisperyao.dsplayer.R;
 import com.synology.ThreadWork;
@@ -237,7 +238,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
             this.setInitialized(true);
             this.blDoRefresh = false;
         } else if (this.mItems.isEmpty()) {
-            this.mEmptyView.setVisibility(0);
+            this.mEmptyView.setVisibility(View.VISIBLE);
             setNoDataView();
         }
         this.mContainerClickCallback.onUpdateTitle();
@@ -373,7 +374,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
         this.mEmptyImageView = this.mContentView.findViewById(R.id.icon_no_data);
         this.mRecyclerView = this.mContentView.findViewById(R.id.recycler_view);
         this.mFastScroller = this.mContentView.findViewById(R.id.fast_scroller);
-        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), 1, false));
+        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         this.songListAdapter.addEmptyView(this.mEmptyView, false);
         this.songListAdapter.setOnItemClickListener(new AbsAdapter.OnItemClickListener() {
             @Override
@@ -399,7 +400,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
         if (!StateManager.getInstance().isMobileLayout() || TextUtils.isEmpty(this.mTitle)) {
             return;
         }
-        this.mTitleView.setVisibility(0);
+        this.mTitleView.setVisibility(View.VISIBLE);
         this.mTitleView.setText(this.mTitle);
     }
 
@@ -814,7 +815,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                 if (this.success && this.f51info.getResultVo() != null && this.f51info.getResultVo().getSuccess()) {
                     PlaylistSongFragment.this.doRefresh();
                 } else {
-                    Toast.makeText(PlaylistSongFragment.this.mActivity, this.f51info.getStringId(), 0).show();
+                    Toast.makeText(PlaylistSongFragment.this.mActivity, this.f51info.getStringId(), Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -867,7 +868,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                 if (this.success && this.info.getResultVo() != null && this.info.getResultVo().getSuccess()) {
                     PlaylistSongFragment.this.doRefresh();
                 } else {
-                    Toast.makeText(PlaylistSongFragment.this.mActivity, this.info.getStringId(), 0).show();
+                    Toast.makeText(PlaylistSongFragment.this.mActivity, this.info.getStringId(), Toast.LENGTH_SHORT).show();
                 }
             }
         };

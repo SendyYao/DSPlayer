@@ -250,7 +250,7 @@ public class RatingFragment extends ContentFragment implements ContentFragment.C
             this.setInitialized(true);
             this.blDoRefresh = false;
         } else if (this.ratinglistAdapter.getCount() == 0) {
-            this.mEmptyView.setVisibility(0);
+            this.mEmptyView.setVisibility(View.VISIBLE);
             setNoDataView();
         }
         return this.mContentView;
@@ -292,7 +292,7 @@ public class RatingFragment extends ContentFragment implements ContentFragment.C
         this.mFastScroller = this.mContentView.findViewById(R.id.fast_scroller);
         this.mRecyclerView = this.mContentView.findViewById(R.id.recycler_view);
         this.mRecyclerView.setVisibility(View.VISIBLE);
-        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), 1, false));
+        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         this.mRecyclerView.setAdapter(this.ratinglistAdapter);
         this.ratinglistAdapter.addEmptyView(this.mEmptyView, false);
         this.ratinglistAdapter.setIsListMode(true);

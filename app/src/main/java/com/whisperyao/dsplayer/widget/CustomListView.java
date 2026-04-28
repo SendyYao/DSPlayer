@@ -21,7 +21,7 @@ public class CustomListView extends ListView {
     private int mState;
     private Field stateField;
 
-    public CustomListView(Context context, AttributeSet attrs) throws IllegalAccessException, NoSuchFieldException, NoSuchMethodException, SecurityException, IllegalArgumentException {
+    public CustomListView(Context context, AttributeSet attrs) throws SecurityException, IllegalArgumentException {
         super(context, attrs);
         this.mState = -1;
         this.stateField = null;

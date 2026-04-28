@@ -328,7 +328,7 @@ public class RadioFragment extends ContentFragment implements ContentFragment.Co
         this.mEmptyImageView = this.mContentView.findViewById(R.id.icon_no_data);
         this.mTitleView = this.mContentView.findViewById(R.id.content_title);
         if (StateManager.getInstance().isMobileLayout() && !TextUtils.isEmpty(this.mTitle)) {
-            this.mTitleView.setVisibility(0);
+            this.mTitleView.setVisibility(View.VISIBLE);
             this.mTitleView.setText(this.mTitle);
         }
         ImageView imageView = this.mContentView.findViewById(R.id.Shoutcast_Logo);
@@ -341,7 +341,7 @@ public class RadioFragment extends ContentFragment implements ContentFragment.Co
         }
         this.mFastScroller = this.mContentView.findViewById(R.id.fast_scroller);
         this.mRecyclerView = this.mContentView.findViewById(R.id.recycler_view);
-        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), 1, false));
+        this.mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         this.mRecyclerView.setAdapter(this.radiolistAdapter);
         this.radiolistAdapter.addEmptyView(this.mEmptyView, false);
         this.radiolistAdapter.setFastScroller(this.mFastScroller);
@@ -399,9 +399,9 @@ public class RadioFragment extends ContentFragment implements ContentFragment.Co
             return;
         }
         if (this.selPos == 0) {
-            this.mShoutCastLogo.setVisibility(0);
+            this.mShoutCastLogo.setVisibility(View.VISIBLE);
         } else {
-            this.mShoutCastLogo.setVisibility(8);
+            this.mShoutCastLogo.setVisibility(View.GONE);
         }
         this.radiolistAdapter.notifyDataSetChanged();
     }

@@ -35,7 +35,7 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
         this.VIEW_TYPE_FILE_WIDE = 2;
     }
 
-    @Override // com.synology.dsaudio.adapters.AbsAdapter, androidx.recyclerview.widget.RecyclerView.Adapter
+    @Override
     public AbsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (-1 == viewType) {
             return new HeaderHolder(getHeader());
@@ -51,14 +51,14 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
         return new ListHolder(tabletSongItemFrescoBindingInflate);
     }
 
-    @Override // com.synology.dsaudio.adapters.AbsAdapter
+    @Override
     public void onBind(AbsHolder holder, SongItem song, int position) {
         if (holder instanceof ListHolder) {
-            ((ListHolder) holder).showData((SongItem) this.data.get(position));
+            holder.showData(this.data.get(position));
         }
     }
 
-    @Override // com.synology.dsaudio.adapters.AbsAdapter
+    @Override
     public void onBindHeaderFooter(AbsHolder holder) {
         boolean z = holder instanceof HeaderHolder;
     }
@@ -71,13 +71,13 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
         ArrayList<SongItem> arrayList = new ArrayList<>();
         for (int i = 0; i < this.mCheckedList.length; i++) {
             if (this.mCheckedList[i]) {
-                arrayList.add((SongItem) this.data.get(i));
+                arrayList.add(this.data.get(i));
             }
         }
         return arrayList;
     }
 
-    @Override // com.synology.dsaudio.adapters.AbsAdapter
+    @Override
     public void onMove(int fromPosition, int toPosition) {
         super.onMove(fromPosition, toPosition);
         if (this.callback != null) {
@@ -105,13 +105,13 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
         this.mHoldSongIndex.add(toPosition, this.mHoldSongIndex.remove(fromPosition));
     }
 
-    @Override // com.synology.dsaudio.adapters.AbsAdapter
+    @Override
     public void applyOrder() {
         this.mHoldSongIndex = null;
         super.applyOrder();
     }
 
-    @Override // com.synology.dsaudio.adapters.AbsAdapter
+    @Override
     public void undoOrder() {
         this.mHoldSongIndex = null;
         super.undoOrder();
@@ -139,10 +139,10 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
                 return true;
             });
             if (StateManager.getInstance().isMobileLayout() || !SongListAdapter.this.mType.equals(Common.ContainerType.RANDOM100_MODE)) {
-                this.cover.setVisibility(8);
+                this.cover.setVisibility(View.GONE);
             }
             if (StateManager.getInstance().isMobileLayout()) {
-                this.duration.setVisibility(8);
+                this.duration.setVisibility(View.GONE);
             }
         }
 
@@ -194,7 +194,7 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
             if (textView3 != null) {
                 textView3.setText(item.getAlbum());
             }
-            if (this.cover.getVisibility() == 0) {
+            if (this.cover.getVisibility() == View.VISIBLE) {
                 new CoverUriLoader().with(this.cover).placeHolder(SongListAdapter.this.mType).load(item);
             }
             TextView textView4 = this.duration;
@@ -202,17 +202,17 @@ public class SongListAdapter extends AbsAdapter<SongItem> {
                 textView4.setText(item.getTimeString());
             }
             if (SongListAdapter.this.isCheckMode()) {
-                this.shortcut.setVisibility(8);
-                this.mark.setVisibility(0);
+                this.shortcut.setVisibility(View.GONE);
+                this.mark.setVisibility(View.VISIBLE);
                 this.mark.setChecked(SongListAdapter.this.isItemChecked(getAdapterPosition()));
             } else {
-                this.mark.setVisibility(8);
-                this.shortcut.setVisibility(0);
+                this.mark.setVisibility(View.GONE);
+                this.shortcut.setVisibility(View.VISIBLE);
             }
             if (SongListAdapter.this.mType.isShowRatingIcon()) {
                 TextView textView5 = this.duration;
                 if (textView5 != null) {
-                    textView5.setVisibility(8);
+                    textView5.setVisibility(View.GONE);
                 }
                 int rating = (int) item.getRating();
                 this.icon.setImageResource(

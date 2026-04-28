@@ -2,6 +2,7 @@ package com.whisperyao.dsplayer.adapters;
 
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
@@ -76,9 +77,9 @@ public class ContainerAdapter extends AbstractContainerAdapter {
             this.shortcut.setOnClickListener(ContainerAdapter.this);
             this.title.setText(item.getTitle());
             if (TextUtils.isEmpty(item.getDisplayArtist())) {
-                this.subtitle.setVisibility(4);
+                this.subtitle.setVisibility(View.INVISIBLE);
             } else {
-                this.subtitle.setVisibility(0);
+                this.subtitle.setVisibility(View.VISIBLE);
                 this.subtitle.setText(item.getDisplayArtist());
             }
             if (item.isAllSongs()) {
@@ -91,9 +92,9 @@ public class ContainerAdapter extends AbstractContainerAdapter {
                 ContainerAdapter.this.showContainerCover(this.cover, item);
             }
             if (ContainerAdapter.this.isCheckMode()) {
-                this.shortcut.setVisibility(8);
+                this.shortcut.setVisibility(View.GONE);
             } else {
-                this.shortcut.setVisibility(0);
+                this.shortcut.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -109,7 +110,7 @@ public class ContainerAdapter extends AbstractContainerAdapter {
             super(binding.getRoot());
             CheckBox checkBox = binding.checkbox;
             this.mark = checkBox;
-            checkBox.setVisibility(8);
+            checkBox.setVisibility(View.GONE);
             this.shortcut = binding.shortcut;
             this.title = binding.title;
             this.subtitle = binding.subtitle;
@@ -127,9 +128,9 @@ public class ContainerAdapter extends AbstractContainerAdapter {
             }
             this.title.setText(item.getTitle());
             if (TextUtils.isEmpty(item.getDisplayArtist())) {
-                this.subtitle.setVisibility(8);
+                this.subtitle.setVisibility(View.GONE);
             } else {
-                this.subtitle.setVisibility(0);
+                this.subtitle.setVisibility(View.VISIBLE);
                 this.subtitle.setText(item.getDisplayArtist());
             }
             if (item.isAllSongs()) {
@@ -142,12 +143,12 @@ public class ContainerAdapter extends AbstractContainerAdapter {
                 ContainerAdapter.this.showContainerCover(this.cover, item);
             }
             if (ContainerAdapter.this.isCheckMode()) {
-                this.mark.setVisibility(0);
-                this.shortcut.setVisibility(8);
+                this.mark.setVisibility(View.VISIBLE);
+                this.shortcut.setVisibility(View.GONE);
                 this.mark.setChecked(item.isMarked());
             } else {
-                this.mark.setVisibility(8);
-                this.shortcut.setVisibility(0);
+                this.mark.setVisibility(View.GONE);
+                this.shortcut.setVisibility(View.VISIBLE);
             }
         }
     }
