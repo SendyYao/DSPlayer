@@ -10,6 +10,7 @@ import com.whisperyao.dsplayer.fragment.HomePageDefaultGenreFragment
 import com.whisperyao.dsplayer.fragment.HomePagePinsFragment
 import com.whisperyao.dsplayer.fragment.LyricFragment
 import com.whisperyao.dsplayer.fragment.PhoneLyricFragment
+import com.whisperyao.dsplayer.fragment.PhoneLyricViewXFragment
 import com.whisperyao.dsplayer.fragment.PlayerFragment
 import com.whisperyao.dsplayer.fragment.PlayingQueueFragment
 import com.whisperyao.dsplayer.fragment.PlaylistFragment
@@ -57,6 +58,11 @@ abstract class SupportFragmentBindingModule {
         modules = [PhoneLyricFragmentInstanceModule::class]
     )
     abstract fun phoneLyricFragment(): PhoneLyricFragment
+
+    @ContributesAndroidInjector(
+        modules = [PhoneLyricViewXFragmentInstanceModule::class]
+    )
+    abstract fun phoneLyricViewXFragment(): PhoneLyricViewXFragment
 
     @ContributesAndroidInjector(
         modules = [PlayerFragmentInstanceModule::class]
@@ -143,7 +149,8 @@ abstract class SupportFragmentBindingModule {
             lessThen10: Boolean
         ): LyricFragment {
             return if (lessThen10) {
-                PhoneLyricFragment()
+                PhoneLyricViewXFragment()
+                // PhoneLyricFragment()
             } else {
                 // TabletLyricFragment()
                 PhoneLyricFragment()
@@ -254,4 +261,12 @@ abstract class SupportFragmentBindingModule {
 //            fragment: TabletLyricFragment
 //        ): Fragment = fragment
 //    }
+
+    @Module(includes = [SupportFragmentModule::class])
+    class PhoneLyricViewXFragmentInstanceModule {
+        @Provides
+        fun provideFragment(
+            fragment: PhoneLyricViewXFragment
+        ): Fragment = fragment
+    }
 }

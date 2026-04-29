@@ -1,6 +1,7 @@
 package com.whisperyao.dsplayer.fragment
 
 
+import android.support.v4.media.session.MediaControllerCompat
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager
 import dagger.android.support.DaggerFragment
@@ -14,6 +15,8 @@ abstract class LyricFragment : DaggerFragment() {
     abstract fun setTimeLine(time: Long)
 
     abstract fun updateTrackInfo(songItem: SongItem?)
+
+    abstract fun bindController(controller: MediaControllerCompat)
 
     companion object {
         const val ADDITIONAL: String = "additional"

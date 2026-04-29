@@ -77,19 +77,6 @@ class PlayerFragment @Inject constructor() : DaggerDialogFragment() {
     lateinit var playingQueueManager: PlayingQueueManager
     private var queueFragment: PlayingQueueFragment? = null
 
-    /*
-    private val queueFragmentProvider by lazy {
-        PlayingQueueFragment().apply {
-            val controller = HomeActivity.mMediaController
-
-            if (controller != null) {
-                bindController(controller)
-                setInitialPlaybackState(controller.playbackState)
-            }
-        }
-    }
-     */
-
     @Inject
     lateinit var queueFragmentProvider: Provider<PlayingQueueFragment>
 
@@ -364,6 +351,9 @@ class PlayerFragment @Inject constructor() : DaggerDialogFragment() {
                     queueFragment = null
                     if (lyricFragment == null) {
                         lyricFragment = lyricFragmentProvider.get()
+                        val homeActivity = activity as? HomeActivity ?: return
+                        if (!homeActivity.isConnected()) return
+                        lyricFragment?.bindController(homeActivity.provideController())
                     }
                     lyricFragment!!
                 }

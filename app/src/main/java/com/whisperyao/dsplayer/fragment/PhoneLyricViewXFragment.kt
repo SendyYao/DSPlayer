@@ -9,56 +9,49 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AlphaAnimation
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
+import com.dirror.lyricviewx.LyricViewX
+import com.dirror.lyricviewx.OnPlayClickListener
+import com.dirror.lyricviewx.OnSingleClickListener
 import com.facebook.drawee.view.SimpleDraweeView
-import com.whisperyao.dsplayer.R
 import com.synology.ThreadWork
+import com.whisperyao.dsplayer.App
 import com.whisperyao.dsplayer.CacheManager
-import com.whisperyao.dsplayer.databinding.LyricFragmentBinding
+import com.whisperyao.dsplayer.R
+import com.whisperyao.dsplayer.databinding.LyricviewxFragmentBinding
 import com.whisperyao.dsplayer.injection.Constants
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.playing.PlayingSongDetailHelper
-import com.whisperyao.dsplayer.util.LyricUtils
 import com.whisperyao.dsplayer.util.SynoLog
-import com.whisperyao.dsplayer.widget.DynamicLyricListAdapter
-import com.whisperyao.dsplayer.widget.DynamicLyricListView
 import com.whisperyao.dsplayer.widget.RatingBar
 import javax.inject.Inject
 import javax.inject.Named
-import androidx.core.content.edit
 
-class PhoneLyricFragment : LyricFragment() {
+class PhoneLyricViewXFragment : LyricFragment() {
 
     companion object {
-        private const val KEY_SHOWLYRIC = "show_lyric"
-        private const val LOG = "PhoneLyricFragment"
+        const val LOG = "PhoneLyricViewXFragment"
+        const val KEY_SHOWLYRIC = "show_lyric"
     }
 
-    private var binding: LyricFragmentBinding? = null
+    private var binding: LyricviewxFragmentBinding? = null
     private var hasLyric = false
+    private var modeShowLyricViewX = false
+    private var mSongItem: SongItem? = null
 
+    private var mSongDetailHelper = PlayingSongDetailHelper()
+
+    private var mLastPlayingSongId = ""
     @Inject
     @Named(Constants.PREF_LYRIC)
     lateinit var lyricPreference: SharedPreferences
 
-    private var mDynamicListAdapter: DynamicLyricListAdapter? = null
-    private var mLoadLyricThread: ThreadWork? = null
-    private var mSongItem: SongItem? = null
-    private var mStrLyric: String? = null
-    private var modeShowDynamicLyric = false
+    private var controller: MediaControllerCompat? = null
 
-    private var mSongDetailHelper = PlayingSongDetailHelper()
-    private var mLastPlayingSongId = ""
-
-    private val mLyricText
-        get() = binding?.root?.findViewById<TextView>(R.id.tv_lyric)
-
-    private val mScrollView
-        get() = binding?.root?.findViewById<ScrollView>(R.id.sv_lyric)
-
-    private val mDynamicListView
-        get() = binding?.root?.findViewById<DynamicLyricListView>(
+    private val mDynamicLyricViewX
+        get() = binding?.root?.findViewById<LyricViewX>(
             R.id.dymanic_listview
         )
 
@@ -67,9 +60,9 @@ class PhoneLyricFragment : LyricFragment() {
             R.id.layout_info
         )
 
-    private val mLayoutDynamicLyric
+    private val mLyricFragmentViewX
         get() = binding?.root?.findViewById<View>(
-            R.id.layout_dynamiclyric
+            R.id.layout_lyric_fragment
         )
 
     private val mScrollLayout
@@ -77,9 +70,9 @@ class PhoneLyricFragment : LyricFragment() {
             R.id.layout_sv_lyric
         )
 
-    private val mLyricFragmentView
+    private val mLayoutDynamicLyricX
         get() = binding?.root?.findViewById<View>(
-            R.id.layout_lyric_fragment
+            R.id.layout_dynamiclyric
         )
 
     private val ivCover: SimpleDraweeView?
@@ -97,17 +90,7 @@ class PhoneLyricFragment : LyricFragment() {
     private val rbRating: RatingBar?
         get() = binding?.root?.findViewById(R.id.PlayingControlPanel_RatingBar)
 
-    private val layoutDynamicLyric: View?
-        get() = binding?.root?.findViewById(R.id.layout_dynamiclyric)
-
-    private val dynamicListView: DynamicLyricListView?
-        get() = binding?.root?.findViewById(R.id.dymanic_listview)
-
-    private val layoutInfo: LinearLayout?
-        get() = binding?.root?.findViewById(R.id.layout_info)
-
-    private val scrollViewLyric: ScrollView?
-        get() = binding?.root?.findViewById(R.id.sv_lyric)
+    private var mLoadLyricThread: ThreadWork? = null
 
     private fun getLyricPref(): Boolean {
         return lyricPreference.getBoolean(KEY_SHOWLYRIC, true)
@@ -119,8 +102,18 @@ class PhoneLyricFragment : LyricFragment() {
         }
     }
 
-    private fun setUpViews() {
-        mLyricFragmentView?.setOnClickListener {
+    private fun setupViews() {
+        SynoLog.d(LOG, "mLyricFragmentViewX: $mLyricFragmentViewX, mLayoutInfo: $mLayoutInfo, mDynamicLyricViewX: $mDynamicLyricViewX")
+
+        mDynamicLyricViewX?.setOnSingerClickListener(object : OnSingleClickListener {
+            override fun onClick() {
+                SynoLog.d(LOG, "(mLyricFragmentViewX) onClick")
+                setLyricPref(!getLyricPref())
+                showView()
+            }
+        })
+
+        mLyricFragmentViewX?.setOnClickListener {
             SynoLog.d(LOG, "(mLyricFragmentView) onClick")
             setLyricPref(true)
             showView()
@@ -132,28 +125,14 @@ class PhoneLyricFragment : LyricFragment() {
             showView()
         }
 
-        mLyricText?.setOnClickListener {
-            SynoLog.d(LOG, "(mLyric) onClick")
-            setLyricPref(false)
-            showView()
-        }
-
         mScrollLayout?.setOnClickListener {
             SynoLog.d(LOG, "(mScrollLayout) onClick")
             setLyricPref(false)
             showView()
         }
 
-        mLayoutDynamicLyric?.setOnClickListener {
+        mLayoutDynamicLyricX?.setOnClickListener {
             SynoLog.d(LOG, "(mLayoutDynamicLyric) onClick")
-            setLyricPref(false)
-            showView()
-        }
-
-        mDynamicListView?.setAdapter(mDynamicListAdapter)
-
-        mDynamicListView?.setOnItemClickListener { _, _, _, _ ->
-            SynoLog.d(LOG, "(mDynamicListView) onItemClick")
             setLyricPref(false)
             showView()
         }
@@ -170,13 +149,29 @@ class PhoneLyricFragment : LyricFragment() {
             setPlayingQueueManager(playingQueueManager)
         }
 
+        mDynamicLyricViewX?.setNormalColor(ContextCompat.getColor(App.getContext(), R.color.white))
+        mDynamicLyricViewX?.setCurrentColor(ContextCompat.getColor(App.getContext(), R.color.current_lyric_color))
+
+        mDynamicLyricViewX?.setDraggable(
+            true,
+            object : OnPlayClickListener {
+                override fun onPlayClick(time: Long): Boolean {
+                    SynoLog.d(LOG, "onPlayClick, time: $time, controller: $controller")
+                    this@PhoneLyricViewXFragment.controller?.transportControls?.seekTo(time)
+                    return true
+                }
+            }
+        )
         updateTrackInfo(mSongItem)
+    }
+
+    override fun bindController(controller: MediaControllerCompat) {
+        this.controller = controller
     }
 
     private fun loadLyric(songItem: SongItem) {
         mLoadLyricThread = object : ThreadWork() {
-
-            private val mRequestSongId = songItem.id
+            private var mRequestSongId = songItem.id
             private var strLyric: String? = null
 
             override fun preWork() {
@@ -186,22 +181,15 @@ class PhoneLyricFragment : LyricFragment() {
 
             override fun onWorking() {
                 try {
-                    var json = CacheManager.getInstance().doEnumLyrics(songItem)
+                    val rootJson = CacheManager.getInstance().doEnumLyrics(songItem)
+                    val dataJson = rootJson.optJSONObject("data") ?: rootJson
 
-                    if (json.has("data")) {
-                        json = json.optJSONObject("data")
-                    }
+                    strLyric = dataJson.optJSONArray(LYRICS)
+                        ?.optJSONObject(0)
+                        ?.optJSONObject(ADDITIONAL)
+                        ?.optString(FULL_LYRICS)
+                        ?: dataJson.optString(LYRICS, "")
 
-                    strLyric = json.optString(LYRICS, "")
-
-                    val lyricsArray = json.optJSONArray(LYRICS)
-
-                    if (lyricsArray != null) {
-                        strLyric = lyricsArray
-                                .optJSONObject(0)
-                                ?.optJSONObject(ADDITIONAL)
-                                ?.optString(FULL_LYRICS, "")
-                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -213,35 +201,21 @@ class PhoneLyricFragment : LyricFragment() {
                     return
                 }
 
-                mDynamicListAdapter = LyricUtils.extractDynamicLyric(strLyric)
-
-                SynoLog.d("PhoneLyricFragment", "mDynamicListAdapter: $mDynamicListAdapter")
-
-                mStrLyric = LyricUtils.extractLyric(strLyric)
-
-                if (mDynamicListAdapter == null) {
-                    modeShowDynamicLyric = false
-
-                    if (mStrLyric.isNullOrEmpty()) {
-                        mLyricText?.text = null
-                        hasLyric = false
-                    } else {
-                        mLyricText?.text = mStrLyric
-                        hasLyric = true
-                    }
-
-                    mScrollView?.scrollTo(0, 0)
+                if (strLyric.isNullOrEmpty()) {
+                    modeShowLyricViewX = false
+                    hasLyric = false
+                    mDynamicLyricViewX?.setLabel("No lyrics")
                 } else {
+                    SynoLog.d(LOG, "load lyric")
+                    modeShowLyricViewX = true
                     hasLyric = true
-                    modeShowDynamicLyric = true
-                    mDynamicListView?.setAdapter(mDynamicListAdapter)
+                    mDynamicLyricViewX?.loadLyric(strLyric)
                 }
 
                 showView()
                 SynoLog.d("PhoneLyricFragment", "instance=${hashCode()} lyric loaded")
             }
         }
-
         mLoadLyricThread?.startWork()
     }
 
@@ -250,23 +224,22 @@ class PhoneLyricFragment : LyricFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = LyricFragmentBinding.inflate(inflater, container, false)
+        binding = LyricviewxFragmentBinding.inflate(inflater, container, false)
         return binding!!.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setUpViews()
-        SynoLog.d("PhoneLyricFragment", "instance=${hashCode()} onViewCreated")
+        setupViews()
+        SynoLog.d(LOG, "instance=${hashCode()} onViewCreated")
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        lyricPreference =
-            context.getSharedPreferences(
-                Constants.PREF_LYRIC,
-                Context.MODE_PRIVATE
-            )
+        lyricPreference = context.getSharedPreferences(
+            Constants.PREF_LYRIC,
+            Context.MODE_PRIVATE
+        )
     }
 
     override fun onDetach() {
@@ -284,13 +257,14 @@ class PhoneLyricFragment : LyricFragment() {
     }
 
     override fun setTimeLine(time: Long) {
-        // SynoLog.i("PhoneLyricFragment", "setTimeLine, time: $time, !modeShowDynamicLyric: ${!modeShowDynamicLyric}")
-        // SynoLog.d("PhoneLyricFragment", "instance=${hashCode()} setTimeLine=$time")
-        if (!modeShowDynamicLyric) {
+        if (!modeShowLyricViewX) {
             return
         }
-
-        dynamicListView?.setSelection(time)
+        try {
+            mDynamicLyricViewX?.updateTime(time)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun updateTrackInfo(songItem: SongItem?) {
@@ -313,23 +287,17 @@ class PhoneLyricFragment : LyricFragment() {
         loadLyric(songItem)
     }
 
-    override fun bindController(controller: MediaControllerCompat) { }
-
     private fun showView() {
+        try {
+            SynoLog.d(LOG, "hasLyric: $hasLyric, lyricPref: ${getLyricPref()}, modeShowLyricViewX: $modeShowLyricViewX")
+        } catch (e: UninitializedPropertyAccessException) {
+            e.printStackTrace()
+        }
         if (hasLyric && getLyricPref()) {
-
-            if (modeShowDynamicLyric) {
-                layoutDynamicLyric?.visibility = View.VISIBLE
-                dynamicListView?.visibility = View.VISIBLE
-                dynamicListView?.requestFocus()
-
-                scrollViewLyric?.visibility = View.GONE
+            if (modeShowLyricViewX) {
+                mLayoutDynamicLyricX?.visibility = View.VISIBLE
             } else {
-                scrollViewLyric?.visibility = View.VISIBLE
-                scrollViewLyric?.requestFocus()
-
-                layoutDynamicLyric?.visibility = View.GONE
-                dynamicListView?.visibility = View.GONE
+                mLayoutDynamicLyricX?.visibility = View.GONE
             }
 
             val alphaAnimation = AlphaAnimation(0.15f, 0.15f).apply {
@@ -337,20 +305,18 @@ class PhoneLyricFragment : LyricFragment() {
                 fillAfter = true
             }
 
-            layoutInfo?.startAnimation(alphaAnimation)
+            mLayoutInfo?.startAnimation(alphaAnimation)
 
             return
         }
 
-        scrollViewLyric?.visibility = View.GONE
-        layoutDynamicLyric?.visibility = View.GONE
-        dynamicListView?.visibility = View.GONE
+        mLayoutDynamicLyricX?.visibility = View.GONE
 
         val alphaAnimation = AlphaAnimation(1.0f, 1.0f).apply {
             duration = 0L
             fillAfter = true
         }
 
-        layoutInfo?.startAnimation(alphaAnimation)
+        mLayoutInfo?.startAnimation(alphaAnimation)
     }
 }
