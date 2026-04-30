@@ -18,7 +18,6 @@ import com.whisperyao.dsplayer.R
 import com.whisperyao.dsplayer.CacheManager
 import com.whisperyao.dsplayer.Common
 import com.whisperyao.dsplayer.ConnectionManager
-import com.whisperyao.dsplayer.activity.HomeActivity
 import com.whisperyao.dsplayer.fragment.PlayerFragment
 import com.whisperyao.dsplayer.mediasession.service.AbstractMediaBrowserService
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager
@@ -127,7 +126,7 @@ class PlayerControlHelper @Inject constructor(
         if (playerFragment?.isAdded != true) {
             playerFragment = PlayerFragment()
             playerFragment?.show(
-                HomeActivity.MSupportManager,
+                supportFragmentManager,
                 PlayerFragment.TAG
             )
         }

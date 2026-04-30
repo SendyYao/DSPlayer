@@ -53,9 +53,8 @@ class MainActivity : ComponentActivity() {
             val password = etPassword.text.toString().trim()
             val useHttps = switchHttps.isChecked
 
-            if (isInputValid(baseUrl, account, password)) return@setOnClickListener
-
-//            enterSongList(baseUrl, account, password, useHttps)
+            // if (isInputValid(baseUrl, account, password)) return@setOnClickListener
+            // enterSongList(baseUrl, account, password, useHttps)
             setKnownAPIS()
 
             Toast.makeText(this@MainActivity, "Login Success & setKnownAPIs", Toast.LENGTH_SHORT).show()
@@ -67,7 +66,7 @@ class MainActivity : ComponentActivity() {
     private fun isInputValid(baseUrl: String, account: String, password: String): Boolean {
         if (baseUrl.isEmpty() || account.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-            return false
+            return true
         }
         return false
     }
@@ -100,7 +99,7 @@ class MainActivity : ComponentActivity() {
     }
 
     fun login(baseUrl: String, account: String, password: String, useHttps: Boolean, callback: (Boolean, String?) -> Unit) {
-        var protocol = if (useHttps) "https" else "http"
+        val protocol = if (useHttps) "https" else "http"
 
         val url = "$protocol://$baseUrl:5000/webapi/auth.cgi?" +
                 "api=SYNO.API.Auth&version=3&method=login" +

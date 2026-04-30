@@ -539,6 +539,7 @@ object Common {
         RATING_MODE(R.string.category_search),
         HOMEPAGE_PIN_MODE(R.string.category_homepage_pin),
         HOMEPAGE_DEFAULT_GENRE_MODE(R.string.category_homepage_default_genre),
+        HOMEPAGE_TEST_MODE(R.string.category_homepage_test),
         SEARCH_ARTIST_MODE(R.string.category_artist),
         SEARCH_ALBUM_MODE(R.string.category_album),
         SEARCH_SONG_MODE(R.string.category_song),

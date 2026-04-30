@@ -537,6 +537,15 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                     HomePageDefaultGenreFragment(callback, loadContent)
                 }
 
+                Common.ContainerType.HOMEPAGE_TEST_MODE -> {
+                    bundle.putString(
+                        Common.CONTAINER_TYPE,
+                        Common.ContainerType.HOMEPAGE_DEFAULT_GENRE_MODE.name
+                    )
+                    bundle.putString("type", "container")
+                    TestFragment()
+                }
+
                 Common.ContainerType.FOLDER_MODE -> {
                     bundle.putString(
                         Common.CONTAINER_TYPE,

@@ -24,10 +24,8 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
-import androidx.core.view.accessibility.AccessibilityEventCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.material.tabs.TabLayout
@@ -39,15 +37,12 @@ import com.whisperyao.dsplayer.R
 import com.whisperyao.dsplayer.RecyclerViewCallback
 import com.whisperyao.dsplayer.ServiceOperator
 import com.whisperyao.dsplayer.UDCEvent
+import com.whisperyao.dsplayer.databinding.MainDrawerBinding
 import com.whisperyao.dsplayer.fragment.ContentFragment
 import com.whisperyao.dsplayer.fragment.DrawerFragment
-import com.whisperyao.dsplayer.fragment.GenreFragment
 import com.whisperyao.dsplayer.fragment.HomePageFragment
-import com.whisperyao.dsplayer.fragment.MyPinsFragment
 import com.whisperyao.dsplayer.fragment.PagerFragment
-import com.whisperyao.dsplayer.fragment.TestFragment
 import com.whisperyao.dsplayer.homepage.PinManager
-import com.whisperyao.dsplayer.databinding.MainDrawerBinding
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.mediasession.client.MediaBrowserHelper
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager
@@ -64,14 +59,11 @@ import java.util.Stack
 import javax.inject.Inject
 
 
-class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivity.ContainerPlayer, DrawerFragment.NavigationDrawerCallbacks, PlayerChooser {
+class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivity.ContainerPlayer,
+    DrawerFragment.NavigationDrawerCallbacks, PlayerChooser {
 
     companion object {
         const val TAG: String = "MainActivityKT"
-        var TAB: TabLayout? = null
-        lateinit var mMediaController: MediaControllerCompat
-        lateinit var hPlayerControlHelper: PlayerControlHelper
-        lateinit var MSupportManager: FragmentManager
     }
 
     private var NAVI_MODE = -1
@@ -83,7 +75,6 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
     private lateinit var mHomePageFragment: HomePageFragment
     private lateinit var mOfflineFrag: PagerFragment
     private lateinit var mOnlineFrag: PagerFragment
-    private lateinit var mPinManager: PinManager
     private var mPlaylistFrag: ContentFragment? = null
     private var mRadioFrag: ContentFragment? = null
     private lateinit var mPlaylistStack: Stack<Bundle>
@@ -115,7 +106,6 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
     }
 
     private val playerChooserLauncher: ActivityResultLauncher<Intent>? = null
-
     private lateinit var binding: MainDrawerBinding
 
     private val statusListener by lazy {
@@ -148,15 +138,12 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Fresco.initialize(this@HomeActivity)
         this.mPlayerControlHelper.onCreate()
         ServiceOperator.MainPageClosed = false
         binding = MainDrawerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initView()
         initDrawer()
-        // initTabs()
-        TAB = findViewById(R.id.tab)
         tab = findViewById(R.id.tab)
         this.playerStatusManager.registerOnPlayerLocalityChangedObserver(this.mObserver)
         this.mPlaylistStack = Stack()
@@ -167,21 +154,17 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
         }
         startMediaBrowserConnection()
         setupControlPanel()
-        hPlayerControlHelper = this.mPlayerControlHelper
         playingQueueManager.observeQueueChanged(this) {
             determineMiniPlayerVisibility(playingQueueManager.getQueueSize() > 0)
         }
-        MSupportManager = supportFragmentManager
-//        playingQueueManager.getProgress().observe(this) { progress ->
-//            mPlayerControlHelper.updateSeekBar(
-//                progress.progress,
-//                progress.buffer
-//            )
-//        }
+        playingQueueManager.getProgress().observe(this) { progress ->
+            mPlayerControlHelper.updateSeekBar(
+                progress.progress,
+                progress.buffer
+            )
+        }
         val drawerFragment = supportFragmentManager.findFragmentById(R.id.navigation_drawer) as DrawerFragment?
         drawerFragment?.onNavigationItemSelected(2)
-        // this.mPinManager = PinManager.getInstance()
-        // this.mPinManager.addCallback(this)
         LocalBroadcastManager.getInstance(this).registerReceiver(
             this.mExploreListener,
             IntentFilter(Common.ACTION_INNER_LOGIN_FROM_EXPLORE)
@@ -301,34 +284,6 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
                 PlayerChooserActivity::class.java as Class<*>
             )
         )
-
-    }
-
-    private fun initTabs() {
-        tab = findViewById(R.id.tab)
-
-        tab.tabMode = TabLayout.MODE_FIXED
-        tab.visibility = View.VISIBLE
-
-        // 添加 Tab
-        tab.addTab(tab.newTab().setText("MY PINS"))
-        tab.addTab(tab.newTab().setText("RECOMMENDED GENRE"))
-        tab.addTab(tab.newTab().setText("TestFragment"))
-        tab.addTab(tab.newTab().setText("PagerFragment"))
-
-        tab.clearOnTabSelectedListeners()
-
-        switchFragment(0)
-
-        tab.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                switchFragment(tab.position)
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab) {}
-        })
     }
 
     private fun setupControlPanel() {
@@ -457,19 +412,6 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
 
     fun sendUpdatePlaybackStatusCommand() {
         getMediaBrowserHelper()?.sendUpdatePlaybackStatusCommand()
-    }
-
-    private fun switchFragment(position: Int) {
-        val fragment: Fragment = when (position) {
-            0 -> MyPinsFragment()
-            1 -> GenreFragment()
-            2 -> TestFragment()
-            else -> { PagerFragment.newInstance(PagerFragment.PagerParent.MAIN_ACTIVITY, null, true) }
-        }
-
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.content, fragment)
-            .commit()
     }
 
     private fun initDrawer() {
@@ -960,7 +902,7 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
         if (equalToCurrentAccount(intent)) return
 
         val newIntent = Intent(this, HomeActivity::class.java).apply {
-            flags = AccessibilityEventCompat.TYPE_VIEW_TARGETED_BY_SCROLL
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             action = Common.ACTION_ASK_LOGOUT
             data = intent.data
             putExtras(intent)

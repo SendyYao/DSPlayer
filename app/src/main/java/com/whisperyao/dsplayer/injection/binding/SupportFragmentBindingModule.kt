@@ -17,6 +17,7 @@ import com.whisperyao.dsplayer.fragment.PlaylistFragment
 import com.whisperyao.dsplayer.fragment.PlaylistSongFragment
 import com.whisperyao.dsplayer.fragment.RadioFragment
 import com.whisperyao.dsplayer.fragment.RatingFragment
+import com.whisperyao.dsplayer.fragment.TestFragment
 import com.whisperyao.dsplayer.injection.Constants
 import com.whisperyao.dsplayer.injection.module.SupportFragmentModule
 import com.whisperyao.dsplayer.injection.module.ManagerModule
@@ -48,6 +49,11 @@ abstract class SupportFragmentBindingModule {
         modules = [HomePageDefaultGenreFragmentInstanceModule::class]
     )
     abstract fun homePageDefaultGenreFragment(): HomePageDefaultGenreFragment
+
+    @ContributesAndroidInjector(
+        modules = [TestFragmentInstanceModule::class]
+    )
+    abstract fun testFragment(): TestFragment
 
     @ContributesAndroidInjector(
         modules = [HomePagePinsFragmentInstanceModule::class]
@@ -235,6 +241,14 @@ abstract class SupportFragmentBindingModule {
         @Provides
         fun provideFragment(
             fragment: HomePageDefaultGenreFragment
+        ): Fragment = fragment
+    }
+
+    @Module(includes = [SupportFragmentModule::class])
+    class TestFragmentInstanceModule {
+        @Provides
+        fun provideFragment(
+            fragment: TestFragment
         ): Fragment = fragment
     }
 

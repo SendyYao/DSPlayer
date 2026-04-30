@@ -236,8 +236,6 @@ open class MediaBrowserHelper(
 
                 mMediaController = MediaControllerCompat(mContext, browser.sessionToken)
 
-                HomeActivity.mMediaController = mMediaController as MediaControllerCompat
-
                 mMediaController?.let { controller ->
                     controller.registerCallback(
                         mMediaControllerCallback

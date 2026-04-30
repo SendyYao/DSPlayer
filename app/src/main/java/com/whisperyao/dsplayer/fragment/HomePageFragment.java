@@ -17,7 +17,6 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 import com.whisperyao.dsplayer.Common;
 import com.whisperyao.dsplayer.R;
-import com.whisperyao.dsplayer.activity.HomeActivity;
 import com.whisperyao.dsplayer.util.AudioPreference;
 import com.whisperyao.dsplayer.util.SynoLog;
 
@@ -87,6 +86,7 @@ public class HomePageFragment extends Fragment implements ContentFragment.Conten
         this.mPageTypeList.clear();
         this.mPageTypeList.add(Common.ContainerType.HOMEPAGE_PIN_MODE);
         this.mPageTypeList.add(Common.ContainerType.HOMEPAGE_DEFAULT_GENRE_MODE);
+        this.mPageTypeList.add(Common.ContainerType.HOMEPAGE_TEST_MODE);
         int iIndexOf = this.mPageTypeList.indexOf(AudioPreference.getHomePage());
         this.mCurrentPage = iIndexOf;
         if (iIndexOf < 0 || iIndexOf >= this.mPageTypeList.size()) {
@@ -106,7 +106,7 @@ public class HomePageFragment extends Fragment implements ContentFragment.Conten
         this.mViewPager = viewPager;
         viewPager.setAdapter(this.mPagerAdapter);
         this.mViewPager.setOffscreenPageLimit(this.mPageTypeList.size());
-        TabLayout tab = HomeActivity.Companion.getTAB();
+        TabLayout tab = getActivity().findViewById(R.id.tab);
         this.mTabs = tab;
         SynoLog.d(LOG, tab.toString());
         if (tab != null) {
@@ -138,7 +138,7 @@ public class HomePageFragment extends Fragment implements ContentFragment.Conten
                     HomePageFragment.this.mOnUpdateTitle.doUpdateTitle();
                 }
             });
-            if (2 > size) {
+            if (3 > size) {
                 this.mTabs.setVisibility(View.GONE);
             }
         }

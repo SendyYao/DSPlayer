@@ -1,20 +1,25 @@
 package com.whisperyao.dsplayer.fragment
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.AbsListView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.whisperyao.dsplayer.App
+import com.whisperyao.dsplayer.Common
 import com.whisperyao.dsplayer.R
+import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.ui.login.ConnectData
+import com.whisperyao.dsplayer.util.SynoLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class TestFragment : Fragment(R.layout.test_fragment) {
+class TestFragment : ContentFragment() {
 
     private lateinit var etIp: EditText
     private lateinit var btnTest: Button
@@ -22,6 +27,19 @@ class TestFragment : Fragment(R.layout.test_fragment) {
 
     private val connectionManager by lazy {
         App.connectionManager
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        SynoLog.d("PlaylistFragment", "onCreateView")
+        mContentView = inflater.inflate(R.layout.test_fragment, null)
+
+        SynoLog.i("PlaylistFragment", "isInitialized: $isInitialized")
+        if (!isInitialized) {
+            isInitialized = true
+            blDoRefresh = false
+        }
+
+        return mContentView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,4 +93,32 @@ class TestFragment : Fragment(R.layout.test_fragment) {
             }
         }
     }
+
+    override fun toggleView() { }
+
+    override fun onPageSelected() { }
+
+    override fun allItemPlayAction(action: Common.ItemAction?) { }
+
+    override fun canLoadMore(): Boolean = false
+
+    override fun canMultiEdit(): Boolean = false
+
+    override fun canSetView(): Boolean = false
+
+    override fun getSelectedItems(): ArrayList<SongItem>? = null
+
+    override fun isEditMode(): Boolean = false
+
+    override fun isPlayable(): Boolean = false
+
+    override fun setEditMode(edit: Boolean) { }
+
+    override fun loadContent(refresh: Boolean) {}
+
+    override fun markAllItem(mark: Boolean) { }
+
+    override fun onScrollToBottom(view: AbsListView?) { }
+
+    override fun scrollToTop() { }
 }

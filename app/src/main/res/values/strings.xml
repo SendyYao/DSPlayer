@@ -107,6 +107,7 @@
     <string name="category_homepage">Home</string>
     <string name="category_homepage_default_genre">Recommended Genre</string>
     <string name="category_homepage_pin">My Pins</string>
+    <string name="category_homepage_test">My Test</string>
     <string name="category_playlist">Playlists</string>
     <string name="category_radio">Radio</string>
     <string name="category_search">Search</string>
