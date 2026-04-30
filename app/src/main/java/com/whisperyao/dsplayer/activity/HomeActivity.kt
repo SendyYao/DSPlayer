@@ -278,7 +278,8 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
     }
 
     override fun showPlayerChooser() {
-        this.playerChooserLauncher!!.launch(
+        if (this.playerChooserLauncher == null) return
+        this.playerChooserLauncher.launch(
             Intent(
                 this,
                 PlayerChooserActivity::class.java as Class<*>
@@ -454,6 +455,7 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
 
             else -> false
         }
+        if (showCheckToLeave) { return true }
         if (NAVI_MODE != 4) {
             if (NAVI_MODE != 5) {
                 return false

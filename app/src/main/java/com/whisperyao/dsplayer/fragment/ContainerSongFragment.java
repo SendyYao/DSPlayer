@@ -408,7 +408,7 @@ public class ContainerSongFragment extends ContentFragment implements AbsAdapter
             this.songListAdapter.notifyDataSetChanged();
         }
         this.songListAdapter.setSpan(getSpan());
-        this.mCoverDetailHelper.setIsPortrait(isProtrait());
+        this.mCoverDetailHelper.setIsPortrait(isProtract());
         super.onConfigurationChanged(newConfig);
     }
 
@@ -490,7 +490,7 @@ public class ContainerSongFragment extends ContentFragment implements AbsAdapter
         this.mAlbumBackView = this.mContentView.findViewById(R.id.container_detail_album_back);
         View viewFindViewById = this.mContentView.findViewById(R.id.content_detail_layout_land);
         this.mCoverDetailHelper.setupViews(this.mContentView.findViewById(R.id.content_detail_layout_port), viewFindViewById, this.mTitleView, this.mAlbumBackView);
-        this.mCoverDetailHelper.setIsPortrait(isProtrait());
+        this.mCoverDetailHelper.setIsPortrait(isProtract());
         adjustHeader();
         this.mFastScroller = this.mContentView.findViewById(R.id.fast_scroller);
         this.mRecyclerView = this.mContentView.findViewById(R.id.recycler_view);

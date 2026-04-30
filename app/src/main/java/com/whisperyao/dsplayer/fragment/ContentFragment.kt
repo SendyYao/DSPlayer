@@ -22,7 +22,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -36,11 +35,9 @@ import com.whisperyao.dsplayer.activity.BaseActivity
 import com.whisperyao.dsplayer.activity.HomeActivity
 import com.whisperyao.dsplayer.datasource.network.api.BaseWebApi
 import com.whisperyao.dsplayer.dialog.DialogHelper
-import com.whisperyao.dsplayer.homepage.PinManager
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.net.WebAPI
 import com.whisperyao.dsplayer.net.WebAPIErrorException
-import com.whisperyao.dsplayer.playing.PlayingStatusManager
 import com.whisperyao.dsplayer.playing.PlayingStatusManager.OnPlayerLocalityChangedObserver
 import com.whisperyao.dsplayer.publicsharing.fragment.EditPlaylistFragment
 import com.whisperyao.dsplayer.util.AudioPreference
@@ -315,7 +312,6 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
     protected var mIsVisibleToUser: Boolean = false
     protected var mVisibleHintCalled: Boolean = false
 
-    //    private val mObserver: PlayingStatusManager.OnPlayerLocalityChangedObserver? = null
     protected var mPlaylistChangedListener: BroadcastReceiver? = null
 
     @JvmField
@@ -348,7 +344,6 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
     protected lateinit var mRecyclerView: RecyclerView
     private var mOberserver: OnPlayerLocalityChangedObserver? = null
 
-
     protected lateinit var mDialog: ProgressDialog
 
     @JvmField
@@ -371,7 +366,9 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
         var sDummyCallback: ContentCallback = object : ContentCallback {
             override fun getBundleStack(): Stack<Bundle>? = null
-            override fun onContainerItemClick(bundle: Bundle) {}
+            override fun onContainerItemClick(bundle: Bundle) {
+                SynoLog.d(LOG, "onContainerItemClick from sDummyCallback, bundle: $bundle")
+            }
             override fun onFinishLoading(type: Common.ContainerType, size: Int) {}
             override fun onUpdateTitle() {}
         }
@@ -416,9 +413,9 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                 Common.ContainerType.SEARCH_ALBUM_MODE -> {
 
                     if (type == "container") {
-                        ContainerFragment()
+                        ContainerFragment(callback, true, doRefresh)
                     } else {
-                         ContainerSongFragment(callback, true, doRefresh)
+                        ContainerSongFragment(callback, true, doRefresh)
                     }
                 }
 
@@ -440,6 +437,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                 }
 
                 Common.ContainerType.PLAYLIST_MODE -> {
+                    SynoLog.d(LOG, "PlaylistMode callback: $callback")
                     PlaylistFragment(callback, doRefresh)
                 }
 
@@ -485,7 +483,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
         fun newInstance(online: Boolean, type: Common.ContainerType, filterKey: String?, callback: ContentCallback, loadContent: Boolean): ContentFragment {
 
-            SynoLog.i(LOG, "${type.name} newInstance $online")
+            SynoLog.i(LOG, "newInstance ${type.name} $online, callback: $callback")
 
             val bundle = Bundle().apply {
                 putBoolean("mode", online)
@@ -604,7 +602,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         return initBundle
     }
 
-    protected fun isProtrait(): Boolean {
+    protected fun isProtract(): Boolean {
         return getOrientation() === 1
     }
 
@@ -626,16 +624,11 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
         cacheMgr = CacheManager.getInstance()
 
-        if (this.mArgument?.containsKey(SCROLL_STATE) ?: false) {
-            this.mScrollState = this.mArgument?.getParcelable(SCROLL_STATE)
+        if (this.mArgument.containsKey(SCROLL_STATE)) {
+            this.mScrollState = this.mArgument.getParcelable(SCROLL_STATE)
         }
-        if (this.mArgument?.containsKey(GSCROLL_STATE) == true) {
-            this.mGScrollState = this.mArgument?.getParcelable(GSCROLL_STATE)
-        }
-
-//        this.mContainerClickCallback = sDummyCallback
-        if (!::mContainerClickCallback.isInitialized) {
-            mContainerClickCallback = sDummyCallback
+        if (this.mArgument.containsKey(GSCROLL_STATE)) {
+            this.mGScrollState = this.mArgument.getParcelable(GSCROLL_STATE)
         }
     }
 
@@ -780,13 +773,13 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
     }
 
     override fun onAttach(context: Context) {
+        SynoLog.d(LOG, "onAttach")
         super.onAttach(context)
         val appCompatActivity: AppCompatActivity = context as AppCompatActivity
         mActivity = appCompatActivity
         if (appCompatActivity is ActionModeCallback) {
             this.mActionModeCallback = context as ActionModeCallback
         }
-        mContainerClickCallback = (parentFragment as? ContentCallback) ?: sDummyCallback
         Common.getPlayerStatusManager().registerOnPlayerLocalityChangedObserver(this.mOberserver);
     }
 
@@ -1013,9 +1006,8 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         mVisibleHintCalled = false
 
         mContainerClickCallback = sDummyCallback
-//        this@ContentFragment.doRefresh()
 
-        mOberserver = object : PlayingStatusManager.OnPlayerLocalityChangedObserver {
+        mOberserver = object : OnPlayerLocalityChangedObserver {
             override fun onPlayerLocalityChanged() {
                 val activity = this@ContentFragment.activity
                 activity?.runOnUiThread {
@@ -1060,6 +1052,8 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         if (callback != null) {
             mContainerClickCallback = callback
         }
+
+        SynoLog.d(LOG, "callback: $callback")
     }
 
     class SelectModeAdapter : ArrayAdapter<String> {

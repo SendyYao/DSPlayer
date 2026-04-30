@@ -1,6 +1,7 @@
 package com.whisperyao.dsplayer.fragment
 
 
+import android.app.ProgressDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import com.whisperyao.dsplayer.LocalEnumerator
 import com.whisperyao.dsplayer.PlaylistAdapter
 import com.whisperyao.dsplayer.PlaylistEditor
 import com.whisperyao.dsplayer.R
+import com.whisperyao.dsplayer.ServiceOperator
 import com.whisperyao.dsplayer.StateManager
 import com.whisperyao.dsplayer.homepage.PinManager
 import com.whisperyao.dsplayer.item.Item
@@ -22,6 +24,7 @@ import com.whisperyao.dsplayer.net.WebAPIErrorException
 import com.whisperyao.dsplayer.provider.AudioDatabaseUtils
 import com.whisperyao.dsplayer.publicsharing.fragment.EditPlaylistFragment
 import com.whisperyao.dsplayer.util.SynoLog
+import com.whisperyao.dsplayer.util.Utilities
 import java.io.IOException
 import java.util.LinkedList
 import java.util.Stack
@@ -65,6 +68,7 @@ class PlaylistFragment() : ContentFragment(),
     private var localPlaylists = LinkedList<PlaylistAdapter.UiPlaylistItem>()
 
     constructor(callback: ContentCallback) : this() {
+        SynoLog.d("PlaylistFragment", "callback: $callback")
         mContainerClickCallback = callback
     }
 
@@ -107,6 +111,7 @@ class PlaylistFragment() : ContentFragment(),
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        SynoLog.d("PlaylistFragment", "onCreateView")
         mContentView = inflater.inflate(
             if (StateManager.getInstance().isMobileLayout)
                 R.layout.playlist_fragment
@@ -118,8 +123,7 @@ class PlaylistFragment() : ContentFragment(),
         setupViews()
         SynoLog.i("PlaylistFragment", "isInitialized: $isInitialized")
         if (!isInitialized) {
-            // blDoRefresh
-            loadContent(true)
+            loadContent(this.blDoRefresh)
             isInitialized = true
             blDoRefresh = false
         }
@@ -166,13 +170,13 @@ class PlaylistFragment() : ContentFragment(),
         listView?.adapter = adapter
 
         listView?.setOnItemClickListener { _, _, position, _ ->
-            onPlaylistItemClick(position, false)
+            onItemClick(position, false)
         }
 
         listView?.setOnScrollListener(MyOnScrollListener())
     }
 
-    private fun onPlaylistItemClick(position: Int, refresh: Boolean) {
+    private fun onItemClick(position: Int, refresh: Boolean) {
         SynoLog.i("PlaylistFragment", "onPlaylistItemClick")
         val item = adapter?.getItem(position) ?: return
         if (item.isHeader) return
@@ -189,6 +193,7 @@ class PlaylistFragment() : ContentFragment(),
         SynoLog.i("PlaylistFragment", bundle.toString())
 
         if (StateManager.getInstance().isMobileLayout) {
+            SynoLog.d("PlaylistFragment", "isMobileLayout: True, bundle: $bundle, mContainerClickCallback: $mContainerClickCallback")
             mContainerClickCallback.onContainerItemClick(bundle)
             return
         }
@@ -214,7 +219,7 @@ class PlaylistFragment() : ContentFragment(),
 
     override fun canMultiEdit() = currentContentFragment?.canMultiEdit() ?: false
 
-    override fun canSetView(): Boolean { return false }
+    override fun canSetView(): Boolean = false
 
     override fun getSelectedItems(): ArrayList<SongItem>? {
         if (this.currentContentFragment != null) {
@@ -230,6 +235,10 @@ class PlaylistFragment() : ContentFragment(),
     override fun setEditMode(edit: Boolean) {
         currentContentFragment?.setEditMode(edit)
     }
+
+    override fun onPinLoadFinish() {}
+    override fun onPinPreLoading() {}
+    override fun onFinishLoading(type: Common.ContainerType, size: Int) { }
 
     private fun resetPlaylists() {
         page = 0
@@ -341,7 +350,7 @@ class PlaylistFragment() : ContentFragment(),
     }
 
     override fun loadContent(refresh: Boolean) {
-        SynoLog.d("PlaylistFragment", "loadContent($refresh), type=${mType?.name}")
+        SynoLog.d("PlaylistFragment", "loadContent($refresh), type=${mType.name}")
 
         loadContentWork?.takeIf { it.isWorking }?.endThread()
 
@@ -383,7 +392,7 @@ class PlaylistFragment() : ContentFragment(),
                     val dsId = Common.getDsId()
                         .takeIf { Common.isRemotePlayer() }
 
-//                    localPlaylists = AudioDatabaseUtils.loadDownloadedPlaylists(dsId)
+                    // localPlaylists = AudioDatabaseUtils.loadDownloadedPlaylists(dsId)
 
                 } catch (e: WebAPIErrorException) {
                     exception = e
@@ -414,7 +423,7 @@ class PlaylistFragment() : ContentFragment(),
 
                 if (!StateManager.getInstance().isMobileLayout && isLeft) {
                     checkSelPos()
-                    onPlaylistItemClick(selectedPosition, refresh)
+                    onItemClick(selectedPosition, refresh)
                 }
 
                 if (canLoadMore() && retItems.isNotEmpty()) {
@@ -459,21 +468,65 @@ class PlaylistFragment() : ContentFragment(),
     }
 
     private fun enumSongs(action: Common.ItemAction, playlistItem: PlaylistItem) {
+        val progressDialog = ProgressDialog(mActivity)
+        progressDialog.setMessage(resources.getString(R.string.processing))
+        progressDialog.setCancelable(false)
         enumSongsWork = object : ThreadWork() {
+            private var songList = ArrayList<SongItem>()
 
-            private val songList = ArrayList<SongItem>()
+            override fun preWork() {
+                progressDialog.show()
+            }
 
             override fun onWorking() {
                 try {
-//                    songList.addAll(cacheMgr.doEnumPlaylistSongsForPlaylist(getEnumSongsBundle(playlistItem)
-//                        .getBoolean(PinManager.MODE),
-//                        playlistItem,
-//                        -1,
-//                        true
-//                    ).itemList)
+                    if (playlistItem.isLocal()) {
+                        val listDoEnumLocalPlaylistSongs: List<SongItem> =
+                            this@PlaylistFragment.audioDatabaseUtils
+                                .doEnumLocalPlaylistSongs(
+                                    playlistItem.getDsId(),
+                                    playlistItem.id,
+                                    playlistItem.title
+                                )
+                        this@PlaylistFragment.total = listDoEnumLocalPlaylistSongs.size
+                        this.songList.addAll(listDoEnumLocalPlaylistSongs)
+                        return
+                    }
+                    songList.addAll(cacheMgr.doEnumPlaylistSongsForPlaylist(getEnumSongsBundle(playlistItem)
+                        .getBoolean(PinManager.MODE),
+                        playlistItem,
+                        -1,
+                        true
+                    ).itemList)
+                    if (Common.ItemAction.DOWNLOAD == action) {
+                        playlistItem.setDsId(Common.getDsId())
+                        this@PlaylistFragment.audioDatabaseUtils.saveDownloadedPlaylists(
+                            playlistItem.getDsId(),
+                            playlistItem.id,
+                            playlistItem.title
+                        )
+                        this@PlaylistFragment.audioDatabaseUtils.deleteAllLocalSongsRelationByPlaylist(playlistItem)
+                        this@PlaylistFragment.audioDatabaseUtils.saveSongsInDownloadPlaylist(playlistItem, this.songList)
+                        val arrayList = ArrayList<SongItem>()
+                        val it = this.songList.iterator()
+                        while (it.hasNext()) {
+                            val next = it.next()
+                            if (next.isFile && Utilities.shouldManualDownload(next) && !ServiceOperator.isDownloading(
+                                    next
+                                )
+                            ) {
+                                arrayList.add(next)
+                            }
+                        }
+                        this.songList = arrayList
+                    }
                 } catch (e: Exception) {
                     exception = e as WebAPIErrorException
                 }
+            }
+
+            override fun postWork() {
+                progressDialog.dismiss()
             }
 
             override fun onComplete() {
@@ -505,7 +558,7 @@ class PlaylistFragment() : ContentFragment(),
                         )
 
                     Common.ItemAction.DOWNLOAD -> {
-//                        downloadRemote(songList)
+                        // downloadRemote(songList)
                         doRefresh()
                     }
 
@@ -523,6 +576,7 @@ class PlaylistFragment() : ContentFragment(),
         } else {
             getEnumSongsBundleForOthers(item)
         }
+
     private fun getEnumSongsBundleForPlaylist(item: PlaylistItem): Bundle = Bundle().apply {
 
         putString(
@@ -603,10 +657,6 @@ class PlaylistFragment() : ContentFragment(),
         putString("title", item.title)
     }
 
-    override fun onPinLoadFinish() {}
-    override fun onPinPreLoading() {}
-    override fun onFinishLoading(type: Common.ContainerType, size: Int) { }
-
     override fun onActionClicked(actionId: Int, playlistItem: PlaylistItem) {
         when (actionId) {
             R.id.ItemAction_PLAY ->
@@ -626,7 +676,11 @@ class PlaylistFragment() : ContentFragment(),
         }
     }
 
-    // TODO shwoSharePlaylist(), editPlaylist()
+    // TODO showSharePlaylist(), editPlaylist()
+
+    override fun scrollToTop() {
+        this.listView?.smoothScrollToPosition(0)
+    }
 
     private fun deletePlaylist(item: PlaylistItem) {
         playlistEditWork = object : ThreadWork() {
@@ -660,12 +714,14 @@ class PlaylistFragment() : ContentFragment(),
     }
 
     override fun onContainerItemClick(bundle: Bundle) {
+        SynoLog.i("PlaylistFragment", "onContainerItemClick")
         this.contentBundle.putInt("position", bundle.getInt("position"))
         this.mContainerClickCallback.onContainerItemClick(this.contentBundle)
     }
     override fun onUpdateTitle() {
         this.mContainerClickCallback.onUpdateTitle()
     }
+
     override fun getBundleStack(): Stack<Bundle> {
         val stack: Stack<Bundle> = Stack<Bundle>()
         stack.push(this.contentBundle)
@@ -678,9 +734,5 @@ class PlaylistFragment() : ContentFragment(),
 
     override fun onPinErrorOccur() {
         doRefresh()
-    }
-
-    override fun scrollToTop() {
-        this.listView?.smoothScrollToPosition(0)
     }
 }
