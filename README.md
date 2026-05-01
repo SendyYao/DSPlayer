@@ -59,6 +59,7 @@ The original motivation was simple:
 - RadioFragment
 - FileSongFragment
 - PlayerFragment (LyricFragment(PhoneLyricFragment、TabletFragment)、PlayingQueueFragment)
+- TestFragment
 
 ---
 
@@ -140,43 +141,37 @@ Most core functions are already working.
 ### 🚧 In Progress
 - [ ] SearchActivity
 - [ ] secondary menu actions
-- [ ] fragment back stack optimization
-- [ ] lyric UI replacement
+- [x] fragment back stack optimization
+- [x] lyric UI replacement
 
 ---
 
 ## 🐞 Known Issues
 
-Some bugs and incomplete logic still exist.
-
-### ⚠️ Bugs
-- back button / gesture may incorrectly trigger  
-  **Confirm to leave**
-- some fragment transitions are not fully restored
+Some incomplete logic still exist.
 
 ### 🧩 Missing Features
 Some secondary menu operations are not yet completed:
 
 - [ ] Download
 - [ ] Rate
-- [ ] playlist operations
-- [ ] share / export
+- [ ] Playlist operations
+- [ ] Share
 
 ---
 
 ## 🗺️ Roadmap
 
 ### 🎯 Near Future
-- [ ] replace default lyric UI with **LyricViewX**
+- [x] replace default lyric UI with **LyricViewX**
+- [x] fix back gesture issues
 - [ ] improve search entrance UX & complete SearchActivity
-- [ ] fix back gesture issues
 
 ---
 
 ### 🌟 Future Improvements
 - [ ] dark mode optimization
 - [ ] better player animations
-- [ ] local lyric download support
 - [ ] better NAS API abstraction
 
 ---
