@@ -13,7 +13,9 @@ import com.whisperyao.dsplayer.net.AudioStationAPI
 import com.whisperyao.dsplayer.net.WebAPI
 import com.whisperyao.dsplayer.util.SynoLog
 import com.whisperyao.dsplayer.vos.api.ApiCreatePlaylistResponseVo
+import com.whisperyao.dsplayer.vos.api.ApiPlaylistResponseVo
 import com.whisperyao.dsplayer.vos.base.BaseCreatePlaylistResponseVo
+import com.whisperyao.dsplayer.vos.base.BasePlaylistResponseVo
 import okhttp3.Response
 import org.json.JSONException
 import org.json.JSONObject
@@ -50,7 +52,7 @@ object PlaylistEditor {
     const val PERSONAL = "personal"
     const val SHARED = "shared"
 
-    fun doRenamePlaylist(playlistItem: PlaylistItem, newName: String, got: ConnectionManager.GetHttpPost): BaseCreatePlaylistResponseVo? {
+    fun doRenamePlaylist(playlistItem: PlaylistItem, newName: String, got: GetHttpPost): BaseCreatePlaylistResponseVo? {
         return if (playlistItem.isNormal()) {
             doRenameNormalPlaylist(playlistItem, newName, got)
         } else {
@@ -58,14 +60,14 @@ object PlaylistEditor {
         }
     }
 
-    private fun doRenameNormalPlaylist(playlistItem: PlaylistItem, newName: String, got: ConnectionManager.GetHttpPost): BaseCreatePlaylistResponseVo? {
+    private fun doRenameNormalPlaylist(playlistItem: PlaylistItem, newName: String, got: GetHttpPost): BaseCreatePlaylistResponseVo? {
         val webApi = WebAPI.getInstance()
         val api = webApi.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PLAYLIST)
             ?: return null.also {
                 SynoLog.e(LOG, "Playlist API doesn't exist")
             }
 
-        val url = Common.makeAddress(
+        val url = makeAddress(
             Common.DEFAULT_WEBAPI_PATH,
             api.path
         )
@@ -97,11 +99,7 @@ object PlaylistEditor {
         }
     }
 
-    private fun doRenameSmartPlaylist(
-        playlistItem: PlaylistItem,
-        newName: String,
-        got: ConnectionManager.GetHttpPost
-    ): BaseCreatePlaylistResponseVo? {
+    private fun doRenameSmartPlaylist(playlistItem: PlaylistItem, newName: String, got: ConnectionManager.GetHttpPost): BaseCreatePlaylistResponseVo? {
 
         val rules = getSmartPlaylistRules(playlistItem) ?: return null
 
@@ -157,13 +155,7 @@ object PlaylistEditor {
 
     @JvmStatic
     @Throws(IOException::class)
-    fun doUpdatePlaylist(
-        id: String?,
-        offset: Int,
-        limit: Int,
-        ids: String?,
-        got: GetHttpPost?
-    ): Common.ConnectionInfo {
+    fun doUpdatePlaylist(id: String?, offset: Int, limit: Int, ids: String?, got: GetHttpPost?): Common.ConnectionInfo {
         val webAPI = WebAPI.getInstance()
         val knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PLAYLIST)
         if (knownAPI == null) {
@@ -198,6 +190,36 @@ object PlaylistEditor {
         return connectionInfo2
     }
 
+    @JvmStatic
+    fun doEnumPlaylist(isShared: Boolean): BasePlaylistResponseVo? {
+        val webAPI = WebAPI.getInstance()
+        val knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PLAYLIST)
+        if (knownAPI == null) {
+            SynoLog.e(LOG, "SYNO.AudioStation.Playlist api doesn't exist")
+        }
+        val strMakeAddress = makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.path)
+        SynoLog.d(LOG, "doEnumPlaylist isShared : $isShared")
+        val arrayList: ArrayList<BasicKeyValuePair> = ArrayList()
+        arrayList.add(BasicKeyValuePair(LIBRARY, if (isShared) SHARED else PERSONAL))
+        try {
+            val responseDoRequest: Response = webAPI.doRequest(
+                strMakeAddress,
+                AudioStationAPI.SYNO_AUDIOSTATION_PLAYLIST,
+                "list",
+                arrayList
+            )
+            if (responseDoRequest.isSuccessful) {
+                return Gson().fromJson<Any?>(
+                    JsonReader(InputStreamReader(responseDoRequest.body?.byteStream())),
+                    ApiPlaylistResponseVo::class.java
+                ) as BasePlaylistResponseVo
+            }
+            return null
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return null
+        }
+    }
 
     private fun getSmartPlaylistRules(playlistItem: PlaylistItem): JSONObject? {
         val webApi = WebAPI.getInstance()
@@ -296,5 +318,45 @@ object PlaylistEditor {
         }
 
         return result
+    }
+
+    @JvmStatic
+    fun addToPlaylist(id: String, count: Int, ids: String, got: GetHttpPost): Common.ConnectionInfo {
+        return doUpdatePlaylist(id, getPlaylistSongCount(id), count, ids, got)
+    }
+
+    private fun getPlaylistSongCount(id: String): Int {
+        val webAPI = WebAPI.getInstance()
+        val knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PLAYLIST)
+        if (knownAPI == null) {
+            SynoLog.e(LOG, "api SYNO.AudioStation.Playlist doesn't exist")
+            return 0
+        }
+        val strMakeAddress = makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.path)
+        val arrayList: ArrayList<BasicKeyValuePair> = ArrayList()
+        arrayList.add(BasicKeyValuePair("songs_offset", "0"))
+        arrayList.add(BasicKeyValuePair("song_limit", "1"))
+        arrayList.add(BasicKeyValuePair(LIBRARY, AbstractNetManager.getPersonalLibraryValue()))
+        arrayList.add(BasicKeyValuePair(ID, id))
+        arrayList.add(BasicKeyValuePair("additional", "songs"))
+        try {
+            return JSONObject(webAPI.doRequest(
+                strMakeAddress,
+                AudioStationAPI.SYNO_AUDIOSTATION_PLAYLIST,
+                "getinfo",
+                arrayList).body?.string() as String
+            )
+                .getJSONObject("data")
+                .getJSONArray(PLAYLISTS)
+                .getJSONObject(0)
+                .getJSONObject("additional")
+                .getInt("songs_total")
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return 0
+        } catch (e: JSONException) {
+            e.printStackTrace()
+            return 0
+        }
     }
 }

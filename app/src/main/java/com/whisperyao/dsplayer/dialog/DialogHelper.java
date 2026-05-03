@@ -6,18 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 import androidx.fragment.app.FragmentManager;
+
+import com.whisperyao.dsplayer.PlaylistEditor;
 import com.whisperyao.dsplayer.R;
 import com.synology.ThreadWork;
 import com.whisperyao.dsplayer.CacheManager;
 import com.whisperyao.dsplayer.Common;
 import com.whisperyao.dsplayer.item.PlaylistItem;
 import com.whisperyao.dsplayer.item.SongItem;
+import com.whisperyao.dsplayer.publicsharing.fragment.EditPlaylistFragment;
+import com.whisperyao.dsplayer.publicsharing.fragment.ShowSingleSongShareLinksFragment;
 import com.whisperyao.dsplayer.util.SynoLog;
+import com.whisperyao.dsplayer.util.Utilities;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/* loaded from: classes.dex */
 public class DialogHelper {
 
     private static final String TAG = "DialogHelper";
@@ -62,9 +66,9 @@ public class DialogHelper {
                     String selected = actionArray[which];
 
                     if (saveToPersonal.equals(selected)) {
-//                        choosePlaylist(context, fragmentManager, items, false);
+                        choosePlaylist(context, fragmentManager, items, false);
                     } else if (saveToShared.equals(selected)) {
-//                        choosePlaylist(context, fragmentManager, items, true);
+                        choosePlaylist(context, fragmentManager, items, true);
                     } else if (createPlaylist.equals(selected)) {
                         createPlaylist(fragmentManager, items, false);
                     }
@@ -89,9 +93,7 @@ public class DialogHelper {
             boolean shared,
             boolean createByShare
     ) {
-//        EditPlaylistFragment
-//                .newInstance(EditPlaylistFragment.generateArgumentsForCreate(shared, items, createByShare))
-//                .show(fragmentManager, "create_playlist");
+        EditPlaylistFragment.newInstance(EditPlaylistFragment.generateArgumentsForCreate(shared, items, createByShare)).show(fragmentManager, "create_playlist");
     }
 
     /**
@@ -120,9 +122,9 @@ public class DialogHelper {
 
             @Override
             public void onWorking() {
-//                playlistList = CacheManager.getInstance()
-//                        .doEnumNormalPlaylist(isShared)
-//                        .getItemList();
+                playlistList = CacheManager.getInstance()
+                        .doEnumNormalPlaylist(isShared)
+                        .getItemList();
                 success = true;
             }
 
@@ -149,8 +151,7 @@ public class DialogHelper {
                             int pos = ((AlertDialog) d)
                                     .getListView()
                                     .getCheckedItemPosition();
-
-//                            addToPlaylist(context, playlistList.get(pos), 0, items);
+                            addToPlaylist(context, playlistList.get(pos), 0, items);
                         })
                         .show();
             }
@@ -185,15 +186,15 @@ public class DialogHelper {
 
             @Override
             public void onWorking() {
-//                String idList = Utilities.createIdList(items);
-//                    SynoLog.d(TAG, "addToPlaylist idList = " + idList);
+                String idList = Utilities.createIdList(items);
+                    SynoLog.d(TAG, "addToPlaylist idList = " + idList);
 
-//                    info = PlaylistEditor.addToPlaylist(
-//                            playlistItem.getID(),
-//                            index,
-//                            idList,
-//                            null
-//                    );
+                    info = PlaylistEditor.addToPlaylist(
+                            playlistItem.getID(),
+                            index,
+                            idList,
+                            null
+                    );
 
                 success = true;
 
@@ -205,20 +206,15 @@ public class DialogHelper {
 
                 if (success && info.getResultVo() != null && info.getResultVo().getSuccess()) {
 
-                    if (context != null) {
-//                        String msg = context.getString(R.string.add_songs_to_playlist)
-//                                .replace(Common.NUMBER, String.valueOf(items.size()))
-//                                .replace(Common.PLAYLIST_NAME, playlistItem.getTitle());
-
-//                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-                    }
+                    String msg = context.getString(R.string.add_songs_to_playlist)
+                            .replace(Common.NUMBER, String.valueOf(items.size()))
+                            .replace(Common.PLAYLIST_NAME, playlistItem.getTitle());
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
                     notifyPlaylistChanged(context, playlistItem);
 
                 } else {
-                    if (context != null) {
-                        Toast.makeText(context, R.string.operation_failed, Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(context, R.string.operation_failed, Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -231,7 +227,7 @@ public class DialogHelper {
      * 通知播放列表变更（通过ID）
      */
     public static void notifyPlaylistChanged(Context context, String id) {
-//        CacheManager.getInstance().clearPlaylistCache();
+        CacheManager.getInstance().clearPlaylistCache();
 
         Intent intent = new Intent(Common.ACTION_PLAYLIST_CHANGED);
         intent.putExtra(KEY_ID, id);
@@ -248,8 +244,8 @@ public class DialogHelper {
         String id = playlistItem.getID();
 
         CacheManager cache = CacheManager.getInstance();
-//        cache.clearPlaylistCache();
-//        cache.clearPlaylistSongCache(playlistItem);
+        cache.clearPlaylistCache();
+        cache.clearPlaylistSongCache(playlistItem);
 
         Intent intent = new Intent(Common.ACTION_PLAYLIST_CHANGED);
         intent.putExtra(KEY_ID, id);
@@ -263,8 +259,6 @@ public class DialogHelper {
      * 分享单曲
      */
     public static void shareSong(FragmentManager fragmentManager, SongItem song) {
-//        ShowSingleSongShareLinksFragment
-//                .newInstance(song)
-//                .show(fragmentManager, null);
+        ShowSingleSongShareLinksFragment.newInstance(song).show(fragmentManager, null);
     }
 }

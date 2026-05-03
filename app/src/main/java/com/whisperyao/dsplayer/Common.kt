@@ -95,6 +95,7 @@ object Common {
     const val CAT_RATING = "[__RATING__]"
     const val CAT_RECENTLY_ADDED = "[__RECENTLY_ADDED__]"
     const val NUMBER = "[__NUMBER__]"
+    const val PLAYLIST_NAME = "[__PLAYLIST_NAME__]"
     const val USB_CONTROLLER_CGI = "iPhone/usb_controller.cgi"
     const val STREAM_CGI = "iPhone/stream.cgi"
     const val PROXY_CGI = "iPhone/proxy.cgi"

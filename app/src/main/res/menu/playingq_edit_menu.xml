@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appcompat="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@id/editmenu_delete"
+        android:icon="@drawable/state_tool_del"
+        android:title="@string/delete"
+        appcompat:showAsAction="ifRoom" />
+    <item
+        android:id="@id/editmenu_sharing_share"
+        android:title="@string/sharing_share"
+        appcompat:showAsAction="never" />
+    <item
+        android:id="@id/editmenu_add_to_playlist"
+        android:title="@string/add_to_playlist"
+        appcompat:showAsAction="never" />
+</menu>
