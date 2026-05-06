@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@id/toolbar"
+        android:layout_width="fill_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@android:color/white">
+
+        <include
+            android:id="@id/action_mode_spinner"
+            layout="@layout/action_mode_spinner" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0.0dip"
+        android:layout_weight="1.0">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@id/recycler_view"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+        <include layout="@layout/fast_scroller" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="1.0dip"
+        android:background="?android:listDivider" />
+
+    <LinearLayout
+        android:id="@id/action_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="?actionBarSize"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <androidx.appcompat.widget.ActionMenuView
+            android:id="@id/action_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="?actionBarSize" />
+    </LinearLayout>
+</LinearLayout>

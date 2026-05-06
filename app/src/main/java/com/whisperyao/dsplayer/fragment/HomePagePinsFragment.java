@@ -14,13 +14,19 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.whisperyao.dsplayer.CacheManager;
+import com.whisperyao.dsplayer.ConnectionManager;
 import com.whisperyao.dsplayer.R;
 import com.synology.ThreadWork;
 import com.whisperyao.dsplayer.Common;
+import com.whisperyao.dsplayer.StateManager;
 import com.whisperyao.dsplayer.adapters.HomePinAdapter;
 import com.whisperyao.dsplayer.homepage.PinManager;
 import com.whisperyao.dsplayer.item.HomePagePinItem;
+import com.whisperyao.dsplayer.item.Item;
+import com.whisperyao.dsplayer.item.PlaylistItem;
 import com.whisperyao.dsplayer.item.SongItem;
 import com.whisperyao.dsplayer.net.WebAPIErrorException;
 import com.whisperyao.dsplayer.util.SynoLog;
@@ -191,9 +197,9 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        SynoLog.d(LOG, "onOptionsItemSelected : " + ((Object) item.getTitle()));
+        SynoLog.d(LOG, "onOptionsItemSelected : " + item.getTitle());
         if (item.getItemId() == R.id.menu_edit) {
-//            new HomePagePinReorderFragment().show(getChildFragmentManager(), "pin_reorder");
+            new HomePagePinReorderFragment().show(getChildFragmentManager(), "pin_reorder");
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -257,7 +263,6 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
         setRefreshing(false);
         this.containerGridAdapter.setData(this.mItems);
         this.mRecyclerView.post(() -> {
-            // this.scrollToPos
             this.mRecyclerView.scrollToPosition(scrollToPos);
         });
         if (this.mItems.isEmpty()) {
@@ -309,7 +314,7 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
         this.mEmptyImageView.setImageResource(R.drawable.wizard_1);
         this.mFastScroller = this.mContentView.findViewById(R.id.fast_scroller);
         this.mRecyclerView = this.mContentView.findViewById(R.id.recycler_view);
-        this.mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getSpan(), 1, false));
+        this.mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), getSpan(), RecyclerView.VERTICAL, false));
         this.mRecyclerView.setAdapter(this.containerGridAdapter);
         this.containerGridAdapter.addEmptyView(this.mEmptyView, false);
         this.containerGridAdapter.setIsListMode(false);
@@ -325,9 +330,7 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
             }
         });
         this.mTitleView = this.mContentView.findViewById(R.id.content_title);
-        // StateManager.getInstance().isMobileLayout()
-//        SynoLog.i("mTitle", mTitle);
-        if (!TextUtils.isEmpty(this.mTitle)) {
+        if (StateManager.getInstance().isMobileLayout() && !TextUtils.isEmpty(this.mTitle)) {
             this.mTitleView.setVisibility(View.VISIBLE);
             this.mTitleView.setText(this.mTitle);
         }
@@ -363,8 +366,7 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
         if (!pinItem.getType().equals(PinManager.TYPE_RECENTLY_ADDED)) {
             popupMenu.getMenu().findItem(R.id.ItemAction_PLAY).setVisible(true);
             popupMenu.getMenu().findItem(R.id.ItemAction_ADD_ITEM).setVisible(true);
-            // ConnectionManager.canSupportAddToNext()
-            if (true) {
+            if (ConnectionManager.canSupportAddToNext()) {
                 popupMenu.getMenu().findItem(R.id.ItemAction_ADD_NEXT).setVisible(true);
             }
         }
@@ -376,11 +378,11 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
         PopupMenu popupMenu = new PopupMenu(requireContext(), anchor);
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == R.id.ItemAction_UNPIN) {
-//                 this.mPinManager.unpin(homePagePinItem.getID());
+                this.mPinManager.unpin(pinItem.getId());
                 return false;
             }
             if (menuItem.getItemId() == R.id.ItemAction_PIN_EDIT) {
-                // HomePagePinEditFragment.newInstance(homePagePinItem).show(getChildFragmentManager(), "pin_edit");
+                HomePagePinEditFragment.Companion.newInstance(pinItem).show(getChildFragmentManager(), "pin_edit");
                 return false;
             }
             SynoLog.d(LOG, "准备enumSongs");
@@ -405,70 +407,74 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
 
             @Override
             public void onWorking() {
-//                HomePagePinItem item = HomePagePinsFragment.thisItem;
-                // 你这里 r3 是外部捕获变量
-//                Common.ContainerType containerType = PinManager.getContainerTypeByItem(item);
-                SynoLog.d(LOG, "onWorking");
-                HashMap<String, String> criteria = item.getCriteria();
-                String type = item.getType();
+                try {
+                    Common.ContainerType containerType = PinManager.Companion.getContainerTypeByItem(item);
+                    SynoLog.d(LOG, "onWorking type=" + item.getType());
 
-                CacheManager.ItemSet result = new CacheManager.ItemSet<>();
+                    HashMap<String, String> criteria = item.getCriteria();
+                    String type = Objects.toString(item.getType(), "");
 
-                switch (Objects.requireNonNull(type)) {
+                    CacheManager.ItemSet result;
 
-                    case "album":
-                    case "artist":
-                    case "composer":
-                    case "genre":
-                    case "random_100": {
-//                            CacheManager cacheMgr = HomePagePinsFragment.this.cacheMgr;
-                        boolean isOnline = HomePagePinsFragment.this.isOnline;
+                    switch (type) {
+                        case "album":
+                        case "artist":
+                        case "composer":
+                        case "genre":
+                        case "random_100": {
+                            CacheManager cacheMgr = HomePagePinsFragment.this.cacheMgr;
+                            boolean isOnline = HomePagePinsFragment.this.isOnline;
 
                             Bundle bundle = PinManager.Companion.getEnumSongsBundle(item);
 
-//                            result = cacheMgr.doEnumContainerSongsForContainer(
-//                                    isOnline,
-//                                    containerType,
-//                                    bundle,
-//                                    -1,
-//                                    1
-//                            );
-                        break;
-                    }
+                            result = cacheMgr.doEnumContainerSongsForContainer(
+                                    isOnline,
+                                    containerType,
+                                    bundle,
+                                    -1,
+                                    true
+                            );
+                            break;
+                        }
 
-                    case "playlist": {
-//                            String playlistId = (String) criteria.get("playlist");
+                        case "playlist": {
+                            String playlistId = criteria.get("playlist");
 
-//                            PlaylistItem playlist = PlaylistItem.generatePlaylistWithType(
-//                                    Item.ItemType.PERSONAL_NORMAL_NEW,
-//                                    playlistId,
-//                                    item.getTitle()
-//                            );
+                            PlaylistItem playlist = PlaylistItem.generatePlaylistWithType(
+                                    Item.ItemType.PERSONAL_NORMAL_NEW,
+                                    playlistId,
+                                    item.getTitle()
+                            );
 
-//                            CacheManager cacheMgr = HomePagePinsFragment.this.cacheMgr;
+                            result = HomePagePinsFragment.this.cacheMgr
+                                    .doEnumPlaylistSongsForPlaylist(true, playlist, -1, true);
+                            break;
+                        }
 
-//                            result = cacheMgr.doEnumPlaylistSongsForPlaylist(true, playlist, -1, true);
-                        break;
-                    }
+                        case "folder": {
+                            String folderId = criteria.get("folder");
 
-                    case "folder": {
-                            String folderId = criteria.get("folder"); // folder=dir_582
+                            result = HomePagePinsFragment.this.cacheMgr
+                                    .doEnumFolderSongsForFileSongList(true, folderId, true, -1, true);
+                            break;
+                        }
 
-                            CacheManager cacheMgr = new CacheManager();
-
-                            result = cacheMgr.doEnumFolderSongsForFileSongList(true, folderId, true, -1, true);
-                        break;
-                    }
-
-                    default: {
+                        default: {
                             result = new CacheManager.ItemSet();
-                        break;
+                            break;
+                        }
                     }
+
+                    // 收集结果 & 防止NPE
+                    if (result != null && result.getItemList() != null) {
+                        songList.addAll(result.getItemList());
+                    }
+
+                } catch (WebAPIErrorException e) {
+                    setException(e);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                // 收集结果
-                songList.addAll(result.getItemList());
-
             }
 
             @Override
@@ -480,22 +486,24 @@ public class HomePagePinsFragment extends ContentFragment implements ContentFrag
             public void onComplete() {
                 if (this.getException() != null) {
                     HomePagePinsFragment.this.handleError(this.getException());
+                    return;
                 }
-//                switch (itemAction) {
-//                    case R.id.ItemAction_ADD_ITEM:
-//                        HomePagePinsFragment.this.enqueueAction(Common.PlaybackAction.ADD_ONLY, 0, this.songList);
-//                        break;
-//                    case R.id.ItemAction_ADD_NEXT:
-//                        System.out.println("R.id.Item");
-//                        HomePagePinsFragment.this.enqueueAction(Common.PlaybackAction.ADD_NEXT, 0, this.songList);
-//                        break;
-//                    case R.id.ItemAction_PLAY:
-//                        System.out.println("R.id.Item");
-//                        HomePagePinsFragment.this.enqueueAction(Common.PlaybackAction.PLAY_NOW, 0, this.songList);
-//                        break;
-//                }
+
+                if (itemAction == R.id.ItemAction_ADD_ITEM) {
+                    HomePagePinsFragment.this.enqueueAction(
+                            Common.PlaybackAction.ADD_ONLY, 0, this.songList);
+
+                } else if (itemAction == R.id.ItemAction_ADD_NEXT) {
+                    HomePagePinsFragment.this.enqueueAction(
+                            Common.PlaybackAction.ADD_NEXT, 0, this.songList);
+
+                } else if (itemAction == R.id.ItemAction_PLAY) {
+                    HomePagePinsFragment.this.enqueueAction(
+                            Common.PlaybackAction.PLAY_NOW, 0, this.songList);
+                }
             }
         };
+
         this.enumSongsWork = threadWork;
         threadWork.startWork();
     }

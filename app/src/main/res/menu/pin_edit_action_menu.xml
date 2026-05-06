@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appcompat="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@id/pin_edit_menu_unpin"
+        android:icon="@drawable/tool_unpin"
+        android:title="@string/unpin"
+        appcompat:showAsAction="always" />
+</menu>

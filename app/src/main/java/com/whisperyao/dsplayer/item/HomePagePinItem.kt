@@ -5,7 +5,7 @@ import com.whisperyao.dsplayer.vos.api.pin.PinItemVo
 
 data class HomePagePinItem(
     var type: String?,
-    var id: String?,
+    var id: String,
     var title: String?,
     var criteria: HashMap<String, String>,
     var marked: Boolean = false

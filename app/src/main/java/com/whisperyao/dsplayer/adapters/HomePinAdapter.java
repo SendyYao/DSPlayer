@@ -70,8 +70,8 @@ public class HomePinAdapter extends AbsAdapter<HomePagePinItem> {
                 this.subtitle.setVisibility(View.VISIBLE);
                 this.subtitle.setText(criteria.get(Common.SearchCategory.ARTIST));
             }
-            Bundle enumSongsBundle = PinManager.Companion.getEnumSongsBundle(item);
-            Common.ContainerType containerTypeByItem = PinManager.Companion.getContainerTypeByItem(item);
+            Bundle enumSongsBundle = PinManager.getEnumSongsBundle(item);
+            Common.ContainerType containerTypeByItem = PinManager.getContainerTypeByItem(item);
             this.cover.setImageResource(R.drawable.border);
             SynoLog.d("HomePinAdapter", item.getType().toString());
             if (item.getType().equals("folder")) {

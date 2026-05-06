@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@id/PinItemLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="60.0dip">
+
+    <FrameLayout
+        android:id="@id/PinItemCoverContainer"
+        android:layout_width="60.0dip"
+        android:layout_height="60.0dip"
+        android:background="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.facebook.drawee.view.SimpleDraweeView
+            android:id="@id/PinItemCover"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@id/PinItemMark"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:contentDescription="@string/app_name"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bt_check_tile"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@id/PinItemTitle"
+        style="@style/TextView_Title.OverLight"
+        android:layout_width="0.0dip"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="10.0dip"
+        android:layout_marginEnd="10.0dip"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/drag_handle"
+        app:layout_constraintStart_toEndOf="@id/PinItemCoverContainer"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@id/drag_handle"
+        android:layout_width="30.0dip"
+        android:layout_height="fill_parent"
+        android:layout_marginEnd="15.0dip"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/bt_reorder"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

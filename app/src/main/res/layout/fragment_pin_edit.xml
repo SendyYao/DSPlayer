@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0.0dip"
+        android:layout_weight="1.0"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="0.0dip"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15.0dip"
+                    android:layout_marginTop="15.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:text="@string/pin_name"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="@dimen/model_view_group_title_size" />
+
+                <EditText
+                    android:id="@id/pin_item_name"
+                    android:layout_width="fill_parent"
+                    android:layout_height="@dimen/model_view_input_box_height"
+                    android:layout_marginLeft="15.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/model_view_input_box_text_size" />
+
+                <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15.0dip"
+                    android:layout_marginTop="30.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:text="@string/description"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="@dimen/model_view_group_title_size" />
+
+                <TextView
+                    android:id="@id/pin_item_description"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15.0dip"
+                    android:layout_marginRight="15.0dip"
+                    android:lineSpacingExtra="4.0dip"
+                    android:paddingTop="8.0dip"
+                    android:paddingBottom="8.0dip"
+                    android:textColor="@color/model_view_item_title"
+                    android:textSize="@dimen/model_view_input_box_text_size" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <include
+        android:id="@id/selection_mode_bottom"
+        layout="@layout/select_mode_bottom"
+        android:layout_width="fill_parent"
+        android:layout_height="60.0dip" />
+</LinearLayout>
