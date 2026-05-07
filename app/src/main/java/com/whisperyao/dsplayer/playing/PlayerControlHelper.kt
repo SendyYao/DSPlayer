@@ -76,7 +76,8 @@ class PlayerControlHelper @Inject constructor(
     private val mHandler = object : Handler() {
         override fun handleMessage(msg: Message) {
             if (msg.what == REFRESH) {
-                queueNextRefresh(refreshNow())
+                // refreshNow()
+                queueNextRefresh(200L)
             }
         }
     }

@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.whisperyao.dsplayer.R;
+import com.whisperyao.dsplayer.StateManager;
 import com.whisperyao.dsplayer.widget.DpPxConverter;
 import eu.davidea.fastscroller.FastScroller;
 import java.util.ArrayList;
@@ -77,8 +78,7 @@ public abstract class AbsAdapter<T> extends RecyclerView.Adapter<AbsHolder> impl
         float fDp2px;
         if (this.mDecoration == null && this.mRecyclerView != null) {
             this.mDecoration = new RecyclerDecoration(this.mRecyclerView.getContext());
-            // StateManager.getInstance().isMobile()
-            if (true) {
+            if (StateManager.getInstance().isMobile()) {
                 fDp2px = DpPxConverter.dp2px(4.0f, this.mRecyclerView.getContext());
             } else {
                 fDp2px = DpPxConverter.dp2px(8.0f, this.mRecyclerView.getContext());

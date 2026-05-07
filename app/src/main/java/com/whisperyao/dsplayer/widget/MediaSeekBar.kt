@@ -95,7 +95,7 @@ class MediaSeekBar @JvmOverloads constructor(
         controllerCallback = callback
         mediaController = controller
 
-        SynoLog.d("MetaDebug", "seekbar controller token=${controller.sessionToken}")
+        // SynoLog.d("MetaDebug", "seekbar controller token=${controller.sessionToken}")
 
         // 关键：主动同步一次当前状态
         callback.onMetadataChanged(controller.metadata)

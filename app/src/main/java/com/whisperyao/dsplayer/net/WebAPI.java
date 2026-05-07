@@ -6,9 +6,11 @@ import com.whisperyao.dsplayer.Common;
 import com.whisperyao.dsplayer.ConnectionManager;
 import com.whisperyao.dsplayer.datasource.network.vo.ApiPath;
 import com.whisperyao.dsplayer.util.SynoLog;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +27,7 @@ public class WebAPI {
     public static final String GETLYRICS = "getlyrics";
     public static final String LIST_DEFAULT_GENRE = "list_default_genre";
     public static final String SEARCHLYRICS = "searchlyrics";
+    public static final String SETRATING = "setrating";
 
     private static WebAPI instance;
     private HashMap<String, ApiPath> mKnownAPIs;
@@ -100,8 +103,11 @@ public class WebAPI {
     public void setKnownAPIs(Map<String, ? extends ApiPath> knownAPIs) {
         clearKnownAPIs();
         if (knownAPIs != null) {
+            SynoLog.i("WebAPI", "knownAPIs: " + knownAPIs);
             this.mKnownAPIs.putAll(knownAPIs);
             resolveCapability();
+            SynoLog.i("WebAPI", "Capability: " + ToStringBuilder.reflectionToString(
+                    mCapabilityHolder, ToStringStyle.SHORT_PREFIX_STYLE));
         }
     }
 
@@ -173,8 +179,8 @@ public class WebAPI {
         params.add(new BasicKeyValuePair("method", method));
         params.add(new BasicKeyValuePair(VERSION, Integer.toString(version)));
         params.add(new BasicKeyValuePair("_sid", Common.getSID()));
-        SynoLog.i("WebAPI", "apiName: " + apiName + "method: " + method + "version: " + version);
-        SynoLog.i("WebAPI", "url: " + url + "params: " + params);
+        SynoLog.i("WebAPI", String.format("apiName: %1$s method: %2$s version: %3$s", apiName, method, version));
+        SynoLog.i("WebAPI", String.format("url: %1$s params: %2$s", url, params));
         if ("getstatus".equalsIgnoreCase(method)) {
             SynoLog.i("WebAPI", "api = " + apiName);
             for (BasicKeyValuePair basicKeyValuePair: params) {

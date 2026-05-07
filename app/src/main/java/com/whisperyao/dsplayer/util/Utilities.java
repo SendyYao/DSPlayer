@@ -266,9 +266,15 @@ public class Utilities {
     }
 
     public static boolean shouldManualDownload(SongItem song) {
-//     isManualDownloadInDB(song) && checkHasSongCachedAndPassQuality(song)
+        // return isManualDownloadInDB(song) && checkHasSongCachedAndPassQuality(song);
         return false;
     }
+
+    public static boolean isManualDownloadInDB(SongItem song) {
+        SongItem songItemQuerySong = DatabaseAccesser.getInstance().querySong(song);
+        return songItemQuerySong == null || songItemQuerySong.getDownloadType() == 2;
+    }
+
 
     public static boolean checkPathAvailable(String path) {
         if (TextUtils.isEmpty(path)) {

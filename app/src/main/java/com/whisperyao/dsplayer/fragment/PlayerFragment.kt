@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
@@ -101,7 +100,7 @@ class PlayerFragment @Inject constructor() : DaggerDialogFragment() {
     private val toolbar: Toolbar
         get() = binding!!.toolbar
 
-    private val menu: Menu
+    val menu: Menu
         get() = toolbar.menu
 
     override fun onCreate(savedInstanceState: Bundle?) {

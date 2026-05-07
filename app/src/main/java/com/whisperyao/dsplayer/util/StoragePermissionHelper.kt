@@ -18,7 +18,7 @@ import java.io.File
 
 object StoragePermissionHelper {
 
-    private const val APP_NAME = "DSaudio"
+    private const val APP_NAME = "DSPlayer"
     const val REQUEST_CODE_AUTO_DOWNLOAD = 9478
     const val REQUEST_CODE_STORAGE = 9487
     private const val TAG = "StoragePermissionHelper"
@@ -26,15 +26,17 @@ object StoragePermissionHelper {
     private var hintDialog: AlertDialog? = null
 
     val defaultFolderPath: String =
-        SAFUtils.getExternalStorageRoot() + "/DSaudio"
+        SAFUtils.getExternalStorageRoot() + "/DSPlayer"
 
     fun permissionGranted(): Boolean {
         return getGrantStatus() == GrantStatus.Granted
     }
 
     private fun getGrantStatus(): GrantStatus {
+        val songCacheFolderPath = AudioPreference.getSongCacheFolder()
+        SynoLog.d("StoragePermissionHelper", "songCacheFolderPath: $songCacheFolderPath")
         return PermissionUtils.checkGrantStatus(
-            File(AudioPreference.getSongCacheFolder())
+            File(songCacheFolderPath)
         )
     }
 

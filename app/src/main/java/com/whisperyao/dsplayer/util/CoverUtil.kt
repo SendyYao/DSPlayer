@@ -91,7 +91,6 @@ class CoverUtil {
     }
 
     fun downloadImage(songItem: SongItem, url: String) {
-        SynoLog.d("CoverUtil", "downloadImage")
         val mediaId: String? = songItem.mediaId
         val uri: Uri = url.toUri()
         doDownloadImage(mediaId, songItem, uri, getFileNameFromMediaID(mediaId))

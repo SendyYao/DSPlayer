@@ -139,8 +139,7 @@ public class AudioPreference {
     }
 
     public static Common.PrefPersonal getPersonalPref() {
-        // !Common.supportPersonalLibrary()
-        if (true) {
+        if (!Common.supportPersonalLibrary()) {
             return Common.PrefPersonal.ALL;
         }
         return Common.PrefPersonal.valueOf(PreferenceManager.getDefaultSharedPreferences(App.getContext()).getString(PREFERENCE_PERSONAL, Common.PrefPersonal.ALL.name()));

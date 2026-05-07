@@ -41,7 +41,6 @@ class QueryCallable(
                 .build()
         )
         val jsonStr = mCall.execute().body?.string()
-        SynoLog.d("QueryCallable", "jsonStr: $jsonStr")
         val queryVo = Gson().fromJson(
             jsonStr,
             QueryVo::class.java
