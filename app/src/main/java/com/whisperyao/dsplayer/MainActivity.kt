@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
+import com.google.gson.stream.JsonReader
 import com.whisperyao.dsplayer.App.Companion.connectionManager
 import com.whisperyao.dsplayer.activity.HomeActivity
 import com.whisperyao.dsplayer.activity.SongListActivity
@@ -18,6 +20,8 @@ import com.whisperyao.dsplayer.datasource.network.api.SynoApiInfo
 import com.whisperyao.dsplayer.datasource.network.exception.ApiException
 import com.whisperyao.dsplayer.datasource.network.exception.NotSupportApiLoginException
 import com.whisperyao.dsplayer.datasource.network.vo.ApiPath
+import com.whisperyao.dsplayer.datasource.network.vo.api.ApiAudioInfoVo
+import com.whisperyao.dsplayer.net.AudioStationAPI
 import com.whisperyao.dsplayer.net.WebAPI
 import com.whisperyao.dsplayer.ui.login.ConnectData
 import com.whisperyao.dsplayer.util.SessionManager
@@ -32,6 +36,7 @@ import okhttp3.Response
 import okio.IOException
 import org.json.JSONException
 import org.json.JSONObject
+import java.io.InputStreamReader
 import kotlin.coroutines.cancellation.CancellationException
 
 class MainActivity : ComponentActivity() {
@@ -47,6 +52,8 @@ class MainActivity : ComponentActivity() {
         val switchHttps = findViewById<Switch>(R.id.switchHttps)
         val loginBtn = findViewById<Button>(R.id.btnLogin)
 
+        setKnownAPIS()
+
         loginBtn.setOnClickListener {
             val baseUrl = etAddress.text.toString().trim()
             val account = etAccount.text.toString().trim()
@@ -55,7 +62,10 @@ class MainActivity : ComponentActivity() {
 
             // if (isInputValid(baseUrl, account, password)) return@setOnClickListener
             // enterSongList(baseUrl, account, password, useHttps)
-            setKnownAPIS()
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                doSetAudioInfo()
+            }
 
             Toast.makeText(this@MainActivity, "Login Success & setKnownAPIs", Toast.LENGTH_SHORT).show()
 
@@ -194,10 +204,8 @@ class MainActivity : ComponentActivity() {
     }
 
     fun setKnownAPIS() {
-        val apis = getSharedPreferences("login_prefs", MODE_PRIVATE).getString("webApi", "")
         val sharedPreferences = App.getContext().getSharedPreferences("login_prefs", MODE_PRIVATE)
         SynoLog.d("MainActivity", sharedPreferences.getString("webApi", ""))
-//        apis?.isEmpty()?.let { if (!it) return }
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 val urls = ConnectData(BuildConfig.NAS_ADDRESS, true).possibleUrlList
@@ -207,8 +215,6 @@ class MainActivity : ComponentActivity() {
                 }
                 SynoLog.d("MainActivity", "urls: $urls")
                 val result = connectionManager.queryAll(urls)
-                SynoLog.d("handleUrl", result.httpUrl.toString())
-                SynoLog.d("handleUrl", result.queryVo?.data.toString())
                 handleUrl(result)
 
             } catch (e: Exception) {
@@ -224,8 +230,6 @@ class MainActivity : ComponentActivity() {
     )
     private fun handleUrl(result: com.whisperyao.dsplayer.datasource.network.ConnectionManager.QueryResult) {
         val apiMap = result.queryVo?.data
-
-        SynoLog.d("handleUrl", apiMap.toString())
 
         if (apiMap != null) {
             val infoApi = apiMap["SYNO.AudioStation.Info"]
@@ -245,5 +249,26 @@ class MainActivity : ComponentActivity() {
         }
 
         connectionManager.setEnvironment(apiMap as HashMap<String, ApiPath>, result.httpUrl)
+    }
+
+    private fun doSetAudioInfo() {
+        val webAPI = WebAPI.getInstance()
+        val knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_INFO) ?: return
+        val strMakeAddress = Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.path)
+        SynoLog.d("MainActivity", "doFetchInfo url = $strMakeAddress")
+        try {
+            val responseDoRequest: Response = webAPI.doRequest(strMakeAddress, AudioStationAPI.SYNO_AUDIOSTATION_INFO,
+                WebAPI.GETINFO, knownAPI.maxVersion)
+            if (responseDoRequest.isSuccessful) {
+                val inputStreamByteStream = responseDoRequest.body!!.byteStream()
+                val jsonReader = JsonReader(InputStreamReader(inputStreamByteStream))
+                val apiAudioInfoVo: ApiAudioInfoVo? = Gson().fromJson(jsonReader,
+                    ApiAudioInfoVo::class.java)
+                jsonReader.close()
+                Common.setAudioInfo(apiAudioInfoVo!!)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

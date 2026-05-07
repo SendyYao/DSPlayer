@@ -10,6 +10,7 @@ import android.widget.AbsListView
 import android.widget.ListView
 import com.synology.ThreadWork
 import com.whisperyao.dsplayer.Common
+import com.whisperyao.dsplayer.ConnectionManager
 import com.whisperyao.dsplayer.LocalEnumerator
 import com.whisperyao.dsplayer.PlaylistAdapter
 import com.whisperyao.dsplayer.PlaylistEditor
@@ -335,8 +336,7 @@ class PlaylistFragment() : ContentFragment(),
                 )
             )
         )
-        // ConnectionManager.isWithRating(isOnline)
-        if (true) {
+        if (ConnectionManager.isWithRating(isOnline)) {
             generalPlaylists.add(
                 PlaylistAdapter.UiPlaylistItem.generatePlaylistItem(
                     PlaylistItem.generatePredifinedPlaylist(
