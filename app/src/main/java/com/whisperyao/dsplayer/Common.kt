@@ -17,6 +17,7 @@ import com.whisperyao.dsplayer.datasource.network.vo.base.BaseAudioInfoVo
 import com.whisperyao.dsplayer.item.Item
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.model.data.DataModelManager
+import com.whisperyao.dsplayer.net.WebAPI
 import com.whisperyao.dsplayer.playing.PlayingStatusManager
 import com.whisperyao.dsplayer.util.AudioPreference
 import com.whisperyao.dsplayer.util.ObjFile
@@ -50,7 +51,22 @@ object Common {
 
     @JvmStatic
     fun supportComposer(): Boolean {
-        return true
+        return ConnectionManager.isUseWebAPI()
+    }
+
+    @JvmStatic
+    fun supportPersonalLibrary(): Boolean {
+        if (!isLogin() || ConnectionManager.isUseWebAPI()) {
+            return true
+        }
+        val audioInfo: BaseAudioInfoVo? = getAudioInfo()
+        return audioInfo != null && 2289 <= audioInfo.buildVer
+    }
+
+    @JvmStatic
+    fun haveLatestAlbum(): Boolean {
+        val audioInfo: BaseAudioInfoVo? = getAudioInfo()
+        return !audioInfo?.serverType?.equals(ConnectionManager.ResourceType.CGI)!! || 2107 <= audioInfo.buildVer
     }
 
     @JvmStatic
@@ -115,14 +131,6 @@ object Common {
     private var folderCallCount = 0
     private var lastCallTime = 0L
 
-    // ================== Context（关键修复）==================
-    lateinit var context: Context
-
-    @JvmStatic
-    fun init(ctx: Context) {
-        context = ctx.applicationContext
-    }
-
     // ================== 工具方法 ==================
 
     private var appFolderCache: String? = null
@@ -135,9 +143,7 @@ object Common {
             // 每秒打印一次调用统计，避免日志刷屏
             if (currentTime - lastCallTime > 1000) {
                 println("getDSaudioAppFolder called $folderCallCount times in last second")
-                Thread.currentThread().stackTrace.forEach {
-                    println("  at $it")
-                }
+                // Thread.currentThread().stackTrace.forEach { println("  at $it") }
             // 如果调用次数异常，打印调用栈
             if (folderCallCount > 10) {
                 println("WARNING: Excessive calls detected!")
@@ -206,6 +212,7 @@ object Common {
 
     fun setAudioInfo(info: BaseAudioInfoVo) {
         sAudioInfo = info
+        SynoLog.d("Common", "info: ${info.dSid}, ${info.permitPublicSharing()}")
         ObjFile.saveAudioInfoToFile(info)
     }
 
@@ -220,7 +227,9 @@ object Common {
 
     @JvmStatic
     fun createPersonalPlaylist(): Boolean {
+        // TODO Locate
         val audioInfo: BaseAudioInfoVo = getAudioInfo() ?: return false
+        SynoLog.d("Common createPersonalPlaylist()", "serverType: ${audioInfo.serverType}, buildVer: ${audioInfo.buildVer}")
         return !audioInfo.serverType.equals(ConnectionManager.ResourceType.CGI) || 1528 <= audioInfo.buildVer
     }
 
@@ -273,8 +282,7 @@ object Common {
 
     @JvmStatic
     fun isPlayModeRenderer(): Boolean {
-//        return getPlayerStatusManager().isPlayModeRenderer
-        return true
+        return getPlayerStatusManager().isPlayModeRenderer
     }
 
     @JvmStatic
@@ -414,6 +422,7 @@ object Common {
 
     fun folderAvailable(path: String): Boolean {
         val synoFile = SynoFile(path)
+        SynoLog.d("Common", "synoFilePath: ${synoFile.path} exists: ${synoFile.exists()} status: ${PermissionUtils.checkGrantStatus(synoFile)}")
         if (synoFile.exists()) {
              return PermissionUtils.checkGrantStatus(synoFile) === GrantStatus.Granted
         }
@@ -494,6 +503,16 @@ object Common {
     }
 
     @JvmStatic
+    fun permitPublicSharing(): Boolean {
+        return getAudioInfo()?.permitPublicSharing() ?: false
+    }
+
+    @JvmStatic
+    fun canSupportRating(): Boolean {
+        return WebAPI.getInstance().canSupportRating()
+    }
+
+    @JvmStatic
     fun getDeviceName(): String {
         return Build.MODEL
     }
@@ -515,24 +534,28 @@ object Common {
     enum class ContainerType(
         val stringId: Int,
         val isAlbum: Boolean = false,
-        val isPlaylist: Boolean = false
+        val isPlaylist: Boolean = false,
+        val quickActionParamName: String = "",
+        private val containerParamName: String? = null,
+        private val itemParamName: String? = null
     ) {
 
-        ALBUM_MODE(R.string.category_album, isAlbum = true),
-        FOLDER_MODE(R.string.category_folder),
-        ARTIST_MODE(R.string.category_artist),
-        COMPOSER_MODE(R.string.category_composer),
-        GENRE_MODE(R.string.category_genre),
-        PLAYLIST_MODE(R.string.category_playlist),
-        SHARED_PLAYLIST_MODE(R.string.category_playlist, isPlaylist = true),
-        PERSONAL_PLAYLIST_MODE(R.string.category_playlist, isPlaylist = true),
-        SHARED_SMART_PLAYLIST_MODE(R.string.category_playlist),
-        PERSONAL_SMART_PLAYLIST_MODE(R.string.category_playlist),
-        RADIO_MODE(R.string.category_radio),
-        ARTIST_ALBUM_MODE(R.string.category_album, isAlbum = true),
-        GENRE_ALBUM_MODE(R.string.category_album),
-        GENRE_ARTIST_MODE(R.string.category_artist),
-        GENRE_ARTIST_ALBUM_MODE(R.string.category_album),
+        ALBUM_MODE(R.string.category_album, isAlbum = true, containerParamName = "composer", itemParamName = "artist"),
+        FOLDER_MODE(R.string.category_folder, containerParamName = "genre", itemParamName = "artist"),
+        ARTIST_MODE(R.string.category_artist, containerParamName = "artist", itemParamName = "album"),
+        COMPOSER_MODE(R.string.category_composer, containerParamName = "artist", itemParamName = "album"),
+        GENRE_MODE(R.string.category_genre, containerParamName = "album"),
+        LATEST_ALBUM_MODE(R.string.latest_album, isAlbum = true, containerParamName = "album"),
+        PLAYLIST_MODE(R.string.category_playlist, containerParamName = "album"),
+        SHARED_PLAYLIST_MODE(R.string.category_playlist, isPlaylist = true, containerParamName = "folder"),
+        PERSONAL_PLAYLIST_MODE(R.string.category_playlist, isPlaylist = true, containerParamName = "playlist"),
+        SHARED_SMART_PLAYLIST_MODE(R.string.category_playlist, containerParamName = "playlist"),
+        PERSONAL_SMART_PLAYLIST_MODE(R.string.category_playlist, containerParamName = "playlist"),
+        RADIO_MODE(R.string.category_radio, containerParamName = "playlist"),
+        ARTIST_ALBUM_MODE(R.string.category_album, isAlbum = true, containerParamName = "playlist"),
+        GENRE_ALBUM_MODE(R.string.category_album, containerParamName = "playlist"),
+        GENRE_ARTIST_MODE(R.string.category_artist, containerParamName = "random_100"),
+        GENRE_ARTIST_ALBUM_MODE(R.string.category_album, containerParamName = "recently_added"),
         COMPOSER_ALBUM_MODE(R.string.category_album),
         SMARTPLAYLIST_MODE(R.string.category_smartplaylist),
         SEARCH_MODE(R.string.category_search),
@@ -543,8 +566,7 @@ object Common {
         HOMEPAGE_TEST_MODE(R.string.category_homepage_test),
         SEARCH_ARTIST_MODE(R.string.category_artist),
         SEARCH_ALBUM_MODE(R.string.category_album),
-        SEARCH_SONG_MODE(R.string.category_song),
-        LATEST_ALBUM_MODE(R.string.latest_album, isAlbum = true);
+        SEARCH_SONG_MODE(R.string.category_song);
 
         fun isAlbumType() = isAlbum
         fun isPlaylistType() = isPlaylist
@@ -563,6 +585,27 @@ object Common {
 
         fun isShowRatingIcon(): Boolean {
             return equals(Item.ItemType.RATING_MODE)
+        }
+
+        fun isCanPinTypeInContainer(): Boolean {
+            return equals(LATEST_ALBUM_MODE) || equals(ARTIST_ALBUM_MODE)
+                    || equals(GENRE_ALBUM_MODE) || equals(GENRE_ARTIST_MODE)
+                    || equals(GENRE_ARTIST_ALBUM_MODE) || equals(COMPOSER_ALBUM_MODE)
+                    || equals(FOLDER_MODE) || equals(RANDOM100_MODE)
+        }
+
+        fun isCanPinTypeInContainerSong(): Boolean {
+            return isCanPinTypeInContainer() || equals(ALBUM_MODE)
+                    || equals(ARTIST_MODE) || equals(COMPOSER_MODE)
+                    || equals(GENRE_MODE)
+        }
+
+        fun optionsMenuParamName(listType: String): String {
+            return if (listType == "container") {
+                containerParamName ?: ""
+            } else {
+                itemParamName ?: containerParamName ?: ""
+            }
         }
     }
 

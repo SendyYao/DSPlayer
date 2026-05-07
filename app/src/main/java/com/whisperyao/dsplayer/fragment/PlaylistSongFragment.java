@@ -38,6 +38,7 @@ import com.whisperyao.dsplayer.item.PlaylistItem;
 import com.whisperyao.dsplayer.item.SongItem;
 import com.whisperyao.dsplayer.net.WebAPIErrorException;
 import com.whisperyao.dsplayer.provider.AudioDatabaseUtils;
+import com.whisperyao.dsplayer.provider.DatabaseAccesser;
 import com.whisperyao.dsplayer.publicsharing.fragment.ShowSingleSongShareLinksFragment;
 import com.whisperyao.dsplayer.util.AudioPreference;
 import com.whisperyao.dsplayer.util.SynoLog;
@@ -50,7 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.inject.Inject;
 
-
+@SuppressWarnings("CallToPrintStackTrace")
 public class PlaylistSongFragment extends ContentFragment implements ShowSingleSongShareLinksFragment.Callbacks, AbsAdapter.Callback {
     private static final String LOG = "PlaylistSongFragment";
 
@@ -249,7 +250,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
     public void onDestroyView() {
         SynoLog.d(LOG, "onDestroyView");
         super.onDestroyView();
-        getActivity().getApplicationContext().unregisterReceiver(this.getMPlaylistChangedListener());
+        mActivity.getApplicationContext().unregisterReceiver(this.getMPlaylistChangedListener());
     }
 
     @Override
@@ -396,7 +397,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
         itemTouchHelper.attachToRecyclerView(this.mRecyclerView);
         this.mRecyclerView.setAdapter(this.songListAdapter);
         this.songListAdapter.setFastScroller(this.mFastScroller);
-        this.mTitleView = (TextView) this.mContentView.findViewById(R.id.content_title);
+        this.mTitleView = this.mContentView.findViewById(R.id.content_title);
         if (!StateManager.getInstance().isMobileLayout() || TextUtils.isEmpty(this.mTitle)) {
             return;
         }
@@ -529,8 +530,8 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            PlaylistSongFragment.this.mActivity.getMenuInflater().inflate(R.menu.playingq_edit_menu_drag, menu);
-            PlaylistSongFragment.this.mRefresh.setEnabled(false);
+            mActivity.getMenuInflater().inflate(R.menu.playingq_edit_menu_drag, menu);
+            mRefresh.setEnabled(false);
             return true;
         }
 
@@ -542,8 +543,8 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                 playlistSongFragment.mHoldSongIndex = playlistSongFragment.songListAdapter.getHoldSongIndex();
                 int size = PlaylistSongFragment.this.mHoldSongIndex.size() - 1;
                 int i = 0;
-//                while (i == PlaylistSongFragment.this.mHoldSongIndex.get(i) && (i = i + 1) < size) { }
-//                while (size == PlaylistSongFragment.this.mHoldSongIndex.get(size) && i < size - 1) { }
+                while (i < size && PlaylistSongFragment.this.mHoldIndex.get(i) == i) { i++; }
+                while (i < size && PlaylistSongFragment.this.mHoldIndex.get(size) == size) { size--; }
                 if (i < size) {
                     int i2 = (size - i) + 1;
                     int[] iArr = new int[i2];
@@ -613,7 +614,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                         && Utilities.shouldManualDownload(songItem)
                         && !ServiceOperator.isDownloading(songItem)) {
 
-                    // downloadRemote(songItem);
+                    downloadRemote(songItem);
                     bundle.putString(UDCEvent.KEY_MANAGE, "download");
                 }
 
@@ -623,7 +624,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                 bundle.putString(UDCEvent.KEY_PLAYBACK, "android_play");
 
             } else if (itemId == R.id.ItemAction_RATING) {
-                // rateSongs(arrayList);
+                rateSongs(arrayList);
                 bundle.putString(UDCEvent.KEY_MANAGE, "rate");
 
             } else if (itemId == R.id.ItemAction_SHARING) {
@@ -633,7 +634,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                 bundle.putString(UDCEvent.KEY_MANAGE, "share");
             }
 
-//            firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_SINGLE_SONG, bundle);
+            // firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_SINGLE_SONG, bundle);
 
             return false;
         });
@@ -666,85 +667,85 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
         return popupMenu;
     }
 
-//    @Override
-//    protected void deleteSelected(final List<SongItem> songs) {
-//        if (this.mHoldIndex.isEmpty()) {
-//            return;
-//        }
-//        ThreadWork threadWork = this.playlistEditWork;
-//        if (threadWork != null && threadWork.isWorking()) {
-//            this.playlistEditWork.endThread();
-//        }
-//        ThreadWork threadWork2 = new ThreadWork() {
-//
-//            Common.ConnectionInfo info;
-//            final ProgressDialog myDialog;
-//            boolean success = false;
-//
-//            {
-//                this.myDialog = new ProgressDialog(PlaylistSongFragment.this.mActivity);
-//            }
-//
-//            @Override
-//            public void preWork() {
-//                this.myDialog.setMessage(PlaylistSongFragment.this.getResources().getString(R.string.processing));
-//                this.myDialog.setCancelable(false);
-//                this.myDialog.show();
-//            }
-//
-//            @Override
-//            public void onWorking() {
-//                try {
-//                    if (PlaylistSongFragment.this.mPlaylistItem.isLocal()) {
-//                        PlaylistSongFragment.this.mAudioDatabaseUtils.deleteLocalPlaylistSongRelation(songs);
-//                        Common.ConnectionInfo connectionInfo = Common.ConnectionInfo.SUCCESS;
-//                        this.info = connectionInfo;
-//                        connectionInfo.setResultVo(BaseVo.getSuccessBaseVo());
-//                    } else if (PlaylistSongFragment.this.mPlaylistItem.isMostPlayed() || PlaylistSongFragment.this.mPlaylistItem.isRecentPlayed()) {
-//                        DatabaseAccesser databaseAccesser = DatabaseAccesser.getInstance();
-//                        if (databaseAccesser != null) {
-//                            databaseAccesser.resetHitSong(PlaylistSongFragment.this.mSelectedItems);
-//                            databaseAccesser.close();
-//                            Common.ConnectionInfo connectionInfo2 = Common.ConnectionInfo.SUCCESS;
-//                            this.info = connectionInfo2;
-//                            connectionInfo2.setResultVo(BaseVo.getSuccessBaseVo());
-//                        }
-//                    } else {
-//                        int iIntValue = PlaylistSongFragment.this.mHoldIndex.get(0);
-//                        int iIntValue2 = PlaylistSongFragment.this.mHoldIndex.get(PlaylistSongFragment.this.mHoldIndex.size() - 1).intValue();
-//                        int i = (iIntValue2 - iIntValue) + 1;
-//                        ArrayList arrayList = new ArrayList();
-//                        for (int i2 = iIntValue; i2 < iIntValue2; i2++) {
-//                            if (!PlaylistSongFragment.this.mHoldIndex.contains(i2)) {
-//                                arrayList.add(PlaylistSongFragment.this.songListAdapter.getData().get(i2));
-//                            }
-//                        }
-//                        this.info = PlaylistEditor.doUpdatePlaylist(
-//                                PlaylistSongFragment.this.mPlaylistItem.getID(),
-//                                iIntValue,
-//                                i,
-//                                Utilities.createIdList(arrayList),
-//                                tag -> PlaylistSongFragment.this.playlistEditWork.setTag(tag));
-//                    }
-//                    this.success = true;
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            @Override
-//            public void onComplete() {
-//                this.myDialog.dismiss();
-//                if (this.success && this.info.getResultVo() != null && this.info.getResultVo().getSuccess()) {
-//                    PlaylistSongFragment.this.doRefresh();
-//                } else {
-//                    Toast.makeText(PlaylistSongFragment.this.mActivity, R.string.operation_failed, 0).show();
-//                }
-//            }
-//        };
-//        this.playlistEditWork = threadWork2;
-//        threadWork2.startWork();
-//    }
+    @Override
+    protected void deleteSelected(final List<SongItem> songs) {
+        if (this.mHoldIndex.isEmpty()) {
+            return;
+        }
+        ThreadWork threadWork = this.playlistEditWork;
+        if (threadWork != null && threadWork.isWorking()) {
+            this.playlistEditWork.endThread();
+        }
+        ThreadWork threadWork2 = new ThreadWork() {
+
+            Common.ConnectionInfo info;
+            final ProgressDialog myDialog;
+            boolean success = false;
+
+            {
+                this.myDialog = new ProgressDialog(PlaylistSongFragment.this.mActivity);
+            }
+
+            @Override
+            public void preWork() {
+                this.myDialog.setMessage(PlaylistSongFragment.this.getResources().getString(R.string.processing));
+                this.myDialog.setCancelable(false);
+                this.myDialog.show();
+            }
+
+            @Override
+            public void onWorking() {
+                try {
+                    if (PlaylistSongFragment.this.mPlaylistItem.isLocal()) {
+                        PlaylistSongFragment.this.mAudioDatabaseUtils.deleteLocalPlaylistSongRelation(songs);
+                        Common.ConnectionInfo connectionInfo = Common.ConnectionInfo.SUCCESS;
+                        this.info = connectionInfo;
+                        connectionInfo.setResultVo(BaseVo.getSuccessBaseVo());
+                    } else if (PlaylistSongFragment.this.mPlaylistItem.isMostPlayed() || PlaylistSongFragment.this.mPlaylistItem.isRecentPlayed()) {
+                        DatabaseAccesser databaseAccesser = DatabaseAccesser.getInstance();
+                        if (databaseAccesser != null) {
+                            databaseAccesser.resetHitSong(PlaylistSongFragment.this.mSelectedItems);
+                            databaseAccesser.close();
+                            Common.ConnectionInfo connectionInfo2 = Common.ConnectionInfo.SUCCESS;
+                            this.info = connectionInfo2;
+                            connectionInfo2.setResultVo(BaseVo.getSuccessBaseVo());
+                        }
+                    } else {
+                        int iIntValue = PlaylistSongFragment.this.mHoldIndex.get(0);
+                        int iIntValue2 = PlaylistSongFragment.this.mHoldIndex.get(PlaylistSongFragment.this.mHoldIndex.size() - 1).intValue();
+                        int i = (iIntValue2 - iIntValue) + 1;
+                        ArrayList arrayList = new ArrayList();
+                        for (int i2 = iIntValue; i2 < iIntValue2; i2++) {
+                            if (!PlaylistSongFragment.this.mHoldIndex.contains(i2)) {
+                                arrayList.add(PlaylistSongFragment.this.songListAdapter.getData().get(i2));
+                            }
+                        }
+                        this.info = PlaylistEditor.doUpdatePlaylist(
+                                PlaylistSongFragment.this.mPlaylistItem.getID(),
+                                iIntValue,
+                                i,
+                                Utilities.createIdList(arrayList),
+                                tag -> PlaylistSongFragment.this.playlistEditWork.setTag(tag));
+                    }
+                    this.success = true;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onComplete() {
+                this.myDialog.dismiss();
+                if (this.success && this.info.getResultVo() != null && this.info.getResultVo().getSuccess()) {
+                    PlaylistSongFragment.this.doRefresh();
+                } else {
+                    Toast.makeText(PlaylistSongFragment.this.mActivity, R.string.operation_failed, Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        this.playlistEditWork = threadWork2;
+        threadWork2.startWork();
+    }
 
     private void updatePlaylist(final int start, final int limit, final int[] replaceIdx) {
         ThreadWork threadWork = this.playlistEditWork;
@@ -868,7 +869,7 @@ public class PlaylistSongFragment extends ContentFragment implements ShowSingleS
                 if (this.success && this.info.getResultVo() != null && this.info.getResultVo().getSuccess()) {
                     PlaylistSongFragment.this.doRefresh();
                 } else {
-                    Toast.makeText(PlaylistSongFragment.this.mActivity, this.info.getStringId(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mActivity, this.info.getStringId(), Toast.LENGTH_SHORT).show();
                 }
             }
         };

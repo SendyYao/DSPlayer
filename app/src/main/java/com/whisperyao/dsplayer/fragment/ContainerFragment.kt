@@ -27,7 +27,7 @@ import com.whisperyao.dsplayer.util.Utilities
 import java.util.ArrayList
 import java.util.List
 import java.util.Stack
-import com.google.android.gms.cast.MediaTrack;
+import com.google.android.gms.cast.MediaTrack
 
 
 class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
@@ -48,6 +48,8 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
     private var page = 0
     private var scrollPos = -1
     private var selPos = -1
+
+    private var pinManager = PinManager.getInstance()
 
     constructor() : super()
 
@@ -354,7 +356,7 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
                 bundle.putString("type", PinManager.SONG)
             }
         }
-        SynoLog.d(LOG, "isMobileLayout: ${StateManager.getInstance().isMobileLayout}, isLeft: ${isLeft}")
+        SynoLog.d(LOG, "isMobileLayout: ${StateManager.getInstance().isMobileLayout}, isLeft: $isLeft")
         if (StateManager.getInstance().isMobileLayout || !isLeft) {
             mContainerClickCallback.onContainerItemClick(bundle)
         } else {
@@ -446,20 +448,20 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
                 when (menuItem.itemId) {
 
                     R.id.ItemAction_PIN -> {
-//                        PinManager.getInstance().pin(
-//                            PinManager.getQuickActionTypeParamName(mType),
-//                            PinManager.getPinCriteria(mType, getEnumSongsBundle(item)),
-//                            item.title
-//                        )
+                        PinManager.getInstance().pin(
+                            pinManager.getQuickActionTypeParamName(mType),
+                            PinManager.getPinCriteria(mType, getEnumSongsBundle(item)),
+                            item.title
+                        )
                     }
 
                     R.id.ItemAction_UNPIN -> {
-//                        PinManager.getInstance().unpin(
-//                            PinManager.getInstance().getPinId(
-//                                PinManager.getQuickActionTypeParamName(mType),
-//                                PinManager.getPinCriteria(mType, getEnumSongsBundle(item))
-//                            )
-//                        )
+                        PinManager.getInstance().unpin(
+                            PinManager.getInstance().getPinId(
+                                pinManager.getQuickActionTypeParamName(mType),
+                                PinManager.getPinCriteria(mType, getEnumSongsBundle(item))
+                            )
+                        )
                     }
 
                     else -> {
@@ -469,11 +471,11 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
 
                 false
             }
-
-            if (isOnline && ConnectionManager.canSupportPin()) {
+            val canSupportPin = ConnectionManager.canSupportPin()
+            SynoLog.d(LOG, "isOnline: $isOnline, canSupportPin: $canSupportPin")
+            if (isOnline && canSupportPin) {
                 val bundle = getEnumSongsBundle(item)
-                // PinManager.getInstance().alreadyPin(PinManager.getQuickActionTypeParamName(mType), PinManager.getPinCriteria(mType, bundle))
-                if (true) {
+                if (pinManager.alreadyPin(pinManager.getQuickActionTypeParamName(mType), PinManager.getPinCriteria(mType, bundle))) {
                     menu.findItem(R.id.ItemAction_UNPIN).isVisible = true
                 } else {
                     menu.findItem(R.id.ItemAction_PIN).isVisible = true
@@ -550,7 +552,7 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
 
                 when (itemAction) {
                     R.id.ItemAction_DOWNLOAD -> {
-                        // downloadRemote(songList)
+                        downloadRemote(songList)
                     }
 
                     R.id.ItemAction_PLAY -> {
@@ -705,22 +707,13 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
             override fun onComplete() {
                 if (exception != null) {
                     handleError(exception!!)
+                    if (containerListAdapter.realItemCount == 0) {
+                        containerListAdapter.setData(null)
+                        return
+                    }
                     return
                 }
-
-                mItems.addAll(retItems)
-
-                containerListAdapter.setIsOnline(isOnline)
-                containerListAdapter.setContainerType(mType)
-                containerListAdapter.setData(mItems)
-
-                showView(true)
-
-                mContainerClickCallback.onUpdateTitle()
-                mContainerClickCallback.onFinishLoading(
-                    mType,
-                    total
-                )
+                handleLoadComplete(refresh, connectionInfo, retItems)
             }
         }
 
@@ -728,9 +721,7 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
     }
 
     private fun handleLoadComplete(refresh: Boolean, connectionInfo: Common.ConnectionInfo, retItems: List<Item>) {
-        if (connectionInfo !=
-            Common.ConnectionInfo.SUCCESS
-        ) return
+        if (connectionInfo != Common.ConnectionInfo.SUCCESS) return
 
         mItems.addAll(retItems)
 
@@ -782,9 +773,9 @@ class ContainerFragment : ContentFragment, ContentFragment.ContentCallback {
     }
 
     override fun onContainerItemClick(bundle: Bundle) {
-        this.contentBundle?.putInt("position", bundle.getInt("position"));
-        this.contentBundle?.putInt("scroll_to_position", bundle.getInt("scroll_to_position"));
-        this.mContainerClickCallback.onContainerItemClick(this.contentBundle as Bundle);
+        this.contentBundle?.putInt("position", bundle.getInt("position"))
+        this.contentBundle?.putInt("scroll_to_position", bundle.getInt("scroll_to_position"))
+        this.mContainerClickCallback.onContainerItemClick(this.contentBundle as Bundle)
     }
 
     override fun onUpdateTitle() {

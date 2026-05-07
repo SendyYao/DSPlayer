@@ -3,7 +3,6 @@ package com.whisperyao.dsplayer.fragment;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,7 +15,6 @@ import android.widget.PopupMenu;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -75,6 +73,8 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
     private int scrollToPos;
     private int selPos;
     private int songcount;
+
+    private final PinManager pinManager = PinManager.Companion.getInstance();
 
     public FileSongFragment() {
         this.isForceLoadContent = false;
@@ -293,7 +293,7 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
                     deleteSelected(songList);
 
                 } else if (itemAction == R.id.ItemAction_DOWNLOAD) {
-//                    downloadRemote(songList);
+                    downloadRemote(songList);
                     bundle.putString(UDCEvent.KEY_MANAGE, "download");
 
                 } else if (itemAction == R.id.ItemAction_PLAY) {
@@ -301,15 +301,15 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
                     bundle.putString(UDCEvent.KEY_PLAYBACK, "android_play");
 
                 } else if (itemAction == R.id.ItemAction_RATING) {
-//                    rateSongs(songList);
+                    rateSongs(songList);
                     bundle.putString(UDCEvent.KEY_MANAGE, "rate");
 
                 } else if (itemAction == R.id.ItemAction_SHARING) {
                     shareSongs(songList);
-//                    bundle.putString(UDCEvent.KEY_MANAGE, FirebaseAnalytics.Event.SHARE);
+                    // FirebaseAnalytics.Event.SHARE
+                    bundle.putString(UDCEvent.KEY_MANAGE, "share");
                 }
-
-//                firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_SINGLE_SONG, bundle);
+                // firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_SINGLE_SONG, bundle);
             }
         };
 
@@ -324,12 +324,11 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
     }
 
     private PopupMenu getQuickAction(final View anchor, final SongItem item) {
+        SynoLog.i(LOG, "getQuickAction");
         PopupMenu popupMenu = getPopupMenu(anchor, item);
-        // ConnectionManager.canSupportPin()
-        if (this.isOnline && !item.isFile()) {
+        if (this.isOnline && !item.isFile() && ConnectionManager.canSupportPin()) {
             this.mArgument.putString("folder", item.getID());
-//            PinManager.Companion.getInstance().alreadyPin("folder", PinManager.getPinCriteria(this.mType, this.mArgument))
-            if (true) {
+            if (pinManager.alreadyPin("folder", PinManager.getPinCriteria(this.mType, this.mArgument))) {
                 popupMenu.getMenu().findItem(R.id.ItemAction_UNPIN).setVisible(true);
             } else {
                 popupMenu.getMenu().findItem(R.id.ItemAction_PIN).setVisible(true);
@@ -359,26 +358,45 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
         return popupMenu;
     }
 
-    @NonNull
     private PopupMenu getPopupMenu(View anchor, SongItem songItem) {
         PopupMenu popupMenu = new PopupMenu(getContext(), anchor);
+
+        final ArrayList<SongItem> songList = new ArrayList<>();
+        songList.add(songItem);
+
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             SynoLog.d(LOG, "onActionItemClick : " + menuItem.getTitle());
-            final ArrayList<SongItem> arrayList = new ArrayList<>();
-            arrayList.add(songItem);
+
             int itemId = menuItem.getItemId();
             if (itemId == R.id.ItemAction_DELETE) {
-                new AlertDialog.Builder(mActivity).setTitle(R.string.delete).setMessage(R.string.remove_select).setPositiveButton(R.string.yes, (dialogInterface, i) -> enumSongs(menuItem.getItemId(), 0, arrayList)).setNegativeButton(R.string.no, (DialogInterface.OnClickListener) null).show();
-            } else if (itemId == R.id.ItemAction_PIN) {
-//                    String quickActionTypeParamName = PinManager.getQuickActionTypeParamName(this.mType);
+                new AlertDialog.Builder(mActivity)
+                        .setTitle(R.string.delete)
+                        .setMessage(R.string.remove_select)
+                        .setPositiveButton(R.string.yes, (dialog, which) ->
+                                enumSongs(itemId, 0, songList))
+                        .setNegativeButton(R.string.no, null)
+                        .show();
+
+            } else if (itemId == R.id.ItemAction_PIN || itemId == R.id.ItemAction_UNPIN) {
+                String quickActionTypeParamName = pinManager.getQuickActionTypeParamName(this.mType);
                 mArgument.putString("folder", songItem.getID());
-//                    PinManager.Companion.getInstance().pin(quickActionTypeParamName, PinManager.getPinCriteria(this.mType, this.mArgument), songItem.getTitle());
-            } else if (itemId == R.id.ItemAction_UNPIN) {
-//                    String quickActionTypeParamName2 = PinManager.getQuickActionTypeParamName(this.mType);
-                mArgument.putString("folder", songItem.getID());
-//                    PinManager.Companion.getInstance().unpin(PinManager.Companion.getInstance().getPinId(quickActionTypeParamName2, PinManager.getPinCriteria(this.mType, this.mArgument)));
+
+                if (itemId == R.id.ItemAction_PIN) {
+                    pinManager.pin(
+                            quickActionTypeParamName,
+                            PinManager.getPinCriteria(this.mType, mArgument),
+                            songItem.getTitle()
+                    );
+                } else {
+                    pinManager.unpin(pinManager.getPinId(
+                            quickActionTypeParamName,
+                            PinManager.getPinCriteria(this.mType, mArgument)
+                            )
+                    );
+                }
+
             } else {
-                enumSongs(menuItem.getItemId(), 0, arrayList);
+                enumSongs(itemId, 0, songList);
             }
             return false;
 
@@ -703,7 +721,7 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
         }
         this.mFileSongListAdapter = new FileSongListAdapter(this);
         this.mFileSongHeaderHelper = new FileSongHeaderHelper(getActivity());
-        PinManager.Companion.getInstance().addCallback(this);
+        pinManager.addCallback(this);
     }
 
     @Override

@@ -673,7 +673,7 @@ public class ContainerSongFragment extends ContentFragment implements AbsAdapter
             } else if (menuItemId == R.id.ItemAction_DOWNLOAD) {
                 if (isOnline) {
                     if (songItem.isFile() && Utilities.shouldManualDownload(songItem) && !ServiceOperator.isDownloading(songItem)) {
-                        // downloadRemote(songItem);
+                        downloadRemote(songItem);
                         bundle.putString(UDCEvent.KEY_MANAGE, "download");
                     }
                 } else {
@@ -683,7 +683,7 @@ public class ContainerSongFragment extends ContentFragment implements AbsAdapter
                 enqueueAction(Common.PlaybackAction.PLAY_NOW, 0, arrayList);
                 bundle.putString(UDCEvent.KEY_PLAYBACK, "android_play");
             } else if (menuItemId == R.id.ItemAction_RATING) {
-                // rateSongs(arrayList);
+                rateSongs(arrayList);
                 bundle.putString(UDCEvent.KEY_MANAGE, "rate");
             } else if (menuItemId == R.id.ItemAction_SHARING) {
                 shareSongs(arrayList);

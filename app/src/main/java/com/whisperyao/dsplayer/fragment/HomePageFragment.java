@@ -281,7 +281,8 @@ public class HomePageFragment extends Fragment implements ContentFragment.Conten
                 childFragmentManager.executePendingTransactions();
                 ContentFragment[] contentFragmentArr2 = this.mFragmentLists;
                 int i = this.mCurrentPage;
-                contentFragmentArr2[i] = ContentFragment.Companion.newInstance(this.BundleStacks.get(i).pop(), this);
+                // Force refresh pinList to avoid empty view
+                contentFragmentArr2[i] = ContentFragment.Companion.newInstance(this.BundleStacks.get(i).pop(), this, true);
                 this.mPagerAdapter.notifyDataSetChanged();
                 this.mOnUpdateTitle.doUpdateTitle();
                 return true;

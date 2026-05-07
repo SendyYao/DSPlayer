@@ -5,11 +5,13 @@ import android.app.ProgressDialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.TextUtils
 import android.view.ActionMode
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -28,26 +30,40 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.synology.ThreadWork
 import com.whisperyao.dsplayer.CacheManager
 import com.whisperyao.dsplayer.Common
+import com.whisperyao.dsplayer.ConnectionManager
 import com.whisperyao.dsplayer.R
 import com.whisperyao.dsplayer.RecyclerViewCallback
+import com.whisperyao.dsplayer.ServiceOperator
+import com.whisperyao.dsplayer.StateManager
 import com.whisperyao.dsplayer.UDCEvent
 import com.whisperyao.dsplayer.activity.BaseActivity
 import com.whisperyao.dsplayer.activity.HomeActivity
+import com.whisperyao.dsplayer.datasource.network.PreferenceManager
 import com.whisperyao.dsplayer.datasource.network.api.BaseWebApi
 import com.whisperyao.dsplayer.dialog.DialogHelper
+import com.whisperyao.dsplayer.download.DownloadOperator
+import com.whisperyao.dsplayer.download.TaskManager
+import com.whisperyao.dsplayer.homepage.PinManager
 import com.whisperyao.dsplayer.item.SongItem
 import com.whisperyao.dsplayer.net.WebAPI
 import com.whisperyao.dsplayer.net.WebAPIErrorException
 import com.whisperyao.dsplayer.playing.PlayingStatusManager.OnPlayerLocalityChangedObserver
 import com.whisperyao.dsplayer.publicsharing.fragment.EditPlaylistFragment
 import com.whisperyao.dsplayer.util.AudioPreference
+import com.whisperyao.dsplayer.util.PermissionUtil
+import com.whisperyao.dsplayer.util.StoragePermissionHelper
 import com.whisperyao.dsplayer.util.SynoLog
 import com.whisperyao.dsplayer.util.Utilities
 import com.whisperyao.dsplayer.util.Utils
+import com.whisperyao.dsplayer.util.event.ForceLogoutEvent
+import com.whisperyao.dsplayer.widget.RatingBar
 import com.whisperyao.dsplayer.widget.ReSelectableSpinner
 import com.whisperyao.dsplayer.widget.SynoFastScroller
 import dagger.android.support.DaggerFragment
+import org.greenrobot.eventbus.EventBus
 import java.util.Stack
+import javax.inject.Inject
+import kotlin.collections.hashMapOf
 
 
 abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callbacks, RecyclerViewCallback {
@@ -147,9 +163,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                 menu.findItem(R.id.editmenu_download).isVisible = false
             }
 
-            // ConnectionManager.canSupportAddToNext()
-            menu.findItem(R.id.editmenu_add_to_next).isVisible = true
-
+            menu.findItem(R.id.editmenu_add_to_next).isVisible = ConnectionManager.canSupportAddToNext()
 
             return true
         }
@@ -165,11 +179,11 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                 when (item.itemId) {
 
                     R.id.editmenu_add -> {
-//                        enqueueAction(Common.PlaybackAction.ADD_ONLY, 0, selectedItems)
+                        enqueueAction(Common.PlaybackAction.ADD_ONLY, 0, selectedItems)
                     }
 
                     R.id.editmenu_add_to_next -> {
-//                        enqueueAction(Common.PlaybackAction.ADD_NEXT, 0, selectedItems)
+                        enqueueAction(Common.PlaybackAction.ADD_NEXT, 0, selectedItems)
                     }
 
                     R.id.editmenu_add_to_playlist -> {
@@ -199,12 +213,12 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                             val downloadList = ArrayList<SongItem>()
 
                             override fun preWork() {
-                                mDialog.show()
+                                mDialog?.show()
                             }
 
                             override fun onWorking() {
                                 for (song in selectedItems) {
-                                    if (song.isFile && Utilities.shouldManualDownload(song) // !ServiceOperator.isDownloading(song)
+                                    if (song.isFile && Utilities.shouldManualDownload(song) && !ServiceOperator.isDownloading(song)
                                     ) {
                                         downloadList.add(song)
                                     }
@@ -212,8 +226,8 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                             }
 
                             override fun onComplete() {
-                                mDialog.dismiss()
-//                                downloadRemote(downloadList)
+                                mDialog?.dismiss()
+                                downloadRemote(downloadList)
                             }
 
                         }.startWork()
@@ -222,17 +236,17 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
                     }
 
                     R.id.editmenu_play -> {
-//                        enqueueAction(Common.PlaybackAction.PLAY_NOW, 0, selectedItems)
+                        enqueueAction(Common.PlaybackAction.PLAY_NOW, 0, selectedItems)
                         bundle.putString(UDCEvent.KEY_OPERATION, "play")
                     }
 
                     R.id.editmenu_rating -> {
-//                        rateSongs(selectedItems)
+                        rateSongs(selectedItems)
                         bundle.putString(UDCEvent.KEY_OPERATION, "rate")
                     }
 
                     R.id.editmenu_share -> {
-//                        shareSongs(selectedItems)
+                        shareSongs(selectedItems)
                         bundle.putString(UDCEvent.KEY_OPERATION, "share")
                     }
                 }
@@ -241,10 +255,8 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
             setEditMode(false)
 
             if (!bundle.isEmpty) {
-//                firebaseAnalyticsUtil.logEvent(
-//                    UDCEvent.EVENT__OPERATION_MULTI_SELECT,
-//                    bundle
-//                )
+                SynoLog.d(LOG, "firebaseAnalyticsUtil.logEvent()")
+                // firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_MULTI_SELECT, bundle)
             }
 
             return true
@@ -293,7 +305,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
     protected var blLoadContentFirstTime: Boolean = false
 
     @JvmField
-    protected var isOnline: Boolean = false
+    protected var isOnline: Boolean = true
 
     protected lateinit var mActionModeCallback: ActionModeCallback
 
@@ -306,7 +318,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
     protected var mSubtitle: String? = null
     @JvmField
     protected var mRating = 1.0f
-    protected lateinit var mPopup: AlertDialog
+    protected var mPopup: AlertDialog? = null
     @JvmField
     protected var blEditMode: Boolean = false
     protected var mIsVisibleToUser: Boolean = false
@@ -344,11 +356,18 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
     protected lateinit var mRecyclerView: RecyclerView
     private var mOberserver: OnPlayerLocalityChangedObserver? = null
 
-    protected lateinit var mDialog: ProgressDialog
+    protected var mDialog: ProgressDialog? = null
+    private var mSongsRequested: ArrayList<SongItem>? = null
 
     @JvmField
     protected var mScrollState: Parcelable? = null
     protected var mGScrollState: Parcelable? = null
+
+    @Inject
+    lateinit var preferenceManager: PreferenceManager
+
+    @Inject
+    lateinit var taskMgr: TaskManager
 
     interface ActionModeCallback {
         fun enterActionMode(actionModeCallback: ActionMode.Callback?): ActionMode?
@@ -610,9 +629,18 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         val appCompatActivity: AppCompatActivity = mActivity
         return appCompatActivity.getResources().configuration.orientation
     }
+
+    fun getPageTitle(): String {
+        if (TextUtils.isEmpty(this.mSubtitle)) {
+            return this.mTitle ?: ""
+        }
+        return this.mSubtitle ?: ""
+    }
+
     override fun getScrollToPosition(): Int {
         return 0
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.mArgument = arguments as Bundle
@@ -658,91 +686,94 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         mDialog = ProgressDialog(mActivity)
         val progressDialog = mDialog
 
-        if (!progressDialog.isShowing) {
-            @SuppressLint("StaticFieldLeak")
-            object : AsyncTask<Void, Void, String>() {
+        progressDialog?.isShowing?.let {
+            if (!it) {
+                @SuppressLint("StaticFieldLeak")
+                object : AsyncTask<Void, Void, String>() {
 
-                override fun onPreExecute() {
-                    mDialog = ProgressDialog(mActivity).apply {
-                        setMessage(getString(R.string.loading))
-                        setCancelable(false)
-                        show()
+                    override fun onPreExecute() {
+                        mDialog = ProgressDialog(mActivity).apply {
+                            setMessage(getString(R.string.loading))
+                            setCancelable(false)
+                            show()
+                        }
                     }
-                }
 
-                override fun doInBackground(vararg params: Void?): String {
-                    val containerPlayer: BaseActivity.ContainerPlayer = mActivity as BaseActivity.ContainerPlayer
+                    override fun doInBackground(vararg params: Void?): String {
+                        val containerPlayer: BaseActivity.ContainerPlayer = mActivity as BaseActivity.ContainerPlayer
 
-                    return if (containerPlayer.checkSize(action, songList)) {
-                        containerPlayer.playContainer(
-                            action,
-                            songList,
-                            position,
-                            isFromMenu
-                        )
-
-                        var size = songList.size
-
-                        if (Common.getPlayerStatusManager().isPlayModeChromeCast) {
-                            size = minOf(size, 1000)
-                        }
-
-                        var message = resources.getString(R.string.add_songs_success)
-
-                        if (action == Common.PlaybackAction.ADD_NEXT) {
-                            message = if (size > 1) {
-                                resources.getString(
-                                    R.string.add_multi_songs_to_next_success
-                                )
-                            } else {
-                                resources.getString(
-                                    R.string.add_single_song_to_next_success
-                                )
-                            }
-                        }
-
-                        message.replace(Common.NUMBER, size.toString())
-                    } else {
-                        val freeSize = containerPlayer.getQueueFreeSize(action)
-
-                        val partialList = ArrayList(songList.subList(0, freeSize))
-
-                        if (partialList.isNotEmpty()) {
+                        return if (containerPlayer.checkSize(action, songList)) {
                             containerPlayer.playContainer(
                                 action,
-                                partialList,
+                                songList,
                                 position,
                                 isFromMenu
                             )
+
+                            var size = songList.size
+
+                            if (Common.getPlayerStatusManager().isPlayModeChromeCast) {
+                                size = minOf(size, 1000)
+                            }
+
+                            var message = resources.getString(R.string.add_songs_success)
+
+                            if (action == Common.PlaybackAction.ADD_NEXT) {
+                                message = if (size > 1) {
+                                    resources.getString(
+                                        R.string.add_multi_songs_to_next_success
+                                    )
+                                } else {
+                                    resources.getString(
+                                        R.string.add_single_song_to_next_success
+                                    )
+                                }
+                            }
+
+                            message.replace(Common.NUMBER, size.toString())
+                        } else {
+                            val freeSize = containerPlayer.getQueueFreeSize(action)
+
+                            val partialList = ArrayList(songList.subList(0, freeSize))
+
+                            if (partialList.isNotEmpty()) {
+                                containerPlayer.playContainer(
+                                    action,
+                                    partialList,
+                                    position,
+                                    isFromMenu
+                                )
+                            }
+
+                            containerPlayer.getOutOfCapacityString(
+                                resources.getString(R.string.too_many_songs)
+                            )
+                        }
+                    }
+
+                    override fun onPostExecute(msg: String) {
+                        mDialog?.dismiss()
+
+                        if (mActivity == null || songList.isEmpty()) {
+                            return
                         }
 
-                        containerPlayer.getOutOfCapacityString(
-                            resources.getString(R.string.too_many_songs)
-                        )
+                        Toast.makeText(
+                            mActivity,
+                            msg,
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                }
-
-                override fun onPostExecute(msg: String) {
-                    mDialog?.dismiss()
-
-                    if (mActivity == null || songList.isEmpty()) {
-                        return
-                    }
-
-                    Toast.makeText(
-                        mActivity,
-                        msg,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+                }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+            }
         }
     }
 
-    protected fun deleteSelected(song: SongItem) =
+    protected open fun deleteSelected(song: SongItem) =
         deleteSelected(listOf(song))
 
-    open fun deleteSelected(songs: List<SongItem>) {
+    @JvmSuppressWildcards
+    protected open fun deleteSelected(songs: List<SongItem>) {
         mDialog = ProgressDialog(activity).apply {
             setMessage(getString(R.string.processing))
             setCancelable(false)
@@ -751,11 +782,11 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         object : DeleteThreadWork(songs) {
 
             override fun preWork() {
-                mDialog.show()
+                mDialog?.show()
             }
 
             override fun onComplete() {
-                mDialog.dismiss()
+                mDialog?.dismiss()
 
                 if (!isOnline) {
                     sendDeleteFileBroadCast()
@@ -788,8 +819,8 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
         Common.getPlayerStatusManager().unregisterOnPlayerLocalityChangedObserver(mOberserver)
 
-        // mPopup.takeIf { it.isShowing }?.dismiss()
-        // mDialog.takeIf { it.isShowing }?.dismiss()
+        mPopup.takeIf { it?.isShowing ?: true }?.dismiss()
+        mDialog.takeIf { it?.isShowing ?: true }?.dismiss()
 
         loadContentWork?.takeIf { it.isWorking }?.endThread()
         // mActivity = null
@@ -799,7 +830,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
     @Deprecated("Deprecated in Java")
     override fun onPrepareOptionsMenu(menu: Menu) {
-        // PinManager.getInstance().onPrepareOptionsMenu(menu, mArgument)
+        PinManager.getInstance().onPrepareOptionsMenu(menu, mArgument)
     }
 
     @Deprecated("Deprecated in Java")
@@ -829,19 +860,19 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
             }
 
             R.id.menu_pin -> {
-//                if (mType == Common.ContainerType.LATEST_ALBUM_MODE) {
-//                    PinManager.getInstance().pin(
-//                        PinManager.TYPE_RECENTLY_ADDED,
-//                        hashMapOf(),
-//                        mActivity!!.getString(mType?.stringId)
-//                    )
-//                } else {
-//                    PinManager.getInstance().pin(
-//                        PinManager.getOptionsMenuTypeParamName(mType, mArgument?.getString("type")),
-//                        PinManager.getPinCriteria(mType, mArgument),
-//                        getTitle()
-//                    )
-//                }
+                if (mType == Common.ContainerType.LATEST_ALBUM_MODE) {
+                    PinManager.getInstance().pin(
+                        PinManager.TYPE_RECENTLY_ADDED,
+                        hashMapOf<String, String>(),
+                        mActivity.getString(mType.stringId)
+                    )
+                } else {
+                    PinManager.getInstance().pin(
+                        PinManager.getInstance().getOptionsMenuTypeParamName(mType, mArgument.getString("type") ?: ""),
+                        PinManager.getPinCriteria(mType, mArgument),
+                        getPageTitle()
+                    )
+                }
 
                 bundle.putString(UDCEvent.KEY_MANAGE, WebAPI.WebApiPin.PIN)
             }
@@ -858,25 +889,25 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
             R.id.menu_unpin -> {
                 if (mType == Common.ContainerType.LATEST_ALBUM_MODE) {
-//                    PinManager.getInstance().unpin(
-//                        PinManager.getInstance().getPinId(
-//                            PinManager.TYPE_RECENTLY_ADDED,
-//                            hashMapOf()
-//                        )
-//                    )
+                    PinManager.getInstance().unpin(
+                        PinManager.getInstance().getPinId(
+                            PinManager.TYPE_RECENTLY_ADDED,
+                            hashMapOf<String, String>()
+                        )
+                    )
                 } else {
-//                    PinManager.getInstance().unpin(
-//                        PinManager.getInstance().getPinId(
-//                            PinManager.getOptionsMenuTypeParamName(
-//                                mType,
-//                                mArgument?.getString("type")
-//                            ),
-//                            PinManager.getPinCriteria(
-//                                mType,
-//                                mArgument
-//                            )
-//                        )
-//                    )
+                    PinManager.getInstance().unpin(
+                        PinManager.getInstance().getPinId(
+                            PinManager.getInstance().getOptionsMenuTypeParamName(
+                                mType,
+                                mArgument.getString("type") ?: ""
+                            ),
+                            PinManager.getPinCriteria(
+                                mType,
+                                mArgument
+                            )
+                        )
+                    )
                 }
 
                 bundle.putString(
@@ -891,16 +922,17 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
             }
         }
 
-//        firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_SONG_LIST, bundle)
+        // firebaseAnalyticsUtil.logEvent(UDCEvent.EVENT__OPERATION_SONG_LIST, bundle)
 
         return super.onOptionsItemSelected(item)
     }
 
     protected open fun setNoDataView() {
-        // StateManager.getInstance().isMobileLayout() && this.mEmptyTextView != null && this.mEmptyView.getVisibility() == 0
-        if (this.mEmptyView.visibility == 0) {
-            // isProtrait()
-            this.mEmptyImageView.visibility = if (true) View.VISIBLE else View.GONE
+        if (StateManager.getInstance().isMobileLayout &&
+            this.mEmptyTextView != null &&
+            this.mEmptyView.visibility == View.VISIBLE
+            ) {
+            this.mEmptyImageView.visibility = if (isProtract()) View.VISIBLE else View.GONE
         }
         val textView: TextView? = this.mEmptyTextView
         if (textView != null) {
@@ -944,7 +976,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
     protected fun handleError(error: WebAPIErrorException) {
         if (error.error == 105) {
-//            EventBus.getDefault().post(ForceLogoutEvent())
+            EventBus.getDefault().post(ForceLogoutEvent::class)
         }
         val swipeRefreshLayout: SwipeRefreshLayout = mRefresh
         swipeRefreshLayout.isRefreshing = false
@@ -970,16 +1002,133 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         DialogHelper.listPlaylistOption(mActivity, getChildFragmentManager(), items);
     }
 
+    @Throws(Resources.NotFoundException::class)
+    protected fun rateSongs(songList: List<SongItem>) {
+        if (songList.isEmpty()) return
+
+        val (title, rating) = if (songList.size == 1) {
+            val song = songList[0]
+            song.title to song.rating
+        } else {
+            getString(R.string.songs_count, songList.size) to 0f
+        }
+
+        val activity = mActivity ?: return
+        val inflater = LayoutInflater.from(activity)
+
+        val ratingBar = inflater.inflate(
+            R.layout.rating_bar_quick_action,
+            null
+        ) as RatingBar
+
+        ratingBar.setOnRatingChangeListener { bar, newRating, fromUser ->
+            if (fromUser) {
+                val value = newRating.toInt()
+                CacheManager.getInstance().apply {
+                    recordRatingMapFromUser(songList, value)
+                    requestRatingSongs(songList, value)
+                }
+                bar.setRating(newRating)
+            }
+        }
+
+        ratingBar.setRating(rating)
+
+        val titleView = inflater.inflate(
+            R.layout.rating_alert_dialog_title,
+            null
+        )
+
+        titleView.findViewById<TextView>(R.id.title).text = title
+
+        val dialog = AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setCustomTitle(titleView)
+            .setView(ratingBar)
+            .show()
+
+        dialog.setCanceledOnTouchOutside(true)
+
+        dialog.setOnDismissListener {
+            if (isAdded && mType.isShowRatingIcon()) {
+                try {
+                    Thread.sleep(800)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+                doRefresh()
+            }
+        }
+
+        dialog.window?.setLayout(
+            resources.getDimensionPixelOffset(R.dimen.main_detail_editable_rating_bar_width),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+
+        mPopup = dialog
+    }
+
     protected fun shareSongs(songList: List<SongItem>) {
         if (songList.isEmpty()) {
             return
         }
         if (songList.size == 1) {
             SynoLog.d(LOG, "ShareSingle")
+            shareSingle(songList[0])
         }
         if (songList.size == 2) {
             SynoLog.d(LOG, "ShareMultiple")
+            shareMultiple(songList)
         }
+    }
+
+    private fun shareSingle(song: SongItem) {
+        DialogHelper.shareSong(childFragmentManager, song)
+    }
+
+    private fun shareMultiple(songList: List<SongItem>) {
+        DialogHelper.createPlaylist(childFragmentManager, songList, false, true)
+    }
+
+    protected fun downloadRemote(song: SongItem) {
+        downloadRemote(arrayListOf(song))
+    }
+
+    protected fun downloadRemote(songs: ArrayList<SongItem>) {
+        val activity = mActivity ?: return
+
+        mSongsRequested = songs
+
+        if (!StoragePermissionHelper.permissionGranted()) {
+            StoragePermissionHelper.showHintsThenAskPermission(
+                this,
+                StoragePermissionHelper.REQUEST_CODE_STORAGE
+            )
+            return
+        }
+        // !preferenceManager.getHasShownNotificationPermissionRequest()
+        if (false) {
+            preferenceManager.setHasShownNotificationPermissionRequest(true)
+
+            PermissionUtil.requestPermission(
+                this,
+                PermissionUtil.getNotificationPermissionList(),
+                PermissionUtil.RequestCode.NOTIFICATION_PERMISSION
+            )
+            return
+        }
+        SynoLog.d(LOG, "downloadRemote")
+        taskMgr.add(songs)
+        DownloadOperator.startService(activity)
+
+        Toast.makeText(
+            activity,
+            getString(R.string.add_songs_to_task)
+                .replace(Common.NUMBER, songs.size.toString()),
+            Toast.LENGTH_SHORT
+        ).show()
+
+        mSongsRequested = null
     }
 
     interface ContentCallback {
@@ -1100,8 +1249,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
 
     override fun onResume() {
         super.onResume()
-        // (!this.mVisibleHintCalled || this.mIsVisibleToUser) && (getContext() instanceof MainActivity)
-        if (true) {
+        if ((!this.mVisibleHintCalled || this.mIsVisibleToUser) && (context is HomeActivity)) {
             (context as HomeActivity).addCallback(this)
         }
     }
