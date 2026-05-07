@@ -35,4 +35,5 @@
     <color name="bg_header4">#ff555555</color>
     <color name="playing_bg">@color/list_focus_over_dark</color>
     <color name="list_focus_over_dark">#ff39393a</color>
+    <color name="selected_bg_color">#120ac3a0</color>
 </resources>

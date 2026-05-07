@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.whisperyao.dsplayer.injection.qualifier.ApplicationContext
 import com.whisperyao.dsplayer.util.Utils
+import javax.inject.Inject
+import androidx.core.content.edit
 
 
 class PreferenceManager {
@@ -16,9 +18,10 @@ class PreferenceManager {
     private val context: Context
     private var pref: SharedPreferences
 
+    @Inject
     constructor(@ApplicationContext context: Context) {
         this.context = context
-        this.pref = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        this.pref = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
 
     }
 
@@ -27,13 +30,13 @@ class PreferenceManager {
     }
 
     fun setVerifyCertification(z: Boolean) {
-        this.pref.edit().putBoolean(PREF_KEY_VERIFY_CERTIFICATE, z).apply()
+        this.pref.edit { putBoolean(PREF_KEY_VERIFY_CERTIFICATE, z) }
     }
 
     fun getHasShownNotificationPermissionRequest(): Boolean {
-        var systemService: Any? = this.context.getSystemService("notification")
-        var notificationManager: NotificationManager? =
-            if (systemService is NotificationManager) systemService as NotificationManager? else null;
+        val systemService: Any? = this.context.getSystemService("notification")
+        val notificationManager: NotificationManager? =
+            if (systemService is NotificationManager) systemService as NotificationManager? else null
         if (notificationManager == null) {
             return !Utils.isSdk33() || this.pref.getBoolean(HAS_SHOWN_NOTIFICATION_PERMISSION_REQUEST, false)
         }
@@ -41,7 +44,7 @@ class PreferenceManager {
     }
 
     fun setHasShownNotificationPermissionRequest(z: Boolean) {
-        this.pref.edit().putBoolean(HAS_SHOWN_NOTIFICATION_PERMISSION_REQUEST, z).apply()
+        this.pref.edit { putBoolean(HAS_SHOWN_NOTIFICATION_PERMISSION_REQUEST, z) }
     }
 
 }

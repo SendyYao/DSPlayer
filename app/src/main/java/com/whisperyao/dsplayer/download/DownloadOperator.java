@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
+import com.whisperyao.dsplayer.util.SynoLog;
 import java.util.HashMap;
 
 
@@ -14,6 +15,7 @@ public class DownloadOperator {
     private static IDownloadService mService = null;
 
     public static void startService(final Context context) {
+        SynoLog.d("DownloadOperator", "start downloadService");
         context.startService(new Intent(context, DownloadService.class));
     }
 

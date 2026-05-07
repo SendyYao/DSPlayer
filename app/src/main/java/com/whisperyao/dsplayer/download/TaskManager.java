@@ -1,6 +1,8 @@
 package com.whisperyao.dsplayer.download;
 
 import com.whisperyao.dsplayer.item.SongItem;
+import com.whisperyao.dsplayer.util.SynoLog;
+
 import io.reactivex.rxjava3.subjects.PublishSubject;
 import io.reactivex.rxjava3.subjects.Subject;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TaskManager {
     private Subject<Boolean> mMessageSubject = PublishSubject.create();
-    private LinkedList<SongItem> jobQueue = new LinkedList<>();
+    private final LinkedList<SongItem> jobQueue = new LinkedList<>();
     private ConcurrentHashMap<String, Integer> progressMap = new ConcurrentHashMap<>();
 
     public Subject<Boolean> getMessageObservable() {
@@ -18,6 +20,9 @@ public class TaskManager {
     }
 
     public void add(ArrayList<SongItem> songList) {
+        if (!songList.isEmpty()) {
+            SynoLog.d("TaskManager", "download: " + songList.get(0).getTitle());
+        }
         synchronized (this.jobQueue) {
             this.jobQueue.addAll(songList);
         }
