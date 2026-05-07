@@ -3,10 +3,13 @@ package com.whisperyao.dsplayer;
 import android.os.Bundle;
 
 import com.synology.sylib.util.NetworkUtils;
+import com.whisperyao.dsplayer.datasource.network.vo.BaseVo;
 import com.whisperyao.dsplayer.item.PlaylistItem;
 import com.whisperyao.dsplayer.item.SongItem;
 import com.whisperyao.dsplayer.util.AudioPreference;
 import com.whisperyao.dsplayer.vos.api.pin.PinListResponseVo;
+import com.whisperyao.dsplayer.vos.api.pin.PinResponseVo;
+import com.whisperyao.dsplayer.vos.api.pin.UnpinResponseVo;
 import com.whisperyao.dsplayer.vos.base.BasePlaylistResponseVo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,10 +18,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import okhttp3.Response;
+
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class AbstractNetManager {
@@ -40,6 +44,18 @@ public abstract class AbstractNetManager {
 
     public abstract ConnectionManager.ResourceType getResourceType();
 
+    protected abstract boolean canEditRating();
+
+    protected abstract boolean canEditRating(SongItem item);
+
+    protected abstract boolean canPublicShare();
+
+    protected abstract boolean canShareSong(SongItem song);
+
+    protected abstract boolean canSupportAddToNext();
+
+    protected abstract boolean canSupportGenreArtist();
+
     protected abstract boolean isWithRating();
 
     public abstract boolean isOnline();
@@ -48,13 +64,27 @@ public abstract class AbstractNetManager {
         return false;
     }
 
-    protected abstract boolean canSupportAddToNext();
+    protected PinResponseVo pin(final String type, final HashMap<String, String> criteria, final String name) throws Exception {
+        return null;
+    }
 
-    protected abstract boolean canSupportGenreArtist();
+    protected UnpinResponseVo unpin(List<String> idList) throws Exception {
+        return null;
+    }
+
+    protected BaseVo rename(final String id, final String name) throws Exception {
+        return null;
+    }
+
+    protected BaseVo reorder(List<String> idList) throws Exception {
+        return null;
+    }
 
     protected abstract String getPlayUrl(SongItem song, boolean isForChromeCast);
 
     protected abstract List<SongItem> doSearch(final Common.SearchCategory category, final String key) throws JSONException, IOException;
+
+    protected abstract void doSetRating(List<String> ids, int rating) throws IOException;
 
     protected abstract void deleteRadioInfo(String stream_id);
 

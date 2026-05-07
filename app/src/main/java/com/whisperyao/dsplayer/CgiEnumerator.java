@@ -71,6 +71,16 @@ public class CgiEnumerator extends AbstractNetManager {
     }
 
     @Override
+    protected boolean canEditRating(SongItem item) {
+        return false;
+    }
+
+    @Override
+    protected boolean canPublicShare() {
+        return false;
+    }
+
+    @Override
     protected boolean canSupportAddToNext() {
         return false;
     }
@@ -78,6 +88,16 @@ public class CgiEnumerator extends AbstractNetManager {
     @Override
     protected boolean canSupportGenreArtist() {
         return false;
+    }
+
+    @Override
+    protected boolean canEditRating() {
+        return isWithRating();
+    }
+
+    @Override
+    protected boolean canShareSong(SongItem song) {
+        return canPublicShare();
     }
 
     @Override
@@ -169,6 +189,9 @@ public class CgiEnumerator extends AbstractNetManager {
 
     @Override
     protected void deleteRadioInfo(String stream_id) { }
+
+    @Override
+    protected void doSetRating(List<String> ids, int rating) { }
 
     @Override
     protected JSONObject doPollingRadioInfo(String stream_id) {

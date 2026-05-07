@@ -8,6 +8,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import com.synology.sylib.syhttp3.tuple.BasicKeyValuePair;
 import com.whisperyao.dsplayer.datasource.network.vo.ApiPath;
+import com.whisperyao.dsplayer.datasource.network.vo.BaseVo;
 import com.whisperyao.dsplayer.homepage.PinManager;
 import com.whisperyao.dsplayer.item.PlaylistItem;
 import com.whisperyao.dsplayer.item.SongItem;
@@ -21,7 +22,11 @@ import com.whisperyao.dsplayer.util.Utilities;
 import com.whisperyao.dsplayer.vos.api.ApiPlaylistResponseVo;
 import com.whisperyao.dsplayer.vos.api.ApiSongsResponseVo;
 import com.whisperyao.dsplayer.vos.api.pin.PinListResponseVo;
+import com.whisperyao.dsplayer.vos.api.pin.PinResponseVo;
+import com.whisperyao.dsplayer.vos.api.pin.UnpinResponseVo;
 import com.whisperyao.dsplayer.vos.base.BasePlaylistResponseVo;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -30,8 +35,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import okhttp3.Response;
@@ -65,6 +70,50 @@ public class ApiEnumerator extends AbstractNetManager {
     @Override
     protected boolean isWithRating() {
         return WebAPI.getInstance().canSupportRating();
+    }
+
+    @Override
+    protected boolean canEditRating() {
+        return isWithRating();
+    }
+
+    @Override
+    protected boolean canEditRating(SongItem song) {
+        String dsId = Common.getDsId();
+        return dsId != null && dsId.equals(song.getDsId());
+    }
+
+    @Override
+    protected void doSetRating(List<String> ids, int rating) throws IOException {
+        WebAPI webAPI = WebAPI.getInstance();
+        ApiPath knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_SONG);
+        if (knownAPI == null) {
+            SynoLog.e(LOG, "api SYNO.AudioStation.Song doesn't exist");
+            return;
+        }
+        String strCreateJoinedEscapedIdList = Utilities.createJoinedEscapedIdList(ids);
+        String strMakeAddress = Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.getPath());
+        List<BasicKeyValuePair> basicParams = getBasicParams(1);
+        basicParams.add(new BasicKeyValuePair("id", strCreateJoinedEscapedIdList));
+        // TimeModel.NUMBER_FORMAT
+        basicParams.add(new BasicKeyValuePair(SongItem.SQL_RATING, String.format(Locale.ENGLISH, "%d", rating)));
+        SynoLog.d(LOG, "setrating params = " + basicParams.toString());
+        Response responseDoRequest = webAPI.doRequest(strMakeAddress, AudioStationAPI.SYNO_AUDIOSTATION_SONG, WebAPI.SETRATING, 2, basicParams);
+        if (responseDoRequest.isSuccessful()) {
+            return;
+        }
+        handleError(responseDoRequest.code());
+    }
+
+    @Override
+    protected boolean canPublicShare() {
+        return Common.permitPublicSharing();
+    }
+
+    @Override
+    protected boolean canShareSong(SongItem song) {
+        String dsId = Common.getDsId();
+        return dsId != null && dsId.equals(song.getDsId());
     }
 
     @Override
@@ -848,6 +897,127 @@ public class ApiEnumerator extends AbstractNetManager {
     }
 
     @Override
+    protected PinResponseVo pin(final String type, final HashMap<String, String> criteria, final String name) throws JSONException, WebAPIErrorException, IOException {
+        Response responseDoRequest = null;
+        ArrayList<BasicKeyValuePair> arrayList = new ArrayList<>();
+        WebAPI webAPI = WebAPI.getInstance();
+        ApiPath knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PIN);
+        if (knownAPI == null) {
+            SynoLog.e(LOG, "api SYNO.AudioStation.Pin doesn't exist");
+            return null;
+        }
+        JSONArray jSONArray = new JSONArray();
+        JSONObject jSONObject = new JSONObject();
+        try {
+            jSONObject.put("type", type);
+            jSONObject.put("criteria", new JSONObject(criteria));
+            jSONObject.put("name", name);
+            jSONArray.put(jSONObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        arrayList.add(new BasicKeyValuePair("items", jSONArray.toString()));
+        try {
+            responseDoRequest = webAPI.doRequest(Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.getPath()), AudioStationAPI.SYNO_AUDIOSTATION_PIN, WebAPI.WebApiPin.PIN, 1, arrayList);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (responseDoRequest.isSuccessful()) {
+            PinResponseVo pinResponseVo = new Gson().fromJson(new JsonReader(new InputStreamReader(responseDoRequest.body().byteStream())), PinResponseVo.class);
+            if (pinResponseVo.getError() != null && pinResponseVo.getError().getCode() == 105) {
+                throw new WebAPIErrorException(105);
+            }
+            return pinResponseVo;
+        }
+        handleError(responseDoRequest.code());
+        return null;
+    }
+
+    @Override
+    protected UnpinResponseVo unpin(List<String> idList) throws WebAPIErrorException, IOException {
+        Response responseDoRequest = null;
+        ArrayList<BasicKeyValuePair> arrayList = new ArrayList<>();
+        arrayList.add(new BasicKeyValuePair("items", new Gson().toJson(idList)));
+        WebAPI webAPI = WebAPI.getInstance();
+        ApiPath knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PIN);
+        if (knownAPI != null) {
+            try {
+                responseDoRequest = webAPI.doRequest(Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.getPath()), AudioStationAPI.SYNO_AUDIOSTATION_PIN, WebAPI.WebApiPin.UNPIN, 1, arrayList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (responseDoRequest.isSuccessful()) {
+                UnpinResponseVo unpinResponseVo = new Gson().fromJson(new JsonReader(new InputStreamReader(responseDoRequest.body().byteStream())), UnpinResponseVo.class);
+                if (unpinResponseVo.getError() != null && unpinResponseVo.getError().getCode() == 105) {
+                    throw new WebAPIErrorException(105);
+                }
+                return unpinResponseVo;
+            }
+            handleError(responseDoRequest.code());
+            return null;
+        }
+        SynoLog.e(LOG, "api SYNO.AudioStation.Pin doesn't exist");
+        return null;
+    }
+
+    @Override
+    protected BaseVo rename(final String id, final String name) throws WebAPIErrorException, IOException {
+        Response responseDoRequest = null;
+        ArrayList<BasicKeyValuePair> arrayList = new ArrayList<>();
+        arrayList.add(new BasicKeyValuePair("id", new Gson().toJson(id)));
+        arrayList.add(new BasicKeyValuePair("name", new Gson().toJson(name)));
+        WebAPI webAPI = WebAPI.getInstance();
+        ApiPath knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PIN);
+        if (knownAPI != null) {
+            try {
+                responseDoRequest = webAPI.doRequest(Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.getPath()), AudioStationAPI.SYNO_AUDIOSTATION_PIN, WebAPI.WebApiPin.RENAME, 1, arrayList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (responseDoRequest.isSuccessful()) {
+                BaseVo baseVo = new Gson().fromJson(new JsonReader(new InputStreamReader(responseDoRequest.body().byteStream())), BaseVo.class);
+                if (baseVo.getError() != null && baseVo.getError().getCode() == 105) {
+                    throw new WebAPIErrorException(105);
+                }
+                return baseVo;
+            }
+            handleError(responseDoRequest.code());
+            return null;
+        }
+        SynoLog.e(LOG, "api SYNO.AudioStation.Pin doesn't exist");
+        return null;
+    }
+
+    @Override
+    protected BaseVo reorder(List<String> idList) throws WebAPIErrorException, IOException {
+        Response responseDoRequest = null;
+        ArrayList<BasicKeyValuePair> arrayList = new ArrayList<>();
+        arrayList.add(new BasicKeyValuePair("items", new Gson().toJson(idList)));
+        arrayList.add(new BasicKeyValuePair("offset", new Gson().toJson(0)));
+        arrayList.add(new BasicKeyValuePair("limit", new Gson().toJson(-1)));
+        WebAPI webAPI = WebAPI.getInstance();
+        ApiPath knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_PIN);
+        if (knownAPI != null) {
+            try {
+                responseDoRequest = webAPI.doRequest(Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownAPI.getPath()), AudioStationAPI.SYNO_AUDIOSTATION_PIN, WebAPI.WebApiPin.REORDER, 1, arrayList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (responseDoRequest.isSuccessful()) {
+                BaseVo baseVo = new Gson().fromJson(new JsonReader(new InputStreamReader(responseDoRequest.body().byteStream())), BaseVo.class);
+                if (baseVo.getError() != null && baseVo.getError().getCode() == 105) {
+                    throw new WebAPIErrorException(105);
+                }
+                return baseVo;
+            }
+            handleError(responseDoRequest.code());
+            return null;
+        }
+        SynoLog.e(LOG, "api SYNO.AudioStation.Pin doesn't exist");
+        return null;
+    }
+
+    @Override
     protected int requestToGetSongRating(SongItem song) throws IOException {
         WebAPI webAPI = WebAPI.getInstance();
         ApiPath knownAPI = webAPI.getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_SONG);
@@ -875,6 +1045,4 @@ public class ApiEnumerator extends AbstractNetManager {
         handleError(responseDoRequest.code());
         return -1;
     }
-
-
 }

@@ -52,6 +52,27 @@ public class LocalEnumerator extends AbstractNetManager{
     }
 
     @Override
+    protected boolean canEditRating() {
+        return Common.isLogin() && Common.canSupportRating();
+    }
+
+    @Override
+    protected boolean canEditRating(SongItem song) {
+        return Common.isLogin() && song.getDsId().equals(Common.getDsId());
+    }
+
+    @Override
+    protected boolean canPublicShare() {
+        return Common.isLogin() && Common.permitPublicSharing();
+    }
+
+    @Override
+    protected boolean canShareSong(SongItem song) {
+        String dsId = Common.getDsId();
+        return Common.isLogin() && dsId != null && dsId.equals(song.getDsId());
+    }
+
+    @Override
     protected String getPlayUrl(SongItem song, boolean isForChromeCast) {
         SynoLog.d(LOG, "getPlayUrl : " + song.getCachePath());
         return song.getCachePath();
@@ -73,6 +94,9 @@ public class LocalEnumerator extends AbstractNetManager{
     protected JSONObject doPollingRadioInfo(String stream_id) {
         return new JSONObject();
     }
+
+    @Override
+    protected void doSetRating(List<String> ids, int rating) { }
 
     @Override
     protected void doEnumLyrics(String strFilename, String id) { }

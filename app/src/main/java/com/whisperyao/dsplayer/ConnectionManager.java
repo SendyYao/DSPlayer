@@ -4,18 +4,24 @@ import android.os.Bundle;
 import com.synology.sylib.syhttp3.SyHttpClient;
 import com.synology.sylib.syhttp3.relay.utils.RelayUtil;
 import com.whisperyao.dsplayer.datasource.network.vo.ApiPath;
+import com.whisperyao.dsplayer.datasource.network.vo.BaseVo;
 import com.whisperyao.dsplayer.item.PlaylistItem;
 import com.whisperyao.dsplayer.item.SongItem;
 import com.whisperyao.dsplayer.net.AudioStationAPI;
 import com.whisperyao.dsplayer.net.WebAPI;
 import com.whisperyao.dsplayer.util.AudioPreference;
+import com.whisperyao.dsplayer.util.CallMonitor;
 import com.whisperyao.dsplayer.util.SyhttpInitializer;
+import com.whisperyao.dsplayer.util.SynoLog;
 import com.whisperyao.dsplayer.vos.api.pin.PinListResponseVo;
+import com.whisperyao.dsplayer.vos.api.pin.PinResponseVo;
+import com.whisperyao.dsplayer.vos.api.pin.UnpinResponseVo;
 import com.whisperyao.dsplayer.vos.base.BasePlaylistResponseVo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 public class ConnectionManager {
@@ -35,14 +41,17 @@ public class ConnectionManager {
 
     public static boolean canEditRating(boolean isOnline) {
         validateNetMgr(isOnline);
-        // sNetMgr.canEditRating()
-        return false;
+        return sNetMgr.canEditRating();
     }
 
     public static boolean canEditRating(boolean isOnline, SongItem song) {
         validateNetMgr(isOnline);
-        // song != null && song.isOnDS() && sNetMgr.isWithRating() && sNetMgr.canEditRating(song);
-        return false;
+        return song != null && song.isOnDS() && sNetMgr.isWithRating() && sNetMgr.canEditRating(song);
+    }
+
+    public static void doSetRating(List<String> ids, int rating) throws IOException {
+        validateNetMgr(true);
+        sNetMgr.doSetRating(ids, rating);
     }
 
     public static boolean canSupportAddToNext() {
@@ -59,14 +68,13 @@ public class ConnectionManager {
     }
     public static boolean canShareSong(boolean isOnline, SongItem song) {
         validateNetMgr(isOnline);
-        // song != null && song.isOnDS() && sNetMgr.canPublicShare() && sNetMgr.canShareSong(song)
-        return false;
+        SynoLog.d("Common canShareSong()", "song: " + song);
+        return song != null && song.isOnDS() && sNetMgr.canPublicShare() && sNetMgr.canShareSong(song);
     }
 
     public static boolean canSharePlaylist(boolean isOnline) {
         validateNetMgr(isOnline);
-        // sNetMgr.canPublicShare()
-        return false;
+        return sNetMgr.canPublicShare();
     }
 
     public static boolean canSupportGenreArtist(boolean isOnline) {
@@ -76,6 +84,26 @@ public class ConnectionManager {
 
     public static boolean hasHomepage() {
         return canSupportPin();
+    }
+
+    public static PinResponseVo pin(final String type, final HashMap<String, String> criteria, final String name) throws Exception {
+        validateNetMgr();
+        return sNetMgr.pin(type, criteria, name);
+    }
+
+    public static UnpinResponseVo unPin(List<String> idList) throws Exception {
+        validateNetMgr();
+        return sNetMgr.unpin(idList);
+    }
+
+    public static BaseVo rename(final String id, final String name) throws Exception {
+        validateNetMgr();
+        return sNetMgr.rename(id, name);
+    }
+
+    public static BaseVo reorder(List<String> idList) throws Exception {
+        validateNetMgr();
+        return sNetMgr.reorder(idList);
     }
 
     public static String getCoverUrl(String songId) {
@@ -139,6 +167,11 @@ public class ConnectionManager {
         return sNetMgr.doSearch(category, query);
     }
 
+    public static boolean isWithRating(boolean isOnline) {
+        validateNetMgr(isOnline);
+        return sNetMgr.isWithRating();
+    }
+
     public static PinListResponseVo doEnumPins() throws Exception {
         validateNetMgr();
         return sNetMgr.doEnumPins();
@@ -189,25 +222,25 @@ public class ConnectionManager {
 
     private static void validateNetMgr(boolean isOnline) {
         AbstractNetManager abstractNetManager = sNetMgr;
-        // abstractNetManager != null && isOnline != abstractNetManager.isOnline()
-        if (false) {
+        if (abstractNetManager != null && isOnline != abstractNetManager.isOnline()) {
             sNetMgr = null;
         }
-        // Common.isLogin || !isOnline
-        if (false) {
-            sNetMgr = new LocalEnumerator();
-            return;
+        if (sNetMgr == null) {
+            if (!Common.isLogin() || !isOnline) {
+                sNetMgr = new LocalEnumerator();
+                return;
+            }
+            ApiPath knownAPI = WebAPI.getInstance().getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_INFO);
+            SynoLog.i("validateNetMgr", "knownAPI != null: " + knownAPI);
+            if (knownAPI != null && knownAPI.getMaxVersion() >= 2) {
+                SynoLog.i("validateNetMgr", "knownAPI: " + knownAPI + " " + "maxVersion: " + knownAPI.getMaxVersion());
+                sNetMgr = new ApiEnumerator();
+            } else {
+                sNetMgr = new CgiEnumerator();
+            }
         }
-        ApiPath knownAPI = WebAPI.getInstance().getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_INFO);
-
-        // 先默认使用ApiEnumerator
-        if (knownAPI != null && knownAPI.getMaxVersion() >= 2) {
-//            SynoLog.i("validateNetMgr", "knownAPI: " + knownAPI + " " + "maxVersion: " + knownAPI.getMaxVersion());
-            sNetMgr = new ApiEnumerator();
-        } else {
-            sNetMgr = new CgiEnumerator();
-        }
-//        SynoLog.i("validateNetMgr", "sNetMgr: " + sNetMgr);
+        CallMonitor.hit("validateNetMgr", 3);
+        SynoLog.i("validateNetMgr", "sNetMgr: " + sNetMgr);
     }
 
     public static void validateNetMgr() {
