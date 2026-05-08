@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import com.synology.ThreadWork;
 import com.whisperyao.dsplayer.AndroidAuto.VoiceSearchParams;
 import com.whisperyao.dsplayer.AudioFocusManager;
+import com.whisperyao.dsplayer.CacheManager;
 import com.whisperyao.dsplayer.Common;
 import com.whisperyao.dsplayer.ConnectionManager;
 import com.whisperyao.dsplayer.LocalEnumerator;
@@ -165,6 +166,20 @@ public class PlaybackService extends AndroidAutoService {
             return PlaybackService.this.getVolume();
         }
     };
+    private final CacheManager.OnRatingChangeObserver mOnRatingChangeObserver = songList -> {
+        SongItem songItem = PlaybackService.this.playingQueueManager.getSongItem();
+        if (songItem == null) {
+            return;
+        }
+        for (SongItem songItem2 : songList) {
+            if (songItem2.getDsId().equals(songItem.getDsId()) && songItem2.getID().equals(songItem.getID())) {
+                songItem.setSongRating(songItem2.getSongRating());
+            }
+        }
+        CacheManager.getInstance().adjustRating(PlaybackService.this.playingQueueManager.getQueue());
+        PlaybackService.this.getNowPlayingManager().saveQueue(PlaybackService.this.playingQueueManager.getQueue());
+    };
+
     // =========================
     // Handler：主播放器状态机
     // =========================
@@ -502,7 +517,7 @@ public class PlaybackService extends AndroidAutoService {
         wakeLockNewWakeLock.setReferenceCounted(false);
         this.mDelayedStopHandler.sendMessageDelayed(this.mDelayedStopHandler.obtainMessage(), DateUtils.MILLIS_PER_MINUTE);
         Utils.registerReceiver(this, this.mLoginStatusListener, new IntentFilter("com.synology.dsaudio.NOTIFY_LOGIN_STATUS"), false);
-//        CacheManager.getInstance().registerOnRatingChangeObserver(this.mOnRatingChangeObserver);
+        CacheManager.getInstance().registerOnRatingChangeObserver(this.mOnRatingChangeObserver);
         WifiReceiver wifiReceiver = new WifiReceiver();
         this.mWifiReceiver = wifiReceiver;
         registerReceiver(wifiReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
@@ -522,8 +537,8 @@ public class PlaybackService extends AndroidAutoService {
         if (this.mWakeLock != null) {
             mWakeLock.release();
         }
-        // CacheManager.getInstance().unregisterOnRatingChangeObserver(this.mOnRatingChangeObserver);
-        // CacheManager.getInstance().clearCache();
+        CacheManager.getInstance().unregisterOnRatingChangeObserver(this.mOnRatingChangeObserver);
+        CacheManager.getInstance().clearCache();
         this.mPlayer.release();
         stopProxyPolling();
         terminatePrevStopRadioWork();

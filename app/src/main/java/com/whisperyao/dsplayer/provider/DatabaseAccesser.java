@@ -148,9 +148,9 @@ public class DatabaseAccesser {
         checkRowExist(song);
         ContentValues contentValues = new ContentValues();
         contentValues.put(SongItem.SQL_CACHEPATH, song.getCachePath());
-        contentValues.put(SongItem.SQL_HITCOUNT, Integer.valueOf(song.getHitCount()));
-        contentValues.put(SongItem.SQL_CACHEBITRATE, Long.valueOf(song.getCacheBitrate()));
-        contentValues.put(SongItem.SQL_DOWNLOAD_TYPE, Integer.valueOf(song.getDownloadType()));
+        contentValues.put(SongItem.SQL_HITCOUNT, song.getHitCount());
+        contentValues.put(SongItem.SQL_CACHEBITRATE, song.getCacheBitrate());
+        contentValues.put(SongItem.SQL_DOWNLOAD_TYPE, song.getDownloadType());
         updateTimeAndArgs(song, contentValues);
     }
 
@@ -166,6 +166,28 @@ public class DatabaseAccesser {
             iUpdate = this.mDB.update(SONGLIST_TABLE_NAME, contentValues, "dsid = ? AND path= ? AND track= ? ", new String[]{song.getDsId(), song.getFilePath(), Integer.toString(song.getTrack())});
         }
         // SynoLog.d(str, iUpdate + " update SongItem = " + song.getCachePath() + ", args = " + contentValues);
+    }
+
+    public void updateSongRating(List<SongItem> songItemList) {
+        SQLiteDatabase sQLiteDatabase;
+        synchronized (this.mDB) {
+            try {
+                this.mDB.beginTransaction();
+                for (SongItem songItem : songItemList) {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(SongItem.SQL_RATING, songItem.getSongRating());
+                    this.mDB.update(SONGLIST_TABLE_NAME, contentValues, "dsid = ? AND songid= ?", new String[]{songItem.getDsId(), songItem.getID()});
+                }
+                this.mDB.setTransactionSuccessful();
+                sQLiteDatabase = this.mDB;
+            } catch (SQLException unused) {
+                sQLiteDatabase = this.mDB;
+            } catch (Throwable th) {
+                this.mDB.endTransaction();
+                throw th;
+            }
+            sQLiteDatabase.endTransaction();
+        }
     }
 
     public int deleteSong(final SongItem song) {

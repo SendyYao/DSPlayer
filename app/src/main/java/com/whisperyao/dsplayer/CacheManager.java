@@ -1,7 +1,9 @@
 package com.whisperyao.dsplayer;
 
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
@@ -9,7 +11,6 @@ import android.os.Handler;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-//import com.google.firebase.sessions.settings.RemoteSettings;
 import com.whisperyao.dsplayer.datasource.network.vo.BaseVo;
 import com.whisperyao.dsplayer.fragment.LyricFragment;
 import com.whisperyao.dsplayer.item.HomePagePinItem;
@@ -36,11 +37,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class CacheManager {
     private static CacheManager sCacheManger;
 
@@ -51,17 +54,28 @@ public class CacheManager {
     private static final String RADIOS = "radios";
     private static final String SONGS = "songs";
     private static final String SONGS_TOTAL = "songs_total";
+    private static final String PROFILE_DIR = "/profile/";
+    public static final int MESSAGE_RATING_UPDATE = 1;
+    public static final int MESSAGE_RECORD_RATING_FROM_USER = 2;
 
-    private final Map<String, Integer> mRatingMap = new HashMap();
-
+    private final Map<String, Integer> mRatingMap = new HashMap<>();
+    private final List<OnRatingChangeObserver> mOnRatingChangeObservers = new ArrayList<>();
     private final File mRootDir = new File(Common.getDSaudioAppFolder());
-    private CacheWorkerHandler mHandler;
+    private final CacheWorkerHandler mHandler;
     private boolean bUpdatingRate = false;
     private boolean bRecordingRatingFromUser = false;
 
     public interface OnRatingChangeObserver {
         void onRatingChanged(List<SongItem> songItemList);
     }
+
+    private CacheManager() {
+        clearProfile();
+        HandlerThread mWorkerThread = new HandlerThread("CacheManagerWorkerThead");
+        mWorkerThread.start();
+        this.mHandler = new CacheWorkerHandler(mWorkerThread.getLooper());
+    }
+
     private class CacheWorkerHandler extends Handler {
         public CacheWorkerHandler(Looper looper) {
             super(looper);
@@ -70,8 +84,8 @@ public class CacheManager {
         @Override
         public void handleMessage(final Message msg) {
             int i = msg.what;
-            if (i == 1) {
-                final List list = (List) msg.obj;
+            if (i == MESSAGE_RATING_UPDATE) {
+                final List<SongItem> list = (List) msg.obj;
                 final int i2 = msg.arg1;
                 new AsyncTask<Void, Void, Void>() {
                     @Override
@@ -84,9 +98,9 @@ public class CacheManager {
                 if (i != 2) {
                     return;
                 }
-                final List list2 = (List) msg.obj;
+                final List<SongItem> list2 = (List) msg.obj;
                 new AsyncTask<Void, Void, Void>() {
-                    @Override // android.os.AsyncTask
+                    @Override
                     protected Void doInBackground(Void... params) {
                         CacheManager.this.recordRatingFromUser(list2);
                         return null;
@@ -96,12 +110,30 @@ public class CacheManager {
         }
     }
 
+    public void registerOnRatingChangeObserver(OnRatingChangeObserver observer) {
+        this.mOnRatingChangeObservers.add(observer);
+    }
+
+    public void unregisterOnRatingChangeObserver(OnRatingChangeObserver observer) {
+        this.mOnRatingChangeObservers.remove(observer);
+    }
+
+    private void notifyRatingChanged(List<SongItem> songList) {
+        for (OnRatingChangeObserver mOnRatingChangeObserver : this.mOnRatingChangeObservers) {
+            mOnRatingChangeObserver.onRatingChanged(songList);
+        }
+    }
+
+    public boolean isUpdatingRate() {
+        return this.mHandler.hasMessages(MESSAGE_RATING_UPDATE) || this.bUpdatingRate;
+    }
+
     public void requestRatingSongs(final List<SongItem> songList, final int rating) {
         Message message = new Message();
-        message.what = 1;
+        message.what = MESSAGE_RATING_UPDATE;
         message.obj = songList;
         message.arg1 = rating;
-        this.mHandler.removeMessages(1);
+        this.mHandler.removeMessages(MESSAGE_RATING_UPDATE);
         this.mHandler.sendMessageDelayed(message, 500L);
     }
 
@@ -112,15 +144,19 @@ public class CacheManager {
             arrayList.add(songItem.getID());
             songItem.setSongRating(rating);
         }
-        // ConnectionManager.doSetRating(arrayList, rating);
+        try {
+            ConnectionManager.doSetRating(arrayList, rating);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         recordRatingFromUser(songList);
         this.bUpdatingRate = false;
     }
 
     public void recordRatingFromUser(List<SongItem> songList) {
         this.bRecordingRatingFromUser = true;
-        // DatabaseAccesser.getInstance().updateSongRating(songList);
-        // notifyRatingChanged(songList);
+        DatabaseAccesser.getInstance().updateSongRating(songList);
+        notifyRatingChanged(songList);
         this.bRecordingRatingFromUser = false;
     }
 
@@ -129,6 +165,14 @@ public class CacheManager {
             sCacheManger = new CacheManager();
         }
         return sCacheManger;
+    }
+
+    private void clearProfile() {
+        File file = new File(this.mRootDir + PROFILE_DIR);
+        if (file.exists()) {
+            clearFolder(file);
+            file.delete();
+        }
     }
 
     public static class ItemSet<T> {
@@ -191,13 +235,17 @@ public class CacheManager {
         return str;
     }
 
+    public void clearCache() {
+        clearFolder(new File(getCacheDir()));
+    }
+
     private void clearFolder(File dir) {
         String[] list;
         if (!dir.exists() || (list = dir.list()) == null || list.length == 0) {
             return;
         }
         for (String str : list) {
-            // RemoteSettings.FORWARD_SLASH_STRING = "/"
+            // RemoteSettings.FORWARD_SLASH_STRING
             File file = new File(dir.getAbsolutePath() + "/" + str);
             if (file.isDirectory()) {
                 clearFolder(file);
@@ -232,6 +280,37 @@ public class CacheManager {
         }
     }
 
+    public void clearPlaylistCache() {
+        String[] list;
+        File file = new File(getCacheDir());
+
+        if (!file.exists() || !file.isDirectory() || (list = file.list()) == null || list.length == 0) {
+            return;
+        }
+
+        for (String s : list) {
+            if (!s.toLowerCase(Locale.getDefault()).contains("playlist")) {
+                continue;
+            }
+
+            File file2 = new File(file, s);
+
+            if (file2.isDirectory()) {
+                clearFolder(file2);
+            }
+
+            if (file2.delete()) {
+                SynoLog.d(LOG, "delete : " + file2.getPath());
+            } else {
+                SynoLog.e(LOG, "fail to delete : " + file2.getPath());
+            }
+        }
+    }
+
+    public void clearPlaylistSongCache(final PlaylistItem playlistItem) {
+        clearFolder(new File(getCachePrefixFolder(getCachePrefixPlaylist(true, playlistItem))));
+    }
+
     public boolean rotateSong(long needByte) {
         long songCacheLimit = AudioPreference.getSongCacheLimit();
         long autoCacheSize = AudioPreference.getAutoCacheSize();
@@ -257,6 +336,18 @@ public class CacheManager {
         }
         databaseAccesser.close();
         return true;
+    }
+
+    public void deleteSong(SongItem song) {
+        DatabaseAccesser databaseAccesser = DatabaseAccesser.getInstance();
+        SongItem songItemQuerySong = databaseAccesser.querySong(song);
+        if (databaseAccesser.deleteSong(songItemQuerySong) > 0) {
+            Utilities.subCacheByte(songItemQuerySong);
+            Utilities.removeFile(songItemQuerySong.getCachePath());
+            Utilities.removeFile(songItemQuerySong.getCoverPath());
+            Utilities.removeFile(songItemQuerySong.getLyricPath());
+        }
+        databaseAccesser.close();
     }
 
     public JSONObject doEnumLyrics(SongItem song) throws IOException {
@@ -305,16 +396,24 @@ public class CacheManager {
         return getJsonObjectFromFile(file2);
     }
 
-    public void deleteSong(SongItem song) {
-        DatabaseAccesser databaseAccesser = DatabaseAccesser.getInstance();
-        SongItem songItemQuerySong = databaseAccesser.querySong(song);
-        if (databaseAccesser.deleteSong(songItemQuerySong) > 0) {
-            Utilities.subCacheByte(songItemQuerySong);
-            Utilities.removeFile(songItemQuerySong.getCachePath());
-            Utilities.removeFile(songItemQuerySong.getCoverPath());
-            Utilities.removeFile(songItemQuerySong.getLyricPath());
+    public ItemSet<PlaylistItem> doEnumNormalPlaylist(boolean isShared) {
+        BasePlaylistResponseVo basePlaylistResponseVoDoEnumPlaylist = PlaylistEditor.doEnumPlaylist(isShared);
+
+        if (basePlaylistResponseVoDoEnumPlaylist == null) {
+            return new ItemSet<>(0, new LinkedList<>());
         }
-        databaseAccesser.close();
+
+        List<PlaylistItem> list = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            list = basePlaylistResponseVoDoEnumPlaylist.getPlaylists().stream()
+                    .filter(BasePlaylistResponseVo.BasePlaylistVo::isNormal)
+                    .map(PlaylistItem::generateByPlaylistVo)
+                    .filter(item -> !item.isPredefined())
+                    .filter(item -> item.isPersonal() == !isShared)
+                    .collect(Collectors.toList());
+        }
+
+        return new ItemSet<>(basePlaylistResponseVoDoEnumPlaylist.getValidTotal(), list);
     }
 
     public ItemSet<Item> doEnumContainerForContainer(boolean isOnline, Common.ContainerType type, Bundle bundle, int pageNum, boolean doRefresh) throws WebAPIErrorException {
@@ -818,7 +917,7 @@ public class CacheManager {
         if (doRefresh) {
             clearFolder(new File(cachePrefixFolder));
         }
-//        RemoteSettings.FORWARD_SLASH_STRING
+        // RemoteSettings.FORWARD_SLASH_STRING
         String str3 = getCachePrefixFolder(str2) + "/" + pageNum + ".cache";
         File file = new File(str3);
         if (!file.exists()) {
@@ -836,7 +935,7 @@ public class CacheManager {
         long jCurrentTimeMillis = System.currentTimeMillis();
         JSONObject jSONObject = new JSONObject();
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder stringBuffer = new StringBuilder();
         for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine()) {
             stringBuffer.append(line);
         }
@@ -1023,36 +1122,41 @@ public class CacheManager {
     }
 
     private void recordRatingFromDS(List<SongItem> songList) {
-        // !isUpdatingRate() && !isRecordingRatingFromUser()
-        if (false) {
-            Iterator<SongItem> it = songList.iterator();
-            while (it.hasNext()) {
-                this.mRatingMap.remove(getRatingKey(it.next()));
+        if (!isUpdatingRate() && !isRecordingRatingFromUser()) {
+            for (SongItem songItem : songList) {
+                this.mRatingMap.remove(getRatingKey(songItem));
             }
         }
-//        DatabaseAccesser.getInstance().updateSongRating(songList);
-//        notifyRatingChanged(songList);
+        DatabaseAccesser.getInstance().updateSongRating(songList);
+        notifyRatingChanged(songList);
     }
 
     public void adjustRating(SongItem song) {
-        ArrayList arrayList = new ArrayList();
+        ArrayList<SongItem> arrayList = new ArrayList<>();
         arrayList.add(song);
         adjustRating(arrayList);
     }
 
     public void adjustRating(List<SongItem> songList) {
         for (SongItem songItem : songList) {
-            if (this.mRatingMap.containsKey(getRatingKey(songItem))) {
-                songItem.setRating(this.mRatingMap.get(songItem));
+            String key = getRatingKey(songItem);
+
+            if (this.mRatingMap.containsKey(key)) {
+                float rating = this.mRatingMap.get(key).intValue();
+                songItem.setRating(rating);
             }
         }
     }
 
+    public boolean isRecordingRatingFromUser() {
+        return this.mHandler.hasMessages(MESSAGE_RECORD_RATING_FROM_USER) || this.bRecordingRatingFromUser;
+    }
+
     public void requestRecordRatingFromUser(final List<SongItem> songList) {
         Message message = new Message();
-        message.what = 2;
+        message.what = MESSAGE_RECORD_RATING_FROM_USER;
         message.obj = songList;
-        this.mHandler.removeMessages(2);
+        this.mHandler.removeMessages(MESSAGE_RECORD_RATING_FROM_USER);
         this.mHandler.sendMessageDelayed(message, 500L);
     }
 
