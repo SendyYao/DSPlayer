@@ -72,6 +72,12 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.whisperyao.dsplayer.download.TaskActivity"
+            android:launchMode="singleTask"
+            android:configChanges="screenSize|orientation|keyboardHidden"/>
+
         <activity
             android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
             android:name="com.synology.sylibx.synofile.TakePermissionActivity"

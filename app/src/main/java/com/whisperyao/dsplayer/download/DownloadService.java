@@ -376,9 +376,8 @@ public class DownloadService extends DaggerService {
     }
 
     private void showNotification(String name) {
-        // TaskActivity.class
-        Intent intent = new Intent(this, (Class<?>) SongListActivity.class);
-        intent.setFlags(268435456);
+        Intent intent = new Intent(this, TaskActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         this.mBuilder.setContentText(name).setContentIntent(PendingIntent.getActivity(this, 0, intent, 201326592));
         this.mNotificationManager.notify(NOTIFICATION_ID, this.mBuilder.build());
     }
