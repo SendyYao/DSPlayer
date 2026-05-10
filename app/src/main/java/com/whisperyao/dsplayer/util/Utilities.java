@@ -23,7 +23,6 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -191,7 +190,6 @@ public class Utilities {
         return !TextUtils.isEmpty(songItem.getCodec());
     }
 
-
     public static boolean isAAC(final SongItem songItem) {
         TranscodeSetting.TranscodeForceFormat streamAudio = toStreamAudio(songItem.getFilePath());
         return streamAudio != null && streamAudio.isAac();
@@ -266,8 +264,7 @@ public class Utilities {
     }
 
     public static boolean shouldManualDownload(SongItem song) {
-        // return isManualDownloadInDB(song) && checkHasSongCachedAndPassQuality(song);
-        return false;
+        return !isManualDownloadInDB(song) || !checkHasSongCachedAndPassQuality(song);
     }
 
     public static boolean isManualDownloadInDB(SongItem song) {

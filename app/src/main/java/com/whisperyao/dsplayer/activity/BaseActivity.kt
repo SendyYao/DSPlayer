@@ -116,9 +116,17 @@ abstract class BaseActivity : DaggerAppCompatActivity(), ConnectionManagerProvid
             data
         )
 
-        if (requestCode == 9487) {
+        if (requestCode == StoragePermissionHelper.REQUEST_CODE_STORAGE) {
             StoragePermissionHelper.onActivityResult(this, resultCode, data)
         }
+    }
+
+    fun permissionGranted(): Boolean {
+        return StoragePermissionHelper.permissionGranted()
+    }
+
+    fun showHintsThenAskPermission() {
+        StoragePermissionHelper.showHintsThenAskPermission(this)
     }
 
 

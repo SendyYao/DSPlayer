@@ -851,8 +851,8 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
 
     override fun onResume() {
         // App.isMainActivityFirstLaunched() && !permissionGranted() && AudioPreference.enableAutoDownload()
-        if (false) {
-            // showHintsThenAskPermission();
+        if (!permissionGranted() && AudioPreference.enableAutoDownload()) {
+            showHintsThenAskPermission();
         }
         if (Common.gDeviceChanged) {
             if (Common.isLogin()) {

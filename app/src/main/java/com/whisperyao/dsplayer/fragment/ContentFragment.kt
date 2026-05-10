@@ -1106,8 +1106,7 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
             )
             return
         }
-        // !preferenceManager.getHasShownNotificationPermissionRequest()
-        if (false) {
+        if (!preferenceManager.getHasShownNotificationPermissionRequest()) {
             preferenceManager.setHasShownNotificationPermissionRequest(true)
 
             PermissionUtil.requestPermission(
@@ -1129,6 +1128,40 @@ abstract class ContentFragment() : DaggerFragment(), EditPlaylistFragment.Callba
         ).show()
 
         mSongsRequested = null
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == PermissionUtil.RequestCode.NOTIFICATION_PERMISSION.value) {
+            mSongsRequested?.let {
+                downloadRemote(it)
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == StoragePermissionHelper.REQUEST_CODE_STORAGE) {
+            StoragePermissionHelper.onActivityResult(this, resultCode, data)
+
+            if (StoragePermissionHelper.permissionGranted()) {
+                mSongsRequested?.let {
+                    downloadRemote(it)
+                }
+            }
+        }
     }
 
     interface ContentCallback {

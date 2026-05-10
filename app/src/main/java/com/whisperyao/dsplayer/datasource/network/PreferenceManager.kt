@@ -34,13 +34,13 @@ class PreferenceManager {
     }
 
     fun getHasShownNotificationPermissionRequest(): Boolean {
-        val systemService: Any? = this.context.getSystemService("notification")
-        val notificationManager: NotificationManager? =
-            if (systemService is NotificationManager) systemService as NotificationManager? else null
-        if (notificationManager == null) {
-            return !Utils.isSdk33() || this.pref.getBoolean(HAS_SHOWN_NOTIFICATION_PERMISSION_REQUEST, false)
-        }
-        return false
+        val notificationManager =
+            context.getSystemService(NotificationManager::class.java)
+                ?: return false
+
+        return !Utils.isSdk33() ||
+                notificationManager.areNotificationsEnabled() ||
+                pref.getBoolean(HAS_SHOWN_NOTIFICATION_PERMISSION_REQUEST, false)
     }
 
     fun setHasShownNotificationPermissionRequest(z: Boolean) {
