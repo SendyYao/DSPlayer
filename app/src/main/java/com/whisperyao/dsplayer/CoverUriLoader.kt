@@ -23,6 +23,7 @@ import androidx.core.net.toUri
 import com.whisperyao.dsplayer.item.HomePagePinItem
 import com.whisperyao.dsplayer.item.Item
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager
+import com.whisperyao.dsplayer.net.WebAPI
 
 
 class CoverUriLoader {
@@ -655,13 +656,43 @@ class CoverUriLoader {
         val draweeView = view ?: return
         val currentType = type ?: return
 
-        val url = Common.composeUrl(
-            AudioPreference.getCoverPath(),
-            apiName,
-            AudioPreference.getCoverVer(),
-            method,
-            params
-        )
+        val knownApi =
+            WebAPI.getInstance()
+                .getKnownAPI(AudioStationAPI.SYNO_AUDIOSTATION_COVER)
+
+        val url = when {
+            knownApi == null || AudioPreference.getCoverPath() == "null" -> {
+
+                if (ConnectionManager.loadCoverCgi()) {
+                    Common.composeUrl(
+                        Common.makeAddress(Common.getBaseUrl(),
+                            Common.ENUMERATE_CGI
+                        ),
+                        null,
+                        1,
+                        method,
+                        params
+                    )
+                } else {
+                    Common.composeUrl(
+                        AudioPreference.getCoverPath(),
+                        apiName,
+                        AudioPreference.getCoverVer(),
+                        method,
+                        params
+                    )
+                }
+            }
+
+            else -> {
+                val path = Common.makeAddress(Common.DEFAULT_WEBAPI_PATH, knownApi.path)
+
+                AudioPreference.setCoverPath(path)
+                AudioPreference.setCoverVer(knownApi.maxVersion)
+
+                Common.composeUrl(path, apiName, knownApi.maxVersion, method, params)
+            }
+        }
 
         val mediaId = generateMediaId(currentType, params)
 
@@ -671,15 +702,15 @@ class CoverUriLoader {
             SynoLog.d("CoverUriLoader", "localFile exists")
             Uri.fromFile(localFile)
         } else {
-            CoverUtil(App.getContext()).downloadImage(mediaId, url)
             url.toUri()
         }
 
         val requestBuilder = ImageRequestBuilder.newBuilderWithSource(sourceUri)
-
-        if (blur) {
-            requestBuilder.postprocessor = postprocessor
-        }
+            .apply {
+                if (blur) {
+                    postprocessor = this@CoverUriLoader.postprocessor
+                }
+            }
 
         val controllerBuilder = Fresco.newDraweeControllerBuilder()
             .setImageRequest(requestBuilder.build())
@@ -719,15 +750,14 @@ class CoverUriLoader {
                                 )
                                 .build()
                     } else {
-                        legacyUri?.let {
-                            imageView.setImageURI(it)
-                        }
+                        legacyUri?.let(imageView::setImageURI)
                     }
                 }
             }
 
         draweeView.controller = controllerBuilder.build()
-
+        SynoLog.d("CoverUriLoader", "cover url: $url")
+        CoverUtil(App.getContext()).downloadImage(mediaId, url)
     }
 
     open class ControllerListenerWithView(view: View) :

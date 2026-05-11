@@ -21,14 +21,18 @@ import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
 import androidx.core.net.toUri
+import javax.inject.Inject
 
 
 class CoverUtil {
     private var context: Context
     private val TAG: String = CoverUtil::class.java.name
+
+    @Inject
     constructor(context: Context) {
         this.context = context
     }
+
     companion object {
         lateinit var mCoverUpdatedMediaId: Subject<String?>
         var publishSubjectCreate: PublishSubject<*> = PublishSubject.create<Any?>()
@@ -75,7 +79,7 @@ class CoverUtil {
     }
 
     fun getCoverFileFromSong(songItem: SongItem): File {
-        val mediaId: String? = songItem.mediaId
+        val mediaId: String = songItem.mediaId
         return getCoverFileFromSong(mediaId)
     }
 
@@ -87,55 +91,16 @@ class CoverUtil {
 
     fun downloadImage(mediaId: String, url: String) {
         val uri: Uri = url.toUri()
-        downloadImage(mediaId, null, uri, getFileNameFromMediaID(mediaId))
+        doDownloadImage(mediaId, null, uri, getFileNameFromMediaID(mediaId))
     }
 
     fun downloadImage(songItem: SongItem, url: String) {
-        val mediaId: String? = songItem.mediaId
+        val mediaId: String = songItem.mediaId
         val uri: Uri = url.toUri()
         doDownloadImage(mediaId, songItem, uri, getFileNameFromMediaID(mediaId))
     }
 
-    fun downloadImage(mediaId: String?, songItem: SongItem?, uri: Uri, filename: String) {
-        val imageRequestBuild: ImageRequest = ImageRequestBuilder.newBuilderWithSource(uri).build()
-        val imagePipeline: ImagePipeline = Fresco.getImagePipeline()
-        imagePipeline.evictFromCache(uri)
-        imagePipeline.fetchDecodedImage(imageRequestBuild, this.context).subscribe(
-            object : BaseBitmapDataSubscriber() {
-                @Throws(java.io.IOException::class)
-                override fun onFailureImpl(dataSource: DataSource<CloseableReference<CloseableImage?>?>) {
-                }
-                override fun onNewResultImpl(bitmap: Bitmap?) {
-                    if (bitmap == null) {
-                        Log.d(TAG, "download failed")
-                    }
-                    if (bitmap != null) {
-                        val str: String = filename
-                        val coverUtil: CoverUtil = this@CoverUtil
-                        val songItem2: SongItem? = songItem
-                        val str2: String? = mediaId
-                        val file = File(coverUtil.getCoverFolder(), "$str.jpg")
-                        try {
-                            file.delete()
-                            val fileOutputStream = FileOutputStream(file)
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream)
-                            fileOutputStream.flush()
-                            fileOutputStream.close()
-                            if (songItem2 != null) {
-                                DatabaseAccesser.getInstance().addCover(songItem2, file.path)
-                            }
-                            getCoverUpdatedMediaId().onNext(str2)
-                        } catch (_: okio.IOException) {
-                            Integer.valueOf(Log.d(TAG, "$str2 compress failed"))
-                        }
-                    }
-                }
-
-
-            }, CallerThreadExecutor.getInstance())
-    }
-
-    fun doDownloadImage(mediaId: String?, songItem: SongItem, uri: Uri, filename: String) {
+    fun doDownloadImage(mediaId: String, songItem: SongItem?, uri: Uri, filename: String) {
         val imageRequestBuild = ImageRequestBuilder.newBuilderWithSource(uri).build()
         val imagePipeline = Fresco.getImagePipeline()
         imagePipeline.evictFromCache(uri)
@@ -149,7 +114,7 @@ class CoverUtil {
                     if (bitmap != null) {
                         val str: String = filename
                         val coverUtil: CoverUtil = this@CoverUtil
-                        val songItem2: SongItem = songItem
+                        val songItem2: SongItem? = songItem
                         val str2: String? = mediaId
                         val file = File(coverUtil.getCoverFolder(), "$str.jpg")
                         try {
