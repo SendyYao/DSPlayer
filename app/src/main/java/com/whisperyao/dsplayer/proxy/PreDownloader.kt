@@ -123,6 +123,10 @@ class PreDownloader(
         listener?.onDownloadCompleted(songItem)
     }
 
+    fun getCachePath(): String {
+        return cachePath
+    }
+
     @Throws(Throwable::class)
     private fun download(url: String, filePath: String): Boolean {
         val ext = Utilities.getExt(url)
@@ -285,14 +289,13 @@ class PreDownloader(
 
             status = DownloadStatus.HEADER_DONE
 
-            val body = response?.body
-            if (body == null) {
+            if (response?.body == null) {
                 SynoLog.e(TAG, "Response error.")
                 status = DownloadStatus.Error
                 return false
             }
 
-            val contentLength = body.contentLength()
+            val contentLength = response?.body?.contentLength() ?: 0L
 
             if (contentLength <= 0L) {
                 SynoLog.e(
@@ -305,7 +308,7 @@ class PreDownloader(
 
             SynoLog.i(TAG, "Content Length : $contentLength")
 
-            inputStream = body.byteStream()
+            inputStream = response?.body?.byteStream() ?: throw InputStreamNullException()
 
             while (!isIdle()) {
                 writeBytes = inputStream.read(buffer, 0, BUFFER_SIZE)

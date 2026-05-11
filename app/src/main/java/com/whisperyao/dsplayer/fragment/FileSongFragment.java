@@ -674,7 +674,6 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
             }
             ArrayList<SongItem> arrayList = new ArrayList<>();
             for (SongItem next : this.mItems) {
-//                SynoLog.d(LOG, "next = " + next);
                 if (!next.getType().isDirectory()) {
                     arrayList.add(next);
                 }
@@ -750,7 +749,6 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
 
     private class FileSongHeaderHelper {
         private SimpleDraweeView mAlbumBackView;
-        private Context mContext;
         private SimpleDraweeView mCoverImagePort;
         private View mHeader;
         private TextView mMusicTextPort;
@@ -770,7 +768,6 @@ public class FileSongFragment extends ContentFragment implements ContentFragment
         };
 
         FileSongHeaderHelper(Context context) {
-            this.mContext = context;
         }
 
         boolean isFolderGroup() {

@@ -189,7 +189,7 @@ public class StreamProxy implements Runnable {
                 }
             }
 
-            String path = mDownloader.getSongItem().getCachePath();
+            String path = mDownloader.getCachePath();
             SynoLog.d(LOG_TAG, "path = " + path);
 
             byte[] buffer = new byte[65536];
