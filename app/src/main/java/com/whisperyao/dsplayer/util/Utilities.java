@@ -1,5 +1,6 @@
 package com.whisperyao.dsplayer.util;
 
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StatFs;
@@ -7,11 +8,13 @@ import android.text.TextUtils;
 import android.widget.TextView;
 
 import com.google.android.gms.cast.HlsSegmentFormat;
+import com.synology.sylib.util.FileUtils;
 import com.synology.sylib.util.NetworkUtils;
 import com.synology.sylibx.synofile.SynoFile;
 import com.whisperyao.dsplayer.App;
 import com.whisperyao.dsplayer.Common;
 import com.whisperyao.dsplayer.ConnectionManager;
+import com.whisperyao.dsplayer.R;
 import com.whisperyao.dsplayer.item.SongItem;
 import com.whisperyao.dsplayer.playing.EqualizerSettings;
 import com.whisperyao.dsplayer.provider.DatabaseAccesser;
@@ -395,6 +398,25 @@ public class Utilities {
             SynoLog.d("getProperName", str);
         } while (new SynoFile(str).exists());
         return str;
+    }
+
+    public static int getSongCount(int downloadType) {
+        return DatabaseAccesser.getInstance().doEnumAllSongsCount(downloadType);
+    }
+
+    public static String getCacheSettingString(Resources resources, int downloadType) throws Resources.NotFoundException {
+        long manualCacheSize;
+        int songCount = getSongCount(downloadType);
+        if (downloadType == 1) {
+            manualCacheSize = AudioPreference.getAutoCacheSize();
+        } else {
+            manualCacheSize = AudioPreference.getManualCacheSize();
+        }
+        String string = resources.getString(R.string.songs_count, songCount);
+        if (manualCacheSize <= 0) {
+            return resources.getString(R.string.none);
+        }
+        return FileUtils.byteCountToDisplaySize(manualCacheSize, 3) + " / " + string;
     }
 
 

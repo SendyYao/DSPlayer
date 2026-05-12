@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:synology="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:key="category_login_info"
+        android:title="@string/setting_login_information"
+        synology:iconSpaceReserved="false">
+        <PreferenceScreen
+            android:key="login_info_address"
+            android:title="Disk Station"
+            synology:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:key="login_info_account"
+            android:title="@string/login_account"
+            synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.LoginLogoutPreference
+            android:key="login_logout_button"
+            synology:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="category_general"
+        android:title="@string/category_general"
+        synology:iconSpaceReserved="false">
+        <PreferenceScreen
+            android:key="select_player"
+            android:title="@string/select_player"
+            synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.SynoListPreference
+            android:defaultValue="REPLACE"
+            android:entries="@array/entries_pref_tapsong"
+            android:entryValues="@array/entryvalues_pref_tapsong"
+            android:key="pref_tap_song"
+            android:title="@string/pref_tap_song"
+            synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.SynoListPreference
+            android:defaultValue="ALL"
+            android:entries="@array/entries_pref_personal"
+            android:entryValues="@array/entryvalues_pref_personal"
+            android:key="pref_personal_library"
+            android:title="@string/personal_library_source"
+            synology:iconSpaceReserved="false" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="enable_remote_controller"
+            android:title="@string/pref_remote_controller"
+            synology:iconSpaceReserved="false" />
+        <Preference
+            android:key="enable_remote_controller_description"
+            android:summary="@string/pref_remote_controller_description"
+            synology:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/local"
+        synology:iconSpaceReserved="false">
+        <PreferenceScreen
+            android:key="cache_auto_size"
+            android:title="@string/cache_setting_automatic"
+            synology:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:key="cache_manual_size"
+            android:title="@string/cache_setting_manual"
+            synology:iconSpaceReserved="false" />
+        <Preference
+            android:key="cache_path"
+            android:title="@string/download_path"
+            synology:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="category_transcode"
+        android:title="@string/transcode_setting_title"
+        synology:iconSpaceReserved="false">
+        <com.whisperyao.dsplayer.ui.preference.SynoListPreference
+            android:defaultValue="MP3"
+            android:entries="@array/entries_pref_transcode"
+            android:entryValues="@array/entryvalues_pref_transcode"
+            android:key="pref_transcode_type"
+            android:title="@string/transcode_selecting_title"
+            synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.SynoListPreference
+            android:defaultValue="AUTO"
+            android:entries="@array/entries_pref_transcode_quality"
+            android:entryValues="@array/entryvalues_pref_transcode_quality"
+            android:key="pref_transcode_quality"
+            android:title="@string/transcode_quality"
+            synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.SynoMultiSelectListPreference
+            android:defaultValue="@array/default_force_transcode"
+            android:entries="@array/entries_pref_force_transcode"
+            android:entryValues="@array/entryvalues_pref_force_transcode"
+            android:key="pref_force_transcode"
+            android:title="@string/force_transcode_formats"
+            synology:iconSpaceReserved="false"
+            synology:summaryRes="@string/num_of_formats" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="category_sound_effect"
+        android:title="@string/sound_effect_setting_title"
+        synology:iconSpaceReserved="false">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="enable_equalizer"
+            android:title="@string/pref_enable_equalizer"
+            synology:iconSpaceReserved="false" />
+        <PreferenceScreen
+            android:enabled="false"
+            android:key="select_equalizer"
+            android:title="@string/select_equalizer"
+            synology:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="category_androidauto"
+        android:title="@string/androidauto_setting_section"
+        synology:iconSpaceReserved="false">
+        <com.whisperyao.dsplayer.ui.preference.SynoMultiSelectListPreference
+            android:defaultValue="@array/default_androidauto_default_playlists"
+            android:entries="@array/entries_pref_androidauto_default_playlists"
+            android:entryValues="@array/entryvalues_pref_androidauto_default_playlists"
+            android:key="pref_androidauto_default_playlists"
+            android:persistent="true"
+            android:title="@string/androidauto_setting_default_playlists_title"
+            synology:iconSpaceReserved="false"
+            synology:summaryRes="@string/androidauto_num_of_default_playlists" />
+        <Preference
+            android:summary="@string/androidauto_setting_description"
+            synology:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="analytics_setting"
+        android:title="@string/analytics_setting"
+        synology:iconSpaceReserved="false">
+        <PreferenceScreen
+            android:key="share_analytics"
+            android:title="@string/analytics"
+            synology:iconSpaceReserved="false">
+            <intent
+                android:targetClass="com.whisperyao.dsplayer.ui.settings.DisplayPreferenceActivity"
+                android:targetPackage="com.whisperyao.dsplayer">
+                <extra
+                    android:name="@string/fragment_type"
+                    android:value="@string/type_analytics" />
+            </intent>
+        </PreferenceScreen>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/str_about"
+        synology:iconSpaceReserved="false">
+        <Preference
+            android:key="app_name"
+            android:summary="@string/str_copyright"
+            android:title="@string/app_name"
+            synology:iconSpaceReserved="false" />
+        <com.synology.sylibx.ui.documents.preference.UiHelpPreference
+            synology:algorithmicDarkening="false"
+            synology:applyPrefersColorScheme="false"
+            synology:iconSpaceReserved="false" />
+        <com.synology.sylibx.ui.documents.preference.ContactSupportPreference synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.TermsPreference synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.PrivacyPreference synology:iconSpaceReserved="false" />
+        <com.whisperyao.dsplayer.ui.preference.VersionPreference
+            android:key="version"
+            synology:iconSpaceReserved="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="developer"
+        android:title="Developer"
+        synology:iconSpaceReserved="false">
+        <PreferenceScreen
+            android:key="developer_mode"
+            android:title="Developer mode"
+            synology:iconSpaceReserved="false">
+            <intent
+                android:targetClass="com.whisperyao.dsplayer.ui.settings.DisplayPreferenceActivity"
+                android:targetPackage="com.whisperyao.dsplayer">
+                <extra
+                    android:name="@string/fragment_type"
+                    android:value="@string/developer_mode" />
+            </intent>
+        </PreferenceScreen>
+    </PreferenceCategory>
+</PreferenceScreen>

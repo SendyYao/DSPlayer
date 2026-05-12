@@ -11,6 +11,25 @@
         <item name="vpiTabPageIndicatorStyle">@style/customTabPageIndicator</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
+    <style name="Internal.UiDoc.ToolbarStyle" parent="@style/Widget.AppCompat.Toolbar">
+        <item name="android:background">?attr/uiDocToolbarBackground</item>
+        <item name="android:elevation">?attr/uiDocToolbarElevation</item>
+        <item name="titleTextColor">?attr/uiDocToolbarTitleColor</item>
+    </style>
+    <style name="Internal.UiDoc.ToolbarNavigationButtonTheme" parent="@style/Widget.AppCompat.Toolbar.Button.Navigation">
+        <item name="tint">?attr/uiDocToolbarNavigationTint</item>
+    </style>
+    <style name="Base.UiDoc.ToolbarStyle" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/LC13</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+        <item name="toolbarNavigationButtonStyle">@style/Internal.UiDoc.ToolbarNavigationButtonTheme</item>
+        <item name="toolbarStyle">@style/Internal.UiDoc.ToolbarStyle</item>
+        <item name="uiDocAppBackground">@color/LC13</item>
+        <item name="uiDocToolbarBackground">@color/LC13</item>
+        <item name="uiDocToolbarElevation">@dimen/ui_doc_toolbar_elevation</item>
+        <item name="uiDocToolbarNavigationTint">@color/LC1</item>
+        <item name="uiDocToolbarTitleColor">@color/LC1</item>
+    </style>
     <style name="DropDownListView.Dsaudio_light" parent="@style/Widget.AppCompat.Light.ListView.DropDown">
         <item name="android:listSelector">@drawable/selectable_background_dsaudio_light</item>
     </style>
@@ -122,6 +141,20 @@
         <item name="android:minHeight">33.0dip</item>
     </style>
     <style name="Widget" />
+    <style name="PreferencesTheme" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="android:statusBarColor">@color/LC13</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="colorControlNormal">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="toolbarNavigationButtonStyle">@style/Internal.UiDoc.ToolbarNavigationButtonTheme</item>
+        <item name="toolbarStyle">@style/Internal.UiDoc.ToolbarStyle</item>
+        <item name="uiDocAppBackground">@color/LC13</item>
+        <item name="uiDocToolbarBackground">@color/LC13</item>
+        <item name="uiDocToolbarElevation">@dimen/ui_doc_toolbar_elevation</item>
+        <item name="uiDocToolbarNavigationTint">@color/LC1</item>
+        <item name="uiDocToolbarTitleColor">@color/LC1</item>
+    </style>
     <style name="Widget.TabPageIndicator" parent="@style/Widget">
         <item name="android:textAppearance">@style/TextAppearance.TabPageIndicator</item>
         <item name="android:textSize">12.0sp</item>

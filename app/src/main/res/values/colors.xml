@@ -7,8 +7,11 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="blue">#0087ff</color>
     <color name="transparent">#00ffffff</color>
     <color name="current_lyric_color">#F5F500</color>
+    <color name="LC1">#ffffff</color>
+    <color name="LC13">#1c1c1c</color>
     <color name="colorPrimary">#ff0ac3a0</color>
     <color name="popup_bg">#e6040404</color>
     <color name="player_control_background">#ff262628</color>
@@ -36,4 +39,5 @@
     <color name="playing_bg">@color/list_focus_over_dark</color>
     <color name="list_focus_over_dark">#ff39393a</color>
     <color name="selected_bg_color">#120ac3a0</color>
+    <color name="logout_text_color">#f04646</color>
 </resources>

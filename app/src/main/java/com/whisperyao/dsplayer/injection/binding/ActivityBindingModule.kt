@@ -5,6 +5,7 @@ import com.whisperyao.dsplayer.activity.HomeActivity
 import com.whisperyao.dsplayer.download.TaskActivity
 import com.whisperyao.dsplayer.injection.module.AppCompatActivityModule
 import com.whisperyao.dsplayer.injection.module.ContextBasedModule
+import com.whisperyao.dsplayer.ui.settings.DisplayPreferenceActivity
 import dagger.Module
 import dagger.Provides
 import dagger.android.ContributesAndroidInjector
@@ -17,6 +18,9 @@ abstract class ActivityBindingModule {
 
     @ContributesAndroidInjector(modules = [TaskActivityInstanceModule::class])
     abstract fun taskActivity(): TaskActivity
+
+    @ContributesAndroidInjector(modules = [DisplayPreferenceActivityInstanceModule::class])
+    abstract fun displayPreferenceActivity(): DisplayPreferenceActivity
 
     @Module(includes = [AppCompatActivityModule::class, ContextBasedModule::class])
     class HomeActivityInstanceModule {
@@ -34,4 +38,11 @@ abstract class ActivityBindingModule {
         }
     }
 
+    @Module(includes = [AppCompatActivityModule::class, ContextBasedModule::class])
+    class DisplayPreferenceActivityInstanceModule {
+        @Provides
+        fun displayPreferenceActivity(activity: DisplayPreferenceActivity): AppCompatActivity {
+            return activity
+        }
+    }
 }

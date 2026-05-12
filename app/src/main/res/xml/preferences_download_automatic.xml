@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:synology="http://schemas.android.com/apk/res-auto">
+    <com.whisperyao.dsplayer.ui.preference.SynoListPreference
+        android:defaultValue="1000"
+        android:entries="@array/CacheSizeEntry"
+        android:entryValues="@array/CacheSizeEntryValues"
+        android:key="song_cache_limit"
+        android:title="@string/cache_limit"
+        synology:iconSpaceReserved="false" />
+    <PreferenceScreen
+        android:key="clear_auto_cache"
+        android:title="@string/cache_setting_delete_all_automatic_songs"
+        synology:iconSpaceReserved="false" />
+</PreferenceScreen>

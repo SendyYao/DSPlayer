@@ -10,4 +10,16 @@
     <attr name="maxHeight" format="dimension" />
 	<attr name="related_checkable" format="reference" />
 	<attr name="related_checkables" format="reference" />
+    <attr name="themedUIDocToolbarStyle" format="reference" />
+    <attr name="uiDocAppBackground" format="reference" />
+    <attr name="uiDocToolbarBackground" format="reference" />
+    <attr name="uiDocToolbarElevation" format="dimension" />
+    <attr name="uiDocToolbarNavigationTint" format="color" />
+    <attr name="uiDocToolbarTitleColor" format="color" />
+    <attr name="summary" format="string" />
+    <attr name="summaryOff" format="string" />
+    <attr name="summaryOn" format="string" />
+    <attr name="summaryRes" format="string" />
+    <attr name="algorithmicDarkening" format="boolean" />
+    <attr name="applyPrefersColorScheme" format="boolean" />
 </resources>

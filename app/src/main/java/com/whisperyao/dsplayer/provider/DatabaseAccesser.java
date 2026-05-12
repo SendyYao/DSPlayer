@@ -202,6 +202,58 @@ public class DatabaseAccesser {
         return iDelete;
     }
 
+    public int deleteAllSongs(int downloadType) {
+        String str;
+        String[] strArr;
+        int iDelete;
+        if (downloadType == 1) {
+            str = "download_type=?";
+            strArr = new String[]{String.valueOf(1)};
+        } else if (downloadType == 2) {
+            str = "download_type=?";
+            strArr = new String[]{String.valueOf(2)};
+        } else {
+            str = null;
+            strArr = null;
+        }
+        synchronized (this.mDB) {
+            iDelete = this.mDB.delete(SONGLIST_TABLE_NAME, str, strArr);
+        }
+        SynoLog.d(LOG_TAG, " deleteAllSongs row number = " + iDelete);
+        return iDelete;
+    }
+
+    public void deleteAllManual() {
+        synchronized (this.mDB) {
+            deleteAllSongs(2);
+            this.mDB.delete(AudioProvider.LOCALPLAYLIST_TABLE_NAME, null, null);
+            this.mDB.delete(AudioProvider.LOCALPLAYLIST_SONG_RELATION_TABLE_NAME, null, null);
+        }
+    }
+
+    public int doEnumAllSongsCount(int downloadType) {
+        Cursor cursorQuery;
+        String conditionForDownloaded = getConditionForDownloaded();
+        String[] strArr = new String[0];
+        if (downloadType == 1) {
+            conditionForDownloaded = String.format("%s AND %s", conditionForDownloaded, "download_type=?");
+            strArr = (String[]) ArrayUtils.addAll(strArr, String.valueOf(1));
+        } else if (downloadType == 2) {
+            conditionForDownloaded = String.format("%s AND %s", conditionForDownloaded, "download_type=?");
+            strArr = (String[]) ArrayUtils.addAll(strArr, String.valueOf(2));
+        }
+        String str = conditionForDownloaded;
+        String[] strArr2 = strArr;
+        synchronized (this.mDB) {
+            cursorQuery = this.mDB.query(SONGLIST_TABLE_NAME, null, str, strArr2, null, null, "title ASC");
+        }
+        int count = cursorQuery.getCount();
+        IOUtils.closeSilently(cursorQuery);
+        return count;
+    }
+
+
+
     public SongItem[] doEnumRotateCandidate() {
         Cursor cursorQuery;
         synchronized (this.mDB) {

@@ -286,6 +286,11 @@ object Common {
     }
 
     @JvmStatic
+    fun getPlayerName(): String {
+        return getPlayerStatusManager().playerName
+    }
+
+    @JvmStatic
     fun makeAddress(baseUrl: String, path: String): String {
         return makeAddress(baseUrl, path, getIp(), getPort())
     }

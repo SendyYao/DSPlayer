@@ -53,6 +53,7 @@ import com.whisperyao.dsplayer.util.AudioPreference
 import com.whisperyao.dsplayer.util.SynoLog
 import com.whisperyao.dsplayer.util.extension.ExtensionsKt.extensionRegisterReceiver
 import com.whisperyao.dsplayer.util.extension.ExtensionsKt.toVisibility
+import com.whisperyao.dsplayer.util.extension.openSettings
 import com.whisperyao.dsplayer.widget.RatingBar
 import io.reactivex.rxjava3.disposables.Disposable
 import java.util.Stack
@@ -578,6 +579,10 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
         }
     }
 
+    protected fun openSettings() {
+        this.openSettings(R.string.type_settings)
+    }
+
     @SuppressLint("GestureBackNavigation")
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -664,6 +669,7 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
     override fun onNavigationDrawerItemSelected(itemId: Int) {
         if (itemId == 0) {
             SynoLog.i("Drawer Callback", "Open Settings")
+            openSettings()
         } else if (this.NAVI_MODE != itemId) {
             val fragmentTransactionBeginTransaction: FragmentTransaction = supportFragmentManager.beginTransaction()
             when (itemId) {

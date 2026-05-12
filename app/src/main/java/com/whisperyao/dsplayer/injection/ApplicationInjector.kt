@@ -5,6 +5,7 @@ import com.whisperyao.dsplayer.injection.module.ApplicationModule
 import com.whisperyao.dsplayer.injection.binding.ActivityBindingModule
 import com.whisperyao.dsplayer.injection.module.ManagerModule
 import com.whisperyao.dsplayer.injection.binding.ContentProviderBindingModule
+import com.whisperyao.dsplayer.injection.binding.FragmentBindingModule
 import com.whisperyao.dsplayer.injection.binding.SupportFragmentBindingModule
 import com.whisperyao.dsplayer.injection.module.NetModule
 import com.whisperyao.dsplayer.injection.module.ServiceBindingModule
@@ -22,6 +23,7 @@ import javax.inject.Singleton
         ActivityBindingModule::class,
         ContentProviderBindingModule::class,
         ServiceBindingModule::class,
+        FragmentBindingModule::class,
         SupportFragmentBindingModule::class,
         ManagerModule::class,
         NetModule::class

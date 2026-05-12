@@ -29,6 +29,7 @@ public class AudioPreference {
     private static final String KEY_LIBRARY_PAGE = "library_page";
     private static final String KEY_LOCAL_PAGE = "local_page";
     public static final String PREFERENCE_ENABLE_EQUALIZER = "enable_equalizer";
+    public static final String PREFERENCE_CATEGORY_SOUND_EFFECT = "category_sound_effect";
     public static final String PREFERENCE_TAP_SONG = "pref_tap_song";
     public static final String PREFERENCE_PERSONAL = "pref_personal_library";
     public static final String PREFERENCE_ENABLE_REMOTE_CONTROLLER = "enable_remote_controller";
@@ -37,7 +38,7 @@ public class AudioPreference {
     public static final String PREFERENCE_TRANSCODE_QUALITY = "pref_transcode_quality";
     public static final String PREFERENCE_SONG_CACHE_LIMIT = "song_cache_limit";
     public static final String PREFERENCE_ANDROIDAUTO_DEFAULT_PLAYLISTS = "pref_androidauto_default_playlists";
-
+    public static final String PREFERENCE_ENABLE_REMOTE_CONTROLLER_DESCRIPTION = "enable_remote_controller_description";
     private static final String PREFERENCE_INFO = "preference_info";
     private static final String PREF_KEY_NAVIPREF = "navigation_preference";
     private static final String PREF_KEY_CATCHPATH = "catchpath";
@@ -50,8 +51,20 @@ public class AudioPreference {
     private static String mCoverPath = null;
     private static int mCoverVer = -1;
 
+    public static SharedPreferences getSharedPreferences() {
+        return App.getContext().getSharedPreferences(DSAUDIO_INFO, 0);
+    }
+
     public static boolean enableAutoDownload() {
         return getSongCacheLimit() != 0;
+    }
+
+    public static void setAutoCacheSize(long cacheByte) {
+        App.getContext().getSharedPreferences(DSAUDIO_INFO, 0).edit().putLong(PREF_SONG_AUTO_CACHE_SIZE, cacheByte).apply();
+    }
+
+    public static void setManualCacheSize(long cacheByte) {
+        App.getContext().getSharedPreferences(DSAUDIO_INFO, 0).edit().putLong(PREF_SONG_MANUAL_CACHE_SIZE, cacheByte).apply();
     }
 
     public static boolean enableEqualizer() {
@@ -61,7 +74,6 @@ public class AudioPreference {
     public static boolean enableRemoteController(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean(PREFERENCE_ENABLE_REMOTE_CONTROLLER, true);
     }
-
 
     public static String getAccount() {
         return BuildConfig.NAS_ACCOUNT;

@@ -85,6 +85,16 @@
             android:launchMode="singleTask"
             android:configChanges="screenSize|orientation|keyboardHidden"/>
 
+        <activity
+            android:theme="@style/PreferencesTheme"
+            android:name="com.whisperyao.dsplayer.ui.settings.DisplayPreferenceActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden"/>
+
+        <activity
+            android:theme="@style/PreferencesTheme"
+            android:name="com.synology.sylibx.ui.documents.activity.DocumentActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden"/>
+
         <service
             android:name="com.whisperyao.dsplayer.mediasession.service.PlaybackService"
             android:exported="true"

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:synology="http://schemas.android.com/apk/res-auto">
+    <PreferenceScreen
+        android:summary="@string/cache_setting_manual_description"
+        synology:iconSpaceReserved="false" />
+    <PreferenceScreen
+        android:key="clear_all_manual_cache"
+        android:title="@string/cache_setting_delete_all_manual_songs"
+        synology:iconSpaceReserved="false" />
+</PreferenceScreen>

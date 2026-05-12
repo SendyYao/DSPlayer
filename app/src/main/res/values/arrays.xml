@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="ApiSearchCategory">
+        <item>@string/category_all</item>
+        <item>@string/category_title</item>
+        <item>@string/category_album</item>
+        <item>@string/category_artist</item>
+        <item>@string/category_genre</item>
+        <item>@string/category_composer</item>
+    </string-array>
+    <string-array name="CacheSizeEntry">
+        <item>@string/use_no_caches</item>
+        <item>200MB</item>
+        <item>500MB</item>
+        <item>1GB</item>
+        <item>2GB</item>
+        <item>5GB</item>
+        <item>10GB</item>
+        <item>@string/cache_no_limit</item>
+    </string-array>
+    <string-array name="CacheSizeEntryValues">
+        <item>0</item>
+        <item>200</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>-1</item>
+    </string-array>
+    <string-array name="Main_Sections">
+        <item>@string/local</item>
+        <item>@string/music_library</item>
+        <item>@string/category_playlist</item>
+        <item>@string/category_radio</item>
+    </string-array>
+    <string-array name="Main_Sections_NoRadio">
+        <item>@string/local</item>
+        <item>@string/music_library</item>
+        <item>@string/category_playlist</item>
+    </string-array>
+    <string-array name="SearchCategory">
+        <item>@string/category_all</item>
+        <item>@string/category_title</item>
+        <item>@string/category_album</item>
+        <item>@string/category_artist</item>
+    </string-array>
+    <string-array name="assume_strong_biometrics_models">
+        <item>Pixel 4</item>
+        <item>Pixel 4 XL</item>
+    </string-array>
+    <array name="crypto_fingerprint_fallback_prefixes" />
+    <string-array name="crypto_fingerprint_fallback_vendors">
+        <item>samsung</item>
+    </string-array>
+    <string-array name="default_androidauto_default_playlists">
+        <item>FAVORITE_RADIO</item>
+        <item>RANDOM100</item>
+        <item>MOSTOFTEN</item>
+        <item>MOSTRECENT</item>
+        <item>RATING4</item>
+        <item>RATING5</item>
+    </string-array>
+    <array name="default_force_transcode" />
+    <string-array name="delay_showing_prompt_models">
+        <item>Pixel 4</item>
+        <item>Pixel 4 XL</item>
+    </string-array>
+    <string-array name="entries_pref_androidauto_default_playlists">
+        <item>@string/str_my_favorate_radio</item>
+        <item>@string/random_100</item>
+        <item>@string/most_often_played</item>
+        <item>@string/most_recent_played</item>
+        <item>@string/rating_4_star</item>
+        <item>@string/rating_5_star</item>
+    </string-array>
+    <string-array name="entries_pref_force_transcode">
+        <item>FLAC</item>
+        <item>OGG</item>
+    </string-array>
+    <string-array name="entries_pref_passcode_expiration">
+        <item>@string/passcode_passcode_expiration_always</item>
+        <item>@string/passcode_passcode_expiration_1min</item>
+        <item>@string/passcode_passcode_expiration_2min</item>
+        <item>@string/passcode_passcode_expiration_5min</item>
+        <item>@string/passcode_passcode_expiration_10min</item>
+        <item>@string/passcode_passcode_expiration_30min</item>
+    </string-array>
+    <string-array name="entries_pref_personal">
+        <item>@string/personal_library_all</item>
+        <item>@string/personal_library_shared</item>
+        <item>@string/personal_library_personal</item>
+    </string-array>
+    <string-array name="entries_pref_tapsong">
+        <item>@string/pref_add_one_song</item>
+        <item>@string/pref_replace_now_playing</item>
+    </string-array>
+    <string-array name="entries_pref_transcode">
+        <item>MP3</item>
+        <item>WAV</item>
+    </string-array>
+    <string-array name="entries_pref_transcode_quality">
+        <item>@string/transcode_quality_high</item>
+        <item>@string/transcode_quality_medium</item>
+        <item>@string/transcode_quality_low</item>
+        <item>@string/transcode_quality_auto</item>
+    </string-array>
+    <string-array name="entry_values_pref_passcode_expiration">
+        <item>ALWAYS</item>
+        <item>MINUTE_1</item>
+        <item>MINUTE_2</item>
+        <item>MINUTE_5</item>
+        <item>MINUTE_10</item>
+        <item>MINUTE_30</item>
+    </string-array>
+    <string-array name="entryvalues_pref_androidauto_default_playlists">
+        <item>FAVORITE_RADIO</item>
+        <item>RANDOM100</item>
+        <item>MOSTOFTEN</item>
+        <item>MOSTRECENT</item>
+        <item>RATING4</item>
+        <item>RATING5</item>
+    </string-array>
+    <string-array name="entryvalues_pref_force_transcode">
+        <item>FLAC</item>
+        <item>OGG</item>
+    </string-array>
+    <string-array name="entryvalues_pref_personal">
+        <item>ALL</item>
+        <item>SHARED</item>
+        <item>PERSONAL</item>
+    </string-array>
+    <string-array name="entryvalues_pref_tapsong">
+        <item>ADD</item>
+        <item>REPLACE</item>
+    </string-array>
+    <string-array name="entryvalues_pref_transcode">
+        <item>MP3</item>
+        <item>WAV</item>
+    </string-array>
+    <string-array name="entryvalues_pref_transcode_quality">
+        <item>HIGH</item>
+        <item>MEDIUM</item>
+        <item>LOW</item>
+        <item>AUTO</item>
+    </string-array>
+    <string-array name="hide_fingerprint_instantly_prefixes">
+        <item>SM-A50</item>
+        <item>SM-G973</item>
+        <item>SM-G975</item>
+        <item>SM-G977</item>
+        <item>SM-G770</item>
+        <item>SM-N970</item>
+        <item>SM-N971</item>
+        <item>SM-N975</item>
+        <item>SM-N976</item>
+        <item>SM-N770</item>
+        <item>SC-03L</item>
+        <item>SC-04L</item>
+        <item>SC-05L</item>
+        <item>SC-01M</item>
+        <item>SCV41</item>
+        <item>SCV42</item>
+        <item>SCV45</item>
+    </string-array>
+</resources>
