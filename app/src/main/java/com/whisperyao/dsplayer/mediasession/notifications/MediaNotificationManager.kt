@@ -20,7 +20,7 @@ import androidx.core.app.NotificationCompat as NCompat
 import androidx.media.app.NotificationCompat
 import androidx.media.session.MediaButtonReceiver
 import com.whisperyao.dsplayer.R
-import com.whisperyao.dsplayer.MainActivity
+import com.whisperyao.dsplayer.activity.HomeActivity
 import com.whisperyao.dsplayer.injection.Constants
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager
 import javax.inject.Inject
@@ -185,7 +185,7 @@ class MediaNotificationManager @Inject constructor(
     }
 
     private fun createContentIntent(): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
 
