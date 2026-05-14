@@ -2,7 +2,6 @@ package com.whisperyao.dsplayer;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,9 +14,10 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import com.whisperyao.dsplayer.databinding.PlayerChooserBinding;
 import com.whisperyao.dsplayer.mediasession.client.MediaBrowserHelper;
@@ -25,9 +25,13 @@ import com.whisperyao.dsplayer.mediasession.service.AbstractMediaBrowserService;
 import com.whisperyao.dsplayer.model.data.PlayingQueueManager;
 import com.whisperyao.dsplayer.playing.Player;
 import com.whisperyao.dsplayer.playing.PlayingStatusManager;
+import com.whisperyao.dsplayer.util.SynoLog;
 // import com.whisperyao.dsplayer.util.firebase.FirebaseAnalyticsUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -58,7 +62,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
     @Inject
     PlayingStatusManager playingStatusManager;
     private Mode mMode = Mode.single;
-    private PlayingStatusManager.PlayerSetObserver mPlayerSetObserver = new PlayingStatusManager.PlayerSetObserver() {
+    private final PlayingStatusManager.PlayerSetObserver mPlayerSetObserver = new PlayingStatusManager.PlayerSetObserver() {
         @Override
         public void onPlayerChange(Player player) {
             PlayerChooserActivity.this.mSelectedPlayer = player;
@@ -67,7 +71,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
 
         @Override
         public void onPlayerSetChanged() {
-            PlayerChooserActivity.this.runOnUiThread((Runnable) () -> onPlayerSetChangedOnUiThread());
+            PlayerChooserActivity.this.runOnUiThread(this::onPlayerSetChangedOnUiThread);
         }
 
         private void onPlayerSetChangedOnUiThread() {
@@ -79,15 +83,18 @@ public class PlayerChooserActivity extends TestRendererActivity {
     };
     private boolean isInitialConnection = true;
 
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
     private enum Mode {
         single,
         group
     }
 
-
     @Override
     public void onCreate(final Bundle state) {
         super.onCreate(state);
+        SynoLog.d(LOG, "classProvider: " + PlayerChooserActivity.this.classProvider);
         PlayerChooserBinding playerChooserBindingInflate = PlayerChooserBinding.inflate(getLayoutInflater());
         setContentView(playerChooserBindingInflate.getRoot());
         initView(playerChooserBindingInflate);
@@ -115,7 +122,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
     }
 
     private void loadPlayers() {
-        this.mPlayerStatusManager.requestLoadPlayers(new PlayingStatusManager.LoadPlayerCallback() { // from class: com.synology.dsaudio.PlayerChooserActivity.2
+        this.mPlayerStatusManager.requestLoadPlayers(new PlayingStatusManager.LoadPlayerCallback() {
             @Override
             public void onPreLoad() {
                 PlayerChooserActivity.this.switchToLoading();
@@ -186,7 +193,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
         this.mButtonLayout.setVisibility(View.VISIBLE);
         GroupPlayerEditorAdapter groupPlayerEditorAdapter = new GroupPlayerEditorAdapter(this, player);
         this.mGroupPlayerEditorAdapter = groupPlayerEditorAdapter;
-        this.mListViewGroup.setAdapter((ListAdapter) groupPlayerEditorAdapter);
+        this.mListViewGroup.setAdapter(groupPlayerEditorAdapter);
         for (int i = 0; i < this.mGroupPlayerEditorAdapter.getCount(); i++) {
             this.mListViewGroup.setItemChecked(i, this.mGroupPlayerEditorAdapter.hasSelected(this.mGroupPlayerEditorAdapter.getItem(i)));
         }
@@ -203,12 +210,11 @@ public class PlayerChooserActivity extends TestRendererActivity {
         if (!this.playingStatusManager.isCurrentPlayer(player)) {
             if (player.getHasPassword() && ConnectionManager.isUseWebAPI()) {
                 testPassword(player);
-                return;
             } else {
                 doChangePlayer(player);
                 doLog();
-                return;
             }
+            return;
         }
         finishAndSetResultOK();
     }
@@ -236,7 +242,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
 
     private void doChangePlayer(Player player) {
         this.mPlayerStatusManager.setPlayer(player);
-        this.mMediaBrowserHelper.getTransportControls().sendCustomAction(AbstractMediaBrowserService.CUSTOM_ACTION_SWITCH_PLAYER, (Bundle) null);
+        this.mMediaBrowserHelper.getTransportControls().sendCustomAction(AbstractMediaBrowserService.CUSTOM_ACTION_SWITCH_PLAYER, null);
         Common.gModeSwitchMode = true;
         Common.gDeviceChanged = false;
         bindService();
@@ -268,7 +274,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
         }
 
         @Override
-        protected void onConnected(MediaControllerCompat mediaController) {
+        protected void onConnected(@NonNull MediaControllerCompat mediaController) {
             if (PlayerChooserActivity.this.isInitialConnection) {
                 PlayerChooserActivity.this.isInitialConnection = false;
             } else {
@@ -288,6 +294,11 @@ public class PlayerChooserActivity extends TestRendererActivity {
         startMediaBrowserConnection();
     }
 
+    private void finishLoading() {
+        performClickBack();
+        loadPlayers();
+    }
+
     private void finishEditGroupPlayer() {
         SparseBooleanArray checkedItemPositions = this.mListViewGroup.getCheckedItemPositions();
         final Player player = this.mGroupPlayerEditorAdapter.getPlayer();
@@ -299,39 +310,26 @@ public class PlayerChooserActivity extends TestRendererActivity {
             }
         }
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected void onPreExecute() {
-                PlayerChooserActivity.this.switchToLoading();
-            }
+        mainHandler.postDelayed(() -> {
 
-            @Override
-            protected Void doInBackground(Void... params) {
-                RemoteController.setGroupPlayer(player.getUniqueId(), arrayList);
-                return null;
-            }
+            switchToLoading();
 
-            @Override
-            protected void onPostExecute(Void result) {
-                PlayerChooserActivity.this.performClickBack();
-                PlayerChooserActivity.this.loadPlayers();
-            }
-
-            @Override
-            protected void onCancelled() {
-                PlayerChooserActivity.this.performClickBack();
-                PlayerChooserActivity.this.loadPlayers();
-            }
-        }.execute(new Void[0]), 300L);
+            executor.execute(() -> {
+                try {
+                    RemoteController.setGroupPlayer(
+                            player.getUniqueId(),
+                            arrayList
+                    );
+                } finally {
+                    mainHandler.post(this::finishLoading);
+                }
+            });
+        }, 300L);
     }
 
 
     void performClickBack() {
-        onBackPressed();
-    }
-
-    @Override
-    public void onBackPressed() {
+        super.onBackPressed();
         if (this.mMode.equals(Mode.single)) {
             finish();
         } else {
@@ -360,8 +358,8 @@ public class PlayerChooserActivity extends TestRendererActivity {
     }
 
     private class SinglePlayerChooserAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
-        private PlayingStatusManager mPlayerStatusManager;
+        private final LayoutInflater mInflater;
+        private final PlayingStatusManager mPlayerStatusManager;
 
         @Override
         public long getItemId(int position) {
@@ -404,7 +402,7 @@ public class PlayerChooserActivity extends TestRendererActivity {
             viewHolder.mLockImageView.setVisibility(item.getHasPassword() ? View.VISIBLE : View.GONE);
             viewHolder.mInfoImageView.setVisibility(item.isGroupPlayer() ? View.VISIBLE : View.GONE);
             viewHolder.mInfoImageView.setOnClickListener(new View.OnClickListener() {
-                private int mIndex;
+                private final int mIndex;
 
                 {
                     this.mIndex = position;
@@ -429,9 +427,9 @@ public class PlayerChooserActivity extends TestRendererActivity {
     }
 
     private class GroupPlayerEditorAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
+        private final LayoutInflater mInflater;
         Player mPlayer;
-        List<Player> mSubPlayers = new ArrayList();
+        List<Player> mSubPlayers = new ArrayList<>();
 
         @Override
         public long getItemId(int position) {

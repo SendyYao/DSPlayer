@@ -5,11 +5,11 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.view.View;
 import android.widget.EditText;
-import androidx.appcompat.app.AppCompatActivity;
 import com.synology.ThreadWork;
 import com.whisperyao.dsplayer.playing.Player;
+import dagger.android.support.DaggerAppCompatActivity;
 
-public abstract class TestRendererActivity extends AppCompatActivity {
+public abstract class TestRendererActivity extends DaggerAppCompatActivity {
     protected abstract void cancelSettingRemotePlayerPassword();
 
     protected abstract void passSettingRemotePlayerPassword(final Player player);

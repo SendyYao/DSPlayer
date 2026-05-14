@@ -1,6 +1,7 @@
 package com.whisperyao.dsplayer.injection.binding
 
 import androidx.appcompat.app.AppCompatActivity
+import com.whisperyao.dsplayer.PlayerChooserActivity
 import com.whisperyao.dsplayer.activity.HomeActivity
 import com.whisperyao.dsplayer.download.TaskActivity
 import com.whisperyao.dsplayer.injection.module.AppCompatActivityModule
@@ -19,6 +20,9 @@ abstract class ActivityBindingModule {
     @ContributesAndroidInjector(modules = [TaskActivityInstanceModule::class])
     abstract fun taskActivity(): TaskActivity
 
+    @ContributesAndroidInjector(modules = [PlayerChooserActivityInstanceModule::class])
+    abstract fun playerChooserActivity(): PlayerChooserActivity
+
     @ContributesAndroidInjector(modules = [DisplayPreferenceActivityInstanceModule::class])
     abstract fun displayPreferenceActivity(): DisplayPreferenceActivity
 
@@ -35,6 +39,14 @@ abstract class ActivityBindingModule {
         @Provides
         fun appCompatActivity(taskActivity: TaskActivity): AppCompatActivity {
             return taskActivity
+        }
+    }
+
+    @Module(includes = [AppCompatActivityModule::class])
+    class PlayerChooserActivityInstanceModule {
+        @Provides
+        fun appCompatActivity(playerChooserActivity: PlayerChooserActivity): AppCompatActivity {
+            return playerChooserActivity
         }
     }
 

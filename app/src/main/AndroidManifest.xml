@@ -91,6 +91,12 @@
             android:configChanges="screenSize|orientation|keyboardHidden"/>
 
         <activity
+            android:theme="@style/AppDialog"
+            android:name="com.whisperyao.dsplayer.PlayerChooserActivity"
+            android:exported="false"
+            android:configChanges="screenSize|orientation"/>
+
+        <activity
             android:theme="@style/PreferencesTheme"
             android:name="com.synology.sylibx.ui.documents.activity.DocumentActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"/>
