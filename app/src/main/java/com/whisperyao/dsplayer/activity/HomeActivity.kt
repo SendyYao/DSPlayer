@@ -197,11 +197,11 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
     override fun onStart() {
         super.onStart()
         val intentFilter = IntentFilter()
-        intentFilter.addAction(ServiceOperator.PLAYSTATE_CHANGED);
-        intentFilter.addAction(ServiceOperator.META_CHANGED);
-        intentFilter.addAction(ServiceOperator.PREPARE_CHANGED);
-        intentFilter.addAction(ServiceOperator.ERR_DEVICE_NOT_FOUND);
-        intentFilter.addAction(ServiceOperator.ERR_SESSION_ENDED);
+        intentFilter.addAction(ServiceOperator.PLAYSTATE_CHANGED)
+        intentFilter.addAction(ServiceOperator.META_CHANGED)
+        intentFilter.addAction(ServiceOperator.PREPARE_CHANGED)
+        intentFilter.addAction(ServiceOperator.ERR_DEVICE_NOT_FOUND)
+        intentFilter.addAction(ServiceOperator.ERR_SESSION_ENDED)
         this.extensionRegisterReceiver(this.statusListener, IntentFilter(intentFilter), false)
         mPlayerControlHelper.updateAll()
         mPlayerControlHelper.startPollingIfNeeded()
@@ -702,7 +702,7 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
                 4 -> {
                     SynoLog.i("Drawer Callback", "Radio")
                     tab.visibility = View.GONE
-                    this.mRadioFrag = ContentFragment.newInstance(true, Common.ContainerType.RADIO_MODE, this);
+                    this.mRadioFrag = ContentFragment.newInstance(true, Common.ContainerType.RADIO_MODE, this)
                     fragmentTransactionBeginTransaction.replace(R.id.content, this.mRadioFrag as Fragment)
                 }
 
@@ -858,7 +858,7 @@ class HomeActivity : BaseActivity(), ContentFragment.ContentCallback, BaseActivi
     override fun onResume() {
         // App.isMainActivityFirstLaunched() && !permissionGranted() && AudioPreference.enableAutoDownload()
         if (!permissionGranted() && AudioPreference.enableAutoDownload()) {
-            showHintsThenAskPermission();
+            showHintsThenAskPermission()
         }
         if (Common.gDeviceChanged) {
             if (Common.isLogin()) {

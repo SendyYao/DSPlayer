@@ -259,4 +259,10 @@
         <item name="android:textSize">14.0sp</item>
         <item name="android:textColor">@color/text_description_over_dark</item>
     </style>
+    <style name="Base.UiDoc.ContactSupportDialogTheme" parent="@style/Theme.MaterialComponents.DayNight.Dialog.Alert" />
+    <style name="UiDoc.ContactSupportDialogTheme" parent="@style/Base.UiDoc.ContactSupportDialogTheme">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+    </style>
 </resources>

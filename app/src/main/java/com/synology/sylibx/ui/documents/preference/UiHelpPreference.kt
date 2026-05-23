@@ -12,25 +12,22 @@ class UiHelpPreference @JvmOverloads constructor(
 ) : Preference(context, attrs) {
 
     init {
-        // R.styleable.UiHelpPreference
         val typedArray = context.obtainStyledAttributes(
             attrs,
-            intArrayOf(R.attr.algorithmicDarkening, R.attr.applyPrefersColorScheme),
+            R.styleable.UiHelpPreference,
             0,
             0
         )
 
-        // R.styleable.UiHelpPreference_algorithmicDarkening
         val enableAlgorithmicDarkening =
             typedArray.getBoolean(
-                0,
+                R.styleable.UiHelpPreference_algorithmicDarkening,
                 true
             )
 
-        // R.styleable.UiHelpPreference_applyPrefersColorScheme
         val applyPrefersColorScheme =
             typedArray.getBoolean(
-                1,
+                R.styleable.UiHelpPreference_applyPrefersColorScheme,
                 true
             )
 

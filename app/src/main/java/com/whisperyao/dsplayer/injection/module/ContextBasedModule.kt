@@ -12,7 +12,6 @@ import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.PowerManager
 import android.view.inputmethod.InputMethodManager
-import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.whisperyao.dsplayer.R
 import com.whisperyao.dsplayer.injection.Constants
@@ -20,7 +19,7 @@ import com.whisperyao.dsplayer.injection.qualifier.ApplicationContext
 import com.whisperyao.dsplayer.injection.qualifier.Default
 import com.whisperyao.dsplayer.util.CoverUtil
 //import com.whisperyao.dsplayer.util.firebase.FirebaseAnalyticsUtil
-import com.whisperyao.dsplayer.util.DeviceUtil
+import com.synology.sylib.util.DeviceUtil
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Named;

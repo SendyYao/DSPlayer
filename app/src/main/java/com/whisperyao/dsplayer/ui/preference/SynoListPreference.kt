@@ -5,26 +5,24 @@ import android.util.AttributeSet
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceManager
 import com.whisperyao.dsplayer.R
+import androidx.core.content.withStyledAttributes
 
 class SynoListPreference(
     context: Context,
     attrs: AttributeSet?
 ) : ListPreference(context, attrs) {
 
-    private val summaryFormat: String?
+    private var summaryFormat: String? = null
 
     init {
-        // R.styleable.SynoMultiSelectListPreference
-        val typedArray = context.obtainStyledAttributes(
+        context.withStyledAttributes(
             attrs,
-            intArrayOf(R.attr.summaryRes),
+            R.styleable.SynoMultiSelectListPreference,
             0,
             0
-        )
-
-        summaryFormat = typedArray.getString(0)
-
-        typedArray.recycle()
+        ) {
+            summaryFormat = getString(0)
+        }
     }
 
     override fun onAttachedToHierarchy(preferenceManager: PreferenceManager) {

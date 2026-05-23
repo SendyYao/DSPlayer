@@ -5,28 +5,25 @@ import android.util.AttributeSet
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.PreferenceManager
 import com.whisperyao.dsplayer.R
+import androidx.core.content.withStyledAttributes
 
 class SynoMultiSelectListPreference @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : MultiSelectListPreference(context, attrs) {
 
-    private val summaryFormat: String?
+    private var summaryFormat: String? = null
 
     init {
 
-        // R.styleable.SynoMultiSelectListPreference
-        val typedArray = context.obtainStyledAttributes(
+        context.withStyledAttributes(
             attrs,
-            intArrayOf(R.attr.summaryRes),
+            R.styleable.SynoMultiSelectListPreference,
             0,
             0
-        )
-
-        summaryFormat =
-            typedArray.getString(0)
-
-        typedArray.recycle()
+        ) {
+            summaryFormat = getString(0)
+        }
     }
 
     override fun onAttachedToHierarchy(

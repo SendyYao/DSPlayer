@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import androidx.preference.TwoStatePreference
 import com.whisperyao.dsplayer.R
@@ -36,7 +35,7 @@ class LoginLogoutPreference @JvmOverloads constructor(
             context.getString(R.string.logout_title)
 
         onPreferenceClickListener =
-            Preference.OnPreferenceClickListener {
+            OnPreferenceClickListener {
 
                 if (isChecked) {
 

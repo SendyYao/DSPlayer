@@ -67,7 +67,7 @@ class VersionPreference @JvmOverloads constructor(
                 versionCode
             )
 
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
 
             Log.e(
                 TAG,

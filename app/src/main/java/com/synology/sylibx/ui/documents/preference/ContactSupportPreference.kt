@@ -1,47 +1,56 @@
 package com.synology.sylibx.ui.documents.preference
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.util.AttributeSet
-import androidx.preference.Preference
-import com.synology.sylibx.ui.documents.activity.DocumentActivity
+import androidx.appcompat.app.AlertDialog
+import androidx.preference.ListPreference
+import com.synology.sylibx.ui.documents.util.ContactSupportUtil
 import com.whisperyao.dsplayer.R
 
-class ContactSupportPreference @JvmOverloads constructor(
+class ContactSupportPreference(
     context: Context,
-    attrs: AttributeSet? = null
-) : Preference(context, attrs) {
+    attributeSet: AttributeSet?
+) : ListPreference(context, attributeSet) {
 
     init {
-        // R.styleable.UiHelpPreference
-        val typedArray = context.obtainStyledAttributes(
-            attrs,
-            intArrayOf(R.attr.algorithmicDarkening, R.attr.applyPrefersColorScheme),
-            0,
-            0
-        )
+        title = context.getString(R.string.ui_doc_contact_support)
+        negativeButtonText = ""
+    }
 
-        // R.styleable.UiHelpPreference_algorithmicDarkening,
-        val enableAlgorithmicDarkening =
-            typedArray.getBoolean(
-                0,
-                true
+    override fun onClick() {
+        val ctx = context
+
+        AlertDialog.Builder(ctx, R.style.UiDoc_ContactSupportDialogTheme)
+            .setTitle(R.string.ui_doc_contact_support)
+            .setMessage(R.string.ui_doc_contact_support_title)
+            .setPositiveButton(R.string.ui_doc_location_global) { _, _ ->
+                startSupportActivity(
+                    ctx,
+                    ContactSupportUtil.Region.GLOBAL
+                )
+            }
+            .setNegativeButton(R.string.ui_doc_location_china) { _, _ ->
+                startSupportActivity(
+                    ctx,
+                    ContactSupportUtil.Region.CHINA
+                )
+            }
+            .show()
+    }
+
+    private fun startSupportActivity(
+        context: Context,
+        region: ContactSupportUtil.Region
+    ) {
+        try {
+            context.startActivity(
+                ContactSupportUtil.getContactSupportIntent(
+                    context,
+                    region
+                )
             )
-
-        // R.styleable.UiHelpPreference_applyPrefersColorScheme
-        val applyPrefersColorScheme =
-            typedArray.getBoolean(
-                1,
-                true
-            )
-
-        typedArray.recycle()
-
-        intent = DocumentActivity.generateHelpIntent(
-            context,
-            enableAlgorithmicDarkening,
-            applyPrefersColorScheme
-        )
-
-        title = context.getString(R.string.str_help)
+        } catch (_: ActivityNotFoundException) {
+        }
     }
 }

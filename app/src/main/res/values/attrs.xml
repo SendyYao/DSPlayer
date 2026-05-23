@@ -22,4 +22,14 @@
     <attr name="summaryRes" format="string" />
     <attr name="algorithmicDarkening" format="boolean" />
     <attr name="applyPrefersColorScheme" format="boolean" />
+
+    <declare-styleable name="UiHelpPreference">
+        <attr name="algorithmicDarkening" />
+        <attr name="applyPrefersColorScheme" />
+    </declare-styleable>
+
+    <declare-styleable name="SynoMultiSelectListPreference">
+        <attr name="summaryRes" />
+    </declare-styleable>
+
 </resources>

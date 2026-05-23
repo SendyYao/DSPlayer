@@ -374,11 +374,11 @@ public class DatabaseAccesser {
         if (cursorQuery.moveToFirst()) {
             do {
                 try {
-                    String string5 = cursorQuery.getString(cursorQuery.getColumnIndex("album"));
-                    String string6 = cursorQuery.getString(cursorQuery.getColumnIndex("artist"));
-                    String string7 = cursorQuery.getString(cursorQuery.getColumnIndex("album_artist"));
-                    int i = cursorQuery.getInt(cursorQuery.getColumnIndex("COUNT(distinct artist)"));
-                    float f = cursorQuery.getFloat(cursorQuery.getColumnIndex("AVG(rating)"));
+                    String string5 = cursorQuery.getString(cursorQuery.getColumnIndexOrThrow("album"));
+                    String string6 = cursorQuery.getString(cursorQuery.getColumnIndexOrThrow("artist"));
+                    String string7 = cursorQuery.getString(cursorQuery.getColumnIndexOrThrow("album_artist"));
+                    int i = cursorQuery.getInt(cursorQuery.getColumnIndexOrThrow("COUNT(distinct artist)"));
+                    float f = cursorQuery.getFloat(cursorQuery.getColumnIndexOrThrow("AVG(rating)"));
                     JSONObject jSONObject = new JSONObject();
                     jSONObject.put("name", string5);
                     jSONObject.put("album_artist", string7);
@@ -441,7 +441,7 @@ public class DatabaseAccesser {
         }
         if (cursorQuery.moveToFirst()) {
             do {
-                String string2 = cursorQuery.getString(cursorQuery.getColumnIndex("album_artist"));
+                String string2 = cursorQuery.getString(cursorQuery.getColumnIndexOrThrow("album_artist"));
                 if (!arrayList.contains(string2)) {
                     arrayList.add(string2);
                 }
@@ -453,7 +453,7 @@ public class DatabaseAccesser {
         }
         if (cursorQuery2.moveToFirst()) {
             do {
-                String string3 = cursorQuery2.getString(cursorQuery2.getColumnIndex("artist"));
+                String string3 = cursorQuery2.getString(cursorQuery2.getColumnIndexOrThrow("artist"));
                 if (!arrayList.contains(string3)) {
                     arrayList.add(string3);
                 }
@@ -510,7 +510,7 @@ public class DatabaseAccesser {
             do {
                 try {
                     JSONObject jSONObject = new JSONObject();
-                    jSONObject.put("name", cursorQuery.getString(cursorQuery.getColumnIndex(str)));
+                    jSONObject.put("name", cursorQuery.getString(cursorQuery.getColumnIndexOrThrow(str)));
                     jSONArray.put(jSONObject);
                 } catch (JSONException e) {
                     e.printStackTrace();

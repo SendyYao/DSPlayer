@@ -2,8 +2,8 @@ package com.whisperyao.dsplayer.ui.preference
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.util.AttributeSet
+import androidx.core.net.toUri
 import androidx.preference.Preference
 import com.whisperyao.dsplayer.R
 
@@ -22,9 +22,7 @@ class PrivacyPreference @JvmOverloads constructor(
 
         intent = Intent(
             Intent.ACTION_VIEW,
-            Uri.parse(
-                context.getString(R.string.privacy_url)
-            )
+            context.getString(R.string.privacy_url).toUri()
         )
 
         title = context.getString(
