@@ -15,7 +15,6 @@ import com.google.gson.Gson
 import com.google.gson.stream.JsonReader
 import com.whisperyao.dsplayer.App.Companion.connectionManager
 import com.whisperyao.dsplayer.activity.HomeActivity
-import com.whisperyao.dsplayer.activity.SongListActivity
 import com.whisperyao.dsplayer.datasource.network.api.SynoApiInfo
 import com.whisperyao.dsplayer.datasource.network.exception.ApiException
 import com.whisperyao.dsplayer.datasource.network.exception.NotSupportApiLoginException
@@ -46,6 +45,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_login)
 
+        val needSkipLoginCheck = true
+
         val etAddress = findViewById<EditText>(R.id.etAddress)
         val etAccount = findViewById<EditText>(R.id.etAccount)
         val etPassword = findViewById<EditText>(R.id.etPassword)
@@ -60,16 +61,12 @@ class MainActivity : ComponentActivity() {
             val password = etPassword.text.toString().trim()
             val useHttps = switchHttps.isChecked
 
-            // if (isInputValid(baseUrl, account, password)) return@setOnClickListener
-            // enterSongList(baseUrl, account, password, useHttps)
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                doSetAudioInfo()
+            if (!needSkipLoginCheck) {
+                if (isInputValid(baseUrl, account, password)) return@setOnClickListener
+                checkOtp(baseUrl, account, password, useHttps)
+            } else {
+                enterHome()
             }
-
-            Toast.makeText(this@MainActivity, "Login Success & setKnownAPIs", Toast.LENGTH_SHORT).show()
-
-            startActivity(Intent(this@MainActivity, HomeActivity::class.java))
         }
     }
 
@@ -81,9 +78,14 @@ class MainActivity : ComponentActivity() {
         return false
     }
 
-    private fun enterSongList(baseUrl: String, account: String, password: String, useHttps: Boolean) {
+    private fun checkOtp(baseUrl: String, account: String, password: String, useHttps: Boolean) {
         login(baseUrl, account, password, useHttps) { success, response ->
             runOnUiThread {
+                if (response == null) {
+                    Log.e("LOGIN", "response is null")
+                    return@runOnUiThread
+                }
+
                 val json = JSONObject(response)
 
                 if (!json.getBoolean("success")) {
@@ -99,13 +101,21 @@ class MainActivity : ComponentActivity() {
                 }
                 if (success) {
                     Log.d("LOGIN", "Success: $response")
+                    enterHome()
                 } else {
                     Log.e("LOGIN", "Fail: $response")
                 }
             }
         }
-        startActivity(Intent(this, SongListActivity::class.java))
+    }
 
+    private fun enterHome() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            doSetAudioInfo()
+        }
+
+        Toast.makeText(this@MainActivity, "Login Success & setKnownAPIs", Toast.LENGTH_SHORT).show()
+        startActivity(Intent(this@MainActivity, HomeActivity::class.java))
     }
 
     fun login(baseUrl: String, account: String, password: String, useHttps: Boolean, callback: (Boolean, String?) -> Unit) {
@@ -172,7 +182,7 @@ class MainActivity : ComponentActivity() {
                             Toast.makeText(this@MainActivity, "Login Success", Toast.LENGTH_SHORT)
                                 .show()
 
-                            startActivity(Intent(this@MainActivity, SongListActivity::class.java))
+                            startActivity(Intent(this@MainActivity, HomeActivity::class.java))
                         } else {
                             Toast.makeText(this@MainActivity, "OTP Failed", Toast.LENGTH_SHORT)
                                 .show()
