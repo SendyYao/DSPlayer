@@ -25,7 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ServiceLifecycleDispatcher
 import androidx.media.MediaBrowserServiceCompat
 import com.synology.sylibx.passcode.PassCodeObserver
-import com.synology.sylibx.synofile.ExtensionsKt.registerReceiverCompat
+import com.synology.sylibx.synofile.Extensions.registerReceiverCompat
 import com.whisperyao.dsplayer.mediasession.MediaButtonReceiver
 import com.whisperyao.dsplayer.AudioFocusManager
 import com.whisperyao.dsplayer.Common

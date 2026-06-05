@@ -51,7 +51,6 @@ public class Utilities {
         return String.format("%d:%02d:%02d", i4, i3, i);
     }
 
-
     public static String escapeIdForUrl(String id) {
         return URLEncoder.encode(id);
     }
@@ -70,7 +69,6 @@ public class Utilities {
         }
         return StringUtils.join(arrayList, ",");
     }
-
 
     public static String getExt(final String filename) {
         int iLastIndexOf = filename.lastIndexOf(".");
@@ -125,7 +123,6 @@ public class Utilities {
         }
     }
 
-
     public static boolean isSDCardFull() {
         if (!Environment.getExternalStorageState().equals("mounted")) {
             return true;
@@ -147,16 +144,17 @@ public class Utilities {
         return false;
     }
 
-
     public static void subCacheByte(SongItem song) {
         String cachePath = song.getCachePath();
+        long songCacheSize = new File(cachePath).length();
+        SynoLog.d(LOG, "subCacheByte -> songCachePath: " + cachePath + " songCacheSize: " + songCacheSize);
         if (TextUtils.isEmpty(cachePath)) {
             return;
         }
         if (song.getDownloadType() == 1) {
-            AudioPreference.subAutoCacheByte(new File(cachePath).length());
+            AudioPreference.subAutoCacheByte(songCacheSize);
         } else if (song.getDownloadType() == 2) {
-            AudioPreference.subManualCacheByte(new File(cachePath).length());
+            AudioPreference.subManualCacheByte(songCacheSize);
         }
     }
 
@@ -202,7 +200,6 @@ public class Utilities {
         return isAAC(songItem) && (!isSupportCodec(songItem) ? !isBitrateALAC(songItem.getBitrate()) : !isCodecALAC(songItem));
     }
 
-
     public static boolean isStreamAudio(SongItem song, boolean isForChromecast) {
         String lowerCase = song.getFilePath().toLowerCase(Locale.getDefault());
         long frequency = song.getFrequency();
@@ -226,7 +223,6 @@ public class Utilities {
         }
         return false;
     }
-
 
     public static String getMD5Code(String input) {
         try {
@@ -274,7 +270,6 @@ public class Utilities {
         SongItem songItemQuerySong = DatabaseAccesser.getInstance().querySong(song);
         return songItemQuerySong == null || songItemQuerySong.getDownloadType() == 2;
     }
-
 
     public static boolean checkPathAvailable(String path) {
         if (TextUtils.isEmpty(path)) {
@@ -413,11 +408,11 @@ public class Utilities {
             manualCacheSize = AudioPreference.getManualCacheSize();
         }
         String string = resources.getString(R.string.songs_count, songCount);
+        SynoLog.d(LOG, "getCacheSettingString: cacheSize: " + manualCacheSize + " downloadType: " + downloadType);
         if (manualCacheSize <= 0) {
             return resources.getString(R.string.none);
         }
         return FileUtils.byteCountToDisplaySize(manualCacheSize, 3) + " / " + string;
     }
-
 
 }

@@ -10,8 +10,7 @@ import android.text.Spanned
 import android.text.style.URLSpan
 import android.util.Size
 import android.view.WindowManager
-import com.synology.sylibx.synofile.ExtensionsKt
-import com.synology.sylibx.synofile.ExtensionsKt.registerReceiverCompat
+import com.synology.sylibx.synofile.Extensions.registerReceiverCompat
 
 object Utils {
 

@@ -7,7 +7,7 @@ import com.synology.sylib.utilities.contextprovider.SynoContextProvider
 import java.io.File
 import android.os.ParcelFileDescriptor
 import android.webkit.MimeTypeMap
-import com.synology.sylibx.synofile.ExtensionsKt.getValidFile
+import com.synology.sylibx.synofile.Extensions.getValidFile
 import com.whisperyao.dsplayer.util.SynoLog
 import java.io.*
 import java.nio.file.Files

@@ -10,9 +10,9 @@ import android.provider.DocumentsContract
 import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import com.synology.sylib.utilities.contextprovider.SynoContextProvider
-import com.synology.sylibx.synofile.ExtensionsKt.copyRecursivelySyno
-import com.synology.sylibx.synofile.ExtensionsKt.getValidFile
-import com.synology.sylibx.synofile.ExtensionsKt.isUnderPath
+import com.synology.sylibx.synofile.Extensions.copyRecursivelySyno
+import com.synology.sylibx.synofile.Extensions.getValidFile
+import com.synology.sylibx.synofile.Extensions.isUnderPath
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException

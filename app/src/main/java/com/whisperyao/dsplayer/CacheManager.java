@@ -315,12 +315,15 @@ public class CacheManager {
         long songCacheLimit = AudioPreference.getSongCacheLimit();
         long autoCacheSize = AudioPreference.getAutoCacheSize();
         SynoLog.d(LOG, "[rotateSong]\ncacheSongSize = " + (autoCacheSize / 1024) + "KB\n limit = " + (songCacheLimit / 1024) + "KB\n free = " + ((songCacheLimit - autoCacheSize) / 1024) + "KB\n needByte = " + (needByte / 1024) + "KB");
+        SynoLog.d(LOG, "songCacheLimit: " + songCacheLimit + " needByte: " + needByte);
         if (songCacheLimit >= 0 && songCacheLimit < needByte) {
             return false;
         }
         DatabaseAccesser databaseAccesser = DatabaseAccesser.getInstance();
+        SynoLog.d(LOG, "isSDCardFull: " + Utilities.isSDCardFull() + " or condition" + (0 <= songCacheLimit && songCacheLimit - autoCacheSize < needByte));
         while (Utilities.isSDCardFull() || (0 <= songCacheLimit && songCacheLimit - autoCacheSize < needByte)) {
             SongItem[] songItemArrDoEnumRotateCandidate = databaseAccesser.doEnumRotateCandidate();
+            SynoLog.d(LOG, "songItemArrDoEnumRotateCandidate.length: " + songItemArrDoEnumRotateCandidate.length);
             if (songItemArrDoEnumRotateCandidate.length == 0) {
                 databaseAccesser.close();
                 return false;

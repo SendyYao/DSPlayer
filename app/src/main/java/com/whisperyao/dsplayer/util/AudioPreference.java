@@ -296,6 +296,7 @@ public class AudioPreference {
     }
 
     public static void addAutoCacheByte(long addByte) {
+        SynoLog.d(LOG, "addAutoCacheByte: " + addByte);
         App.getContext().getSharedPreferences(DSAUDIO_INFO, 0).edit().putLong(PREF_SONG_AUTO_CACHE_SIZE, getAutoCacheSize() + addByte).apply();
     }
 
@@ -309,6 +310,7 @@ public class AudioPreference {
     }
 
     public static void subAutoCacheByte(long subByte) {
+        SynoLog.d(LOG, "subAutoCacheByte: " + subByte);
         App.getContext().getSharedPreferences(DSAUDIO_INFO, 0).edit().putLong(PREF_SONG_AUTO_CACHE_SIZE, getAutoCacheSize() - subByte).apply();
     }
 

@@ -3,7 +3,7 @@ package com.whisperyao.dsplayer.proxy
 import android.content.Context
 import com.synology.sylib.util.IOUtils
 import com.synology.sylib.util.NetworkUtils
-import com.synology.sylibx.synofile.ExtensionsKt.getProperFile
+import com.synology.sylibx.synofile.Extensions.getProperFile
 import com.synology.sylibx.synofile.SAFUtils
 import com.synology.sylibx.synofile.SynoFile
 import com.whisperyao.dsplayer.CacheManager
@@ -197,6 +197,7 @@ class PreDownloader(
                     "$name.$ext"
                 ).path
                 val properFile = utilities.getProperFile(path2)
+                SynoLog.d("PreDownloader", "path2: $path2, properFile: ${properFile.path}")
                 this.dstFile = properFile
 
                 if (properFile == null) {

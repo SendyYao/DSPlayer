@@ -51,8 +51,8 @@ import com.whisperyao.dsplayer.playing.PlayerControlHelper
 import com.whisperyao.dsplayer.playing.PlayingStatusManager
 import com.whisperyao.dsplayer.util.AudioPreference
 import com.whisperyao.dsplayer.util.SynoLog
-import com.whisperyao.dsplayer.util.extension.ExtensionsKt.extensionRegisterReceiver
-import com.whisperyao.dsplayer.util.extension.ExtensionsKt.toVisibility
+import com.whisperyao.dsplayer.util.extension.Extensions.extensionRegisterReceiver
+import com.whisperyao.dsplayer.util.extension.Extensions.toVisibility
 import com.whisperyao.dsplayer.util.extension.openSettings
 import com.whisperyao.dsplayer.widget.RatingBar
 import io.reactivex.rxjava3.disposables.Disposable

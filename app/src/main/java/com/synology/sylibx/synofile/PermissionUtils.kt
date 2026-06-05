@@ -13,8 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.synology.sylib.utilities.activityinterceptor.ActivityInterceptor
 import com.synology.sylib.utilities.contextprovider.SynoContextProvider
-import com.synology.sylibx.synofile.ExtensionsKt.hasPermission
-import com.synology.sylibx.synofile.TakePermissionActivity
+import com.synology.sylibx.synofile.Extensions.hasPermission
 import com.whisperyao.dsplayer.R
 import java.io.File
 import kotlin.Unit
@@ -134,7 +133,7 @@ object PermissionUtils {
         return try {
             SynoContextProvider.get()
                 .contentResolver
-                .takePersistableUriPermission(uri, 3)
+                .takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             true
         } catch (e: SecurityException) {
             false

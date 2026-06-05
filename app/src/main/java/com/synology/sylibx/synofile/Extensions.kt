@@ -12,7 +12,7 @@ import java.io.File
 import java.io.IOException
 
 
-object ExtensionsKt {
+object Extensions {
 
     fun <K, V> Map<K, V>.getOrDefaultExt(k: K, v: V): V {
         val v2 = this[k]
@@ -95,7 +95,7 @@ object ExtensionsKt {
                 .requestedPermissions
 
             strArr?.contains(permission) == true
-        } catch (e: PackageManager.NameNotFoundException) {
+        } catch (_: PackageManager.NameNotFoundException) {
             false
         }
     }
@@ -122,8 +122,8 @@ object ExtensionsKt {
     @Throws(IOException::class)
     fun SynoFile.copyToSyno(
         target: SynoFile,
-        z: Boolean = false,
-        i: Int = 8192
+        overwrite: Boolean = false,
+        bufferSize: Int = DEFAULT_BUFFER_SIZE
     ): SynoFile {
         if (!exists()) {
             throw NoSuchFileException(
@@ -133,7 +133,7 @@ object ExtensionsKt {
         }
 
         if (target.exists()) {
-            if (!z) {
+            if (!overwrite) {
                 throw FileAlreadyExistsException(
                     this,
                     target,
@@ -182,7 +182,7 @@ object ExtensionsKt {
 
             inputStream.use { input ->
                 outputStream.use { output ->
-                    input.copyTo(output, i)
+                    input.copyTo(output, bufferSize)
                 }
             }
         }
@@ -192,7 +192,7 @@ object ExtensionsKt {
 
     fun SynoFile.copyRecursivelySyno(
         target: File,
-        z: Boolean = false,
+        overwrite: Boolean = false,
         onError: (File, IOException) -> OnErrorAction = { _, exception ->
             throw exception
         }
@@ -217,8 +217,7 @@ object ExtensionsKt {
                 .iterator()
 
             while (it.hasNext()) {
-                val synoFileProvideSynoFile =
-                    ObjectProvider.provideSynoFile(it.next())
+                val synoFileProvideSynoFile = provideSynoFile(it.next())
 
                 if (!synoFileProvideSynoFile.exists()) {
                     if (
@@ -233,13 +232,12 @@ object ExtensionsKt {
                         return false
                     }
                 } else {
-                    val relativeString =
-                        synoFileProvideSynoFile.relativeTo(this).path
+                    val relativeString = synoFileProvideSynoFile.toRelativeString(this)
 
                     val path = target.path
 
-                    val synoFileProvideSynoFile2 =
-                        provideSynoFile(path, relativeString)
+                    val synoFileProvideSynoFile2 = provideSynoFile(path, relativeString)
+                    SynoLog.e("Extensions", "SynoFile1.path: ${synoFileProvideSynoFile.path}, SynoFile2.path: ${synoFileProvideSynoFile2.path}")
 
                     if (
                         synoFileProvideSynoFile2.exists() &&
@@ -248,7 +246,7 @@ object ExtensionsKt {
                                         !synoFileProvideSynoFile2.isDirectory
                                 )
                     ) {
-                        if (z) {
+                        if (overwrite) {
                             if (synoFileProvideSynoFile2.isDirectory) {
                                 synoFileProvideSynoFile2.deleteRecursively()
                             } else {
@@ -273,9 +271,8 @@ object ExtensionsKt {
                     if (synoFileProvideSynoFile.isDirectory) {
                         synoFileProvideSynoFile2.mkdirs()
                     } else if (
-                        synoFileProvideSynoFile
-                            .copyToSyno(synoFileProvideSynoFile2, z)
-                            .length() != synoFileProvideSynoFile.length()
+                        synoFileProvideSynoFile.copyToSyno(synoFileProvideSynoFile2, overwrite).length()
+                        != synoFileProvideSynoFile.length()
                     ) {
                         if (
                             onError(
@@ -292,7 +289,7 @@ object ExtensionsKt {
             }
 
             true
-        } catch (e: TerminateException) {
+        } catch (_: TerminateException) {
             false
         }
     }
