@@ -32,7 +32,7 @@ import com.whisperyao.dsplayer.util.StoragePermissionHelper
 import com.whisperyao.dsplayer.util.SynoLog
 import com.whisperyao.dsplayer.util.Utilities
 import com.whisperyao.dsplayer.util.extension.openSettings
-import com.whisperyao.dsplayer.util.extension.ExtensionsKt.removePreference
+import com.whisperyao.dsplayer.util.extension.Extensions.removePreference
 import javax.inject.Inject
 
 class SettingsFragment : BasePreferenceFragment(),
@@ -160,6 +160,7 @@ class SettingsFragment : BasePreferenceFragment(),
         updateCacheSize()
         refreshCachePath()
 
+        SynoLog.d("SettingsFragment", "cachePathPref: ${cachePathPref?.summary}, cacheAutoSizePref: ${cacheAutoSizePref?.key}")
         cachePathPref?.setOnPreferenceClickListener {
 
             if (
@@ -505,10 +506,12 @@ class SettingsFragment : BasePreferenceFragment(),
 
             AudioPreference.PREF_SONG_MANUAL_CACHE_SIZE,
             AudioPreference.PREF_SONG_AUTO_CACHE_SIZE -> {
+                SynoLog.d("updateCacheSize", "updateCacheSize in onSharedPreferenceChanged")
                 updateCacheSize()
             }
 
             KEY_CACHE_PATH -> {
+                SynoLog.d("SettingsFragment", "refreshCachePath in onSharedPreferenceChanged")
                 refreshCachePath()
             }
         }

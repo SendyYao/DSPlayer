@@ -19,7 +19,6 @@ import com.synology.sylibx.synofile.SynoFile;
 import com.whisperyao.dsplayer.CacheManager;
 import com.whisperyao.dsplayer.Common;
 import com.whisperyao.dsplayer.ConnectionManager;
-import com.whisperyao.dsplayer.activity.SongListActivity;
 import com.whisperyao.dsplayer.injection.Constants;
 import com.whisperyao.dsplayer.injection.qualifier.ApplicationContext;
 import com.whisperyao.dsplayer.item.SongItem;
@@ -378,7 +377,7 @@ public class DownloadService extends DaggerService {
     private void showNotification(String name) {
         Intent intent = new Intent(this, TaskActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        this.mBuilder.setContentText(name).setContentIntent(PendingIntent.getActivity(this, 0, intent, 201326592));
+        this.mBuilder.setContentText(name).setContentIntent(PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         this.mNotificationManager.notify(NOTIFICATION_ID, this.mBuilder.build());
     }
 

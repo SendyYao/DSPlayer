@@ -3,7 +3,6 @@ package com.whisperyao.dsplayer.proxy
 import android.content.Context
 import com.synology.sylib.util.IOUtils
 import com.synology.sylib.util.NetworkUtils
-import com.synology.sylibx.synofile.Extensions.getProperFile
 import com.synology.sylibx.synofile.SAFUtils
 import com.synology.sylibx.synofile.SynoFile
 import com.whisperyao.dsplayer.CacheManager
@@ -14,6 +13,7 @@ import com.whisperyao.dsplayer.provider.DatabaseAccesser
 import com.whisperyao.dsplayer.util.AudioPreference
 import com.whisperyao.dsplayer.util.SynoLog
 import com.whisperyao.dsplayer.util.Utilities
+import com.whisperyao.dsplayer.util.extension.Extensions.getProperFile
 import okhttp3.Call
 import okhttp3.Headers
 import okhttp3.Request

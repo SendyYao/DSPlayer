@@ -12,7 +12,7 @@ import com.whisperyao.dsplayer.R
 import com.whisperyao.dsplayer.provider.DatabaseAccesser
 import com.whisperyao.dsplayer.ui.BasePreferenceFragment
 import com.whisperyao.dsplayer.util.AudioPreference
-import com.whisperyao.dsplayer.util.extension.ExtensionsKt.safeDismiss
+import com.whisperyao.dsplayer.util.extension.Extensions.safeDismiss
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

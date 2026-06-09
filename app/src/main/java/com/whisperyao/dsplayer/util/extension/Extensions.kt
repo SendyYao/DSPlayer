@@ -1,27 +1,28 @@
 package com.whisperyao.dsplayer.util.extension
 
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.IntentFilter;
-import android.view.MenuItem;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceGroup;
-import com.whisperyao.dsplayer.util.SynoLog;
-import com.whisperyao.dsplayer.util.Utilities;
-import com.whisperyao.dsplayer.util.Utils;
-import com.synology.sylibx.synofile.SynoFile;
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import kotlin.Unit;
+import android.app.ProgressDialog
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.IntentFilter
+import android.view.MenuItem
+import android.view.View
+import androidx.preference.Preference
+import androidx.preference.PreferenceGroup
+import com.whisperyao.dsplayer.util.SynoLog
+import com.whisperyao.dsplayer.util.Utils
+import com.synology.sylibx.synofile.SynoFile
+import com.whisperyao.dsplayer.util.Utilities
+import java.util.ArrayList
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.Unit
 import kotlin.math.log
 import kotlin.math.max
 import kotlin.math.pow
 
 
-object ExtensionsKt {
+object Extensions {
     fun Int.setFlags(flags: Int, enabled: Boolean): Int {
         return if (enabled) {
             this or flags
@@ -34,9 +35,9 @@ object ExtensionsKt {
 
     fun Boolean.toVisibility(gone: Boolean = true): Int {
         return if (this) {
-            0   // View.VISIBLE
+            View.VISIBLE
         } else {
-            if (gone) 8 else 4   // View.GONE : View.INVISIBLE
+            if (gone) View.GONE else View.INVISIBLE
         }
     }
 
@@ -59,7 +60,7 @@ object ExtensionsKt {
             registerReceiver(
                 receiver,
                 intentFilter,
-                if (exported) 2 else 4
+                if (exported) Context.RECEIVER_EXPORTED else Context.RECEIVER_NOT_EXPORTED
             )
         } else {
             registerReceiver(receiver, intentFilter)
@@ -74,20 +75,24 @@ object ExtensionsKt {
             return file
         }
 
-        val dotIndex = targetPath.lastIndexOf(".")
-        val name = targetPath.substring(0, dotIndex)
+        val dotIndex = targetPath.lastIndexOf('.')
+        val name = targetPath.take(dotIndex)
         val ext = targetPath.substring(dotIndex)
 
-        var index = 0
+        var index = 1
 
-        do {
+        while (true) {
+            val path = "$name$index$ext"
+            SynoLog.d("getProperName", path)
+
+            val candidate = SynoFile(path)
+
+            if (!candidate.exists()) {
+                return candidate
+            }
+
             index++
-            val newPath = "$name$index$ext"
-            SynoLog.d("getProperName", newPath)
-            file = SynoFile(newPath, null)
-        } while (file.exists())
-
-        return file
+        }
     }
 
     fun Boolean?.isTrue(): Boolean = this == true

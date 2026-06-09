@@ -6,7 +6,6 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import com.synology.sylibx.synofile.ObjectProvider.provideSynoFile
 import com.whisperyao.dsplayer.util.SynoLog
-import com.whisperyao.dsplayer.util.Utilities
 import com.whisperyao.dsplayer.util.Utils
 import java.io.File
 import java.io.IOException
@@ -291,34 +290,6 @@ object Extensions {
             true
         } catch (_: TerminateException) {
             false
-        }
-    }
-
-    fun Utilities.getProperFile(targetPath: String): SynoFile {
-        val file = SynoFile(targetPath, null)
-
-        if (!file.exists()) {
-            SynoLog.d("getProperName", targetPath)
-            return file
-        }
-
-        val dotIndex = targetPath.lastIndexOf(".")
-        val prefix = targetPath.substring(0, dotIndex)
-        val suffix = targetPath.substring(dotIndex)
-
-        var index = 1
-
-        while (true) {
-            val path = "$prefix$index$suffix"
-            SynoLog.d("getProperName", path)
-
-            val properFile = SynoFile(path, null)
-
-            if (!properFile.exists()) {
-                return properFile
-            }
-
-            index++
         }
     }
 }
