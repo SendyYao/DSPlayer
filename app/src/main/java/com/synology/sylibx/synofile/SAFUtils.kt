@@ -1,5 +1,6 @@
 package com.synology.sylibx.synofile
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
@@ -7,12 +8,15 @@ import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
 import android.provider.DocumentsContract
+import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.documentfile.provider.DocumentFile
 import com.synology.sylib.utilities.contextprovider.SynoContextProvider
 import com.synology.sylibx.synofile.Extensions.copyRecursivelySyno
 import com.synology.sylibx.synofile.Extensions.getValidFile
 import com.synology.sylibx.synofile.Extensions.isUnderPath
+import com.whisperyao.dsplayer.util.SynoLog
 import java.io.File
 import java.io.IOException
 import java.lang.reflect.InvocationTargetException
@@ -169,6 +173,7 @@ object SAFUtils {
                 }
             }
         }
+        SynoLog.d("SAFUtils TEST", "persistedUri=$next, basePath=$pathFromTreeUri")
 
         if (next == null || pathFromTreeUri == null) {
             return null
@@ -195,19 +200,25 @@ object SAFUtils {
 
         val uri = baseInfoPair.first.uri
 
-        var strRemovePrefix =
-            fullPath.removePrefix(baseInfoPair.second)
+        var strRemovePrefix = fullPath.removePrefix(baseInfoPair.second)
 
         if (uri.toString().endsWith("%3A")) {
-            strRemovePrefix =
-                strRemovePrefix.removePrefix("/")
+            strRemovePrefix = strRemovePrefix.removePrefix("/")
         }
 
-        return getDocumentForPath(
-            context,
-            strRemovePrefix,
-            uri
+        val result = getDocumentForPath(context, strRemovePrefix, uri)
+
+        SynoLog.d(
+            "SAF_TEST",
+            """
+                returnDoc=${result?.name}
+                base=$uri
+                filePath=$strRemovePrefix
+                finalUri=${Uri.parse(uri.toString() + Uri.encode(strRemovePrefix))} 
+                baseInfoPair=$baseInfoPair
+                """.trimIndent()
         )
+        return result
     }
 
     private fun getDocumentForPath(
@@ -215,12 +226,12 @@ object SAFUtils {
         filePath: String,
         baseDocUri: Uri
     ): DocumentFile? {
-        val documentFile =
-            DocumentFile.fromTreeUri(
-                context,
-                Uri.parse(baseDocUri.toString() + Uri.encode(filePath))
-            )
-
+        val uri = Uri.parse(baseDocUri.toString() + Uri.encode(filePath))
+        val documentFile = DocumentFile.fromTreeUri(context, uri)
+        SynoLog.d(
+            "SAF_TEST",
+            "DocumentFileExists=${documentFile?.exists()}"
+        )
         return if (documentFile?.exists() == true) {
             documentFile
         } else {
@@ -421,6 +432,65 @@ object SAFUtils {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    @SuppressLint("Range")
+    @JvmStatic
+    fun getMediaUri(
+        context: Context,
+        file: SynoFile
+    ): Uri? {
+
+        if (file.isScopedStorage()) {
+            return file.getUri(false)?.let {
+                MediaStore.getMediaUri(context, it)
+            }
+        }
+
+        val contentUri = MediaStore.Files.getContentUri("external")
+
+        context.contentResolver.query(
+            contentUri,
+            null,
+            "_data = ?",
+            arrayOf(file.path),
+            null
+        )?.use { cursor ->
+
+            if (cursor.moveToFirst()) {
+                return Uri.withAppendedPath(
+                    contentUri,
+                    cursor.getLong(
+                        cursor.getColumnIndex("_id")
+                    ).toString()
+                )
+            }
+        }
+
+        return null
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @JvmStatic
+    fun getFileFromMediaUri(
+        context: Context,
+        uri: Uri
+    ): SynoFile? {
+
+        val documentUri =
+            MediaStore.getDocumentUri(
+                context,
+                uri
+            ) ?: return null
+
+        val documentFile =
+            DocumentFile.fromSingleUri(
+                context,
+                documentUri
+            ) ?: return null
+
+        return SynoFile(documentFile)
+    }
+
     private fun isValidPath(path: String): Boolean {
         return path.startsWith(
             "${File.separatorChar}storage${File.separatorChar}",
@@ -474,7 +544,13 @@ object SAFUtils {
         storageManager: StorageManager,
         volumeId: String
     ): String? {
-        val method = StorageVolume::class.java.getMethod("getDirectory")
+        val method = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StorageVolume::class.java.getMethod("getPath")
+        } else {
+            throw UnsupportedOperationException(
+                "Android SDK < 24 is not supported"
+            )
+        }
 
         val storageVolumes = storageManager.storageVolumes
 
@@ -509,7 +585,13 @@ object SAFUtils {
         storageManager: StorageManager,
         volumeId: String
     ): String? {
-        val method = StorageVolume::class.java.getMethod("getPath")
+        val method = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            StorageVolume::class.java.getMethod("getPath")
+        } else {
+            throw UnsupportedOperationException(
+                "Android SDK < 24 is not supported"
+            )
+        }
 
         val storageVolumes = storageManager.storageVolumes
 

@@ -2,6 +2,8 @@ package com.synology.sylibx.synofile
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
 import com.synology.sylib.utilities.contextprovider.SynoContextProvider
 import java.io.File
@@ -13,19 +15,103 @@ import java.io.*
 import java.nio.file.Files
 import java.nio.file.LinkOption
 import java.nio.file.attribute.BasicFileAttributes
+import androidx.core.net.toUri
 
-open class SynoFile(
-    var mContext: Context,
+open class SynoFile @JvmOverloads constructor(
+    private var mContext: Context,
     file: File,
     var mDocFile: DocumentFile? = null
 ) : File(file.path) {
 
-    private val scopedStorageDelegate by lazy {
+    private val scopedStorage by lazy {
         SAFUtils.isScopedStoragePath(path)
     }
 
-    fun isScopedStorage(): Boolean {
-        return scopedStorageDelegate
+    fun isScopedStorage(): Boolean = scopedStorage
+
+    @JvmOverloads
+    constructor(
+        context: Context,
+        path: String,
+        docFile: DocumentFile? = null
+    ) : this(
+        context,
+        File(path),
+        docFile
+    )
+
+    @JvmOverloads
+    constructor(
+        context: Context,
+        parent: String,
+        child: String,
+        docFile: DocumentFile? = null
+    ) : this(
+        context,
+        File(parent, child),
+        docFile
+    )
+
+    @JvmOverloads
+    constructor(
+        file: File,
+        docFile: DocumentFile? = null
+    ) : this(
+        SynoContextProvider.get(),
+        file,
+        docFile
+    )
+
+    @JvmOverloads
+    constructor(
+        path: String,
+        docFile: DocumentFile? = null
+    ) : this(
+        SynoContextProvider.get(),
+        File(path),
+        docFile
+    )
+
+    @JvmOverloads
+    constructor(
+        parent: String,
+        child: String,
+        docFile: DocumentFile? = null
+    ) : this(
+        SynoContextProvider.get(),
+        File(parent, child),
+        docFile
+    )
+
+    constructor(docFile: DocumentFile) : this(
+        SynoContextProvider.get(),
+        File(
+            SAFUtils.getPathFromDocUri(docFile.uri)
+        ),
+        docFile
+    )
+
+    init {
+        if (mDocFile != null || isScopedStorage()) {
+            if (mDocFile == null) {
+                mDocFile = SAFUtils.getDocumentFile(
+                    mContext,
+                    canonicalPath
+                )
+            }
+        }
+        SynoLog.d(
+            "SynoFile",
+            """
+                path=$absolutePath
+                scoped=${isScopedStorage()}
+                isExternal=${absolutePath.startsWith("/storage/emulated/0")}
+                """.trimIndent()
+        )
+        SynoLog.d(
+            "SynoFile",
+            "create hash=${System.identityHashCode(this)} path=$path mDocFile=$mDocFile"
+        )
     }
 
     enum class OpenMode(val modeString: String) {
@@ -38,10 +124,11 @@ open class SynoFile(
         val modeFlag: Int
             get() {
                 var flag = 0
-                if ("r" in modeString) flag = flag or 0x10000000
-                if ("w" in modeString) flag = flag or 0x28000000
-                if ("t" in modeString) flag = flag or 0x00080000
-                if ("a" in modeString) flag = flag or 0x02000000
+                if ('r' in modeString) { flag = flag or ParcelFileDescriptor.MODE_READ_ONLY }
+                if ('w' in modeString) { flag = flag or ParcelFileDescriptor.MODE_WRITE_ONLY }
+                if ('t' in modeString) { flag = flag or ParcelFileDescriptor.MODE_TRUNCATE }
+                if ('a' in modeString) { flag = flag or ParcelFileDescriptor.MODE_APPEND }
+
                 return flag
             }
 
@@ -50,119 +137,26 @@ open class SynoFile(
         }
     }
 
-    constructor(context: Context, file: File) : this(context, file, null)
-
-    constructor(context: Context, path: String) : this(
-        context,
-        File(path),
-        null
-    )
-
-    constructor(
-        context: Context,
-        parent: String,
-        child: String
-    ) : this(
-        context,
-        File(parent, child),
-        null
-    )
-
-    constructor(file: File) : this(
-        SynoContextProvider.get(),
-        file,
-        null
-    )
-
-    constructor(path: String) : this(
-        SynoContextProvider.get(),
-        File(path),
-        null
-    )
-
-    constructor(parent: String, child: String) : this(
-        SynoContextProvider.get(),
-        File(parent, child),
-        null
-    )
-
-    constructor(docFile: DocumentFile) : this(
-        SynoContextProvider.get(),
-        File(SAFUtils.getPathFromDocUri(docFile.uri)),
-        docFile
-    )
-
-    constructor(
-        path: String,
-        documentFile: DocumentFile?
-    ) : this(
-        SynoContextProvider.get(),
-        File(path),
-        documentFile
-    )
-
-    constructor(
-        context: Context,
-        path: String,
-        documentFile: DocumentFile?
-    ) : this(
-        context,
-        File(path),
-        documentFile
-    )
-
-    constructor(
-        parent: String,
-        child: String,
-        documentFile: DocumentFile?
-    ) : this(
-        SynoContextProvider.get(),
-        File(parent, child),
-        documentFile
-    )
-
-    constructor(
-        context: Context,
-        parent: String,
-        child: String,
-        documentFile: DocumentFile?
-    ) : this(
-        context,
-        File(parent, child),
-        documentFile
-    )
-
-    constructor(
-        file: File,
-        documentFile: DocumentFile?
-    ) : this(
-        SynoContextProvider.get(),
-        file,
-        documentFile
-    )
-
-    init {
-        if (mDocFile != null || isScopedStorage()) {
-            if (mDocFile == null) {
-                mDocFile = SAFUtils.getDocumentFile(
-                    mContext,
-                    canonicalPath
-                )
-            }
-        }
-    }
-
     fun isAccessible(): Boolean {
         return PermissionUtils.checkGrantStatus(this).isGranted
     }
 
+    @JvmOverloads
     fun getUri(pathIfLegacy: Boolean = true): Uri? {
-        return if (!isScopedStorage()) {
-            if (pathIfLegacy) Uri.parse(path)
-            else Uri.fromFile(this)
-        } else {
-            mDocFile?.uri
+
+        if (!isScopedStorage()) {
+            return if (pathIfLegacy) {
+                path.toUri()
+            } else {
+                Uri.fromFile(this)
+            }
         }
+
+        return mDocFile?.uri
+    }
+
+    fun getDocFile(): DocumentFile? {
+        return mDocFile
     }
 
     override fun list(): Array<String> {
@@ -184,7 +178,7 @@ open class SynoFile(
         return listFileWithFilter().toTypedArray()
     }
 
-    override fun listFiles(filter: FileFilter): Array<SynoFile> {
+    override fun listFiles(filter: FileFilter?): Array<SynoFile> {
         if (!isScopedStorage()) {
             return super.listFiles(filter)
                 ?.map { SynoFile(mContext, it) }
@@ -200,22 +194,22 @@ open class SynoFile(
     ): List<SynoFile> {
         val result = arrayListOf<SynoFile>()
 
-        mDocFile?.listFiles()?.forEach { documentFile ->
-            val documentPath =
-                SAFUtils.getDocumentPathFromDocUri(documentFile.uri)
+        mDocFile
+            ?.listFiles()
+            ?.forEach { doc ->
 
-            if (filter == null || filter.accept(File(documentPath))) {
-                val fileName = File(documentPath).name
-                result.add(
-                    SynoFile(
+                val path = SAFUtils.getDocumentPathFromDocUri(doc.uri)
+
+                if (filter == null || filter.accept(File(path))) {
+
+                    result += SynoFile(
                         mContext,
-                        path,
-                        fileName,
-                        documentFile
+                        this.path,
+                        File(path).name,
+                        doc
                     )
-                )
+                }
             }
-        }
 
         return result
     }
@@ -336,7 +330,7 @@ open class SynoFile(
     fun getParentDocFile(): DocumentFile? {
         return mDocFile?.parentFile
             ?: parentFile?.let {
-                SynoFile(mContext, it).mDocFile
+                SynoFile(mContext, it).getDocFile()
             }
     }
 
@@ -355,7 +349,7 @@ open class SynoFile(
 
     fun getInputStream(): InputStream? {
         return if (!isScopedStorage()) {
-            FileInputStream(this)
+            return ObjectProvider.provideFileInputStream(this)
         } else {
             getUri(false)?.let {
                 mContext.contentResolver.openInputStream(it)
@@ -367,7 +361,7 @@ open class SynoFile(
         mode: OpenMode = OpenMode.ReadWrite
     ): OutputStream? {
         return if (!isScopedStorage()) {
-            FileOutputStream(this, mode.canAppend())
+            return ObjectProvider.provideFileOutputStream(this, mode.canAppend())
         } else {
             getUri(false)?.let {
                 mContext.contentResolver
@@ -390,6 +384,7 @@ open class SynoFile(
             ?: "application/octet-stream"
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getAttribute(): BasicFileAttributes? {
         return try {
             Files.readAttributes(
@@ -402,6 +397,7 @@ open class SynoFile(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getFileKey(): String? {
         val value = getAttribute()?.fileKey().toString()
         val regex = Regex("\\(dev=[0-9a-fA-F]+?,ino=(\\d+)\\)")
@@ -438,14 +434,31 @@ open class SynoFile(
     }
 
     override fun exists(): Boolean {
-        return if (!isScopedStorage()) {
+        return if (mDocFile == null || !isScopedStorage()) {
             super.exists()
         } else {
+            SynoLog.d("SynoFile Test", "mDocFile=$mDocFile")
             mDocFile?.exists() ?: false
         }
     }
 
     override fun length(): Long {
+        val stack = Throwable()
+            .stackTrace
+            .drop(1)
+            .joinToString("\n")
+
+        SynoLog.e("SynoFileStack", stack)
+        if (mDocFile == null) {
+            SynoLog.e(
+                "SynoFile",
+                "ScopedStorage enabled but mDocFile is null : $absolutePath"
+            )
+        }
+        SynoLog.d(
+            "SynoFile",
+            "length hash=${System.identityHashCode(this)} mDocFile=$mDocFile"
+        )
         return if (!isScopedStorage()) {
             super.length()
         } else {

@@ -68,10 +68,16 @@ object ObjectProvider {
         flag: Int,
         observer: ObserverEvent
     ): FileObserver {
-        return object : FileObserver(file, flag) {
-            override fun onEvent(p0: Int, p1: String?) {
-                observer.onEvent(p0, p1)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            object : FileObserver(file, flag) {
+                override fun onEvent(event: Int, path: String?) {
+                    observer.onEvent(event, path)
+                }
             }
+        } else {
+            throw UnsupportedOperationException(
+                "Android SDK < 29 is not supported"
+            )
         }
     }
 
@@ -87,7 +93,7 @@ object ObjectProvider {
     }
 
     fun isExternalStorageManager(): Boolean {
-        return if (Build.VERSION.SDK_INT >= 30) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             Environment.isExternalStorageManager()
         } else {
             false

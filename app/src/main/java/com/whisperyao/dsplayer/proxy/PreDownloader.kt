@@ -213,7 +213,7 @@ class PreDownloader(
                     properFile,
                     null
                 )
-
+                properFile.mDocFile = SAFUtils.getDocumentFile(context, properFile.path)
                 val songBitrate = Utilities.getSongBitrate(songItem, url)
 
                 songItem.cachePath = properFile.path
@@ -239,6 +239,17 @@ class PreDownloader(
 
                 val downloadType = songItem.downloadType
 
+                SynoLog.d(
+                    TAG,
+                    """
+                        properFile=$properFile
+                        path=${properFile.path}
+                        exists=${properFile.exists()}
+                        length=${properFile.length()}
+                        javaLength=${File(properFile.path).length()}
+                        scoped=${properFile.isScopedStorage()}
+                        """.trimIndent()
+                )
                 if (downloadType == 1) {
                     AudioPreference.addAutoCacheByte(properFile.length())
                 } else if (downloadType == 2) {
